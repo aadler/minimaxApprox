@@ -1,1 +1,7 @@
 exportPattern("^[[:alpha:]]+")
+importFrom("stats", "optimize", "uniroot")
+
+S3method(print, RatApprox)
+S3method(plot, RatApprox)
+export(print.RatApprox)
+export(plot.RatApprox)
