@@ -10,3 +10,4 @@ Description: More about what it does (maybe more than one line)
 License: MPL-2.0
 Encoding: UTF-8
 Imports: stats
+Suggests: tinytest
