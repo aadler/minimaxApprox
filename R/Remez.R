@@ -13,11 +13,8 @@ vanderMat <- function(x, n) {
 }
 
 callFun <- function(fn, x) {
-  if (is.function(fn)) {
-    return(do.call(match.fun(fn), args = list(x = x)))
-  } else {
-    stop("Unable to parse function.")
-  }
+  if (!is.function(fn)) stop("Unable to parse function.")
+  do.call(match.fun(fn), args = list(x = x))
 }
 
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
