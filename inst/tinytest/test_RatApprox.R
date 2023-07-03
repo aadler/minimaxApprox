@@ -31,3 +31,13 @@ expect_true(isOscil(control))
 control <- c(-2, 1, -3, 4, -1, -6)
 expect_false(isOscil(control))
 
+# Test polyCalc
+x <- 3
+control = 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
+expect_equal(control, polyCalc(x, c(2, 3.2, 4.6, -9.7, 0.1)), tolerance = tol)
+
+# Test remPolyMat
+x <- c(-0.4, 0.1, 0.3, 0.4)
+control <- matrix(c(rep(1, 4L), x, x ^ 2, 1, -1, 1, -1), nrow = 4)
+expect_identical(control, remPolyMat(x))
+
