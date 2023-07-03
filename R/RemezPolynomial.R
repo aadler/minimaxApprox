@@ -8,17 +8,15 @@ remPolyMat <- function(x) {
 }
 
 remPolyCoeffs <- function(x, fn) {
-  # PPQ <- qr(remPolyMat(x), LAPACK = TRUE, tol = 1e-15)
-  # PP <- qr.solve(PPQ, callFun(fn, x), tol = 1e-15)
   PP <- solve(remPolyMat(x), callFun(fn, x))
-  list(b = zapsmall(PP[-length(PP)]), E = PP[length(PP)])
+  list(b = PP[-length(PP)], E = PP[length(PP)])
 }
 
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
 remPolyRoots <- function(x, b, fn, errs) {
-  if (all(errs == 0)) {
-    return(x)
+  if (all(abs(errs) < tol)) {
+    return(x[-length(x)])
   } else {
     r <- double(length(x) - 1L)
     for (i in seq_along(r)) {
@@ -45,11 +43,27 @@ remPolySwitch <- function(r, l, u, b, fn) {
                      upper = nodes$upper[i],
                      b = b, fn = fn,
                      maximum = maximize)[[1L]]
+    # Test endpoints
+    testDF <- data.frame(p = c(nodes$lower[i], x[i], nodes$upper[i]),
+                         E = c(remPolyErr(nodes$lower[i], b, fn),
+                                remPolyErr(x[i], b, fn),
+                                remPolyErr(nodes$upper[i], b, fn)))
+    if (maximize) {
+      x[i] <- testDF$p[which.max(testDF$E)]
+    } else {
+      x[i] <- testDF$p[which.min(testDF$E)]
+    }
+
+
+    # Flip maximize
     maximize <- !maximize
   }
+
+  # Test Oscillation
   errs <- sapply(x, remPolyErr, b = b, fn = fn)
+
   if (!isOscil(errs)) {
-    stop("Control points are not oscillating in sign.\n", x)
+    stop("Control points are not oscillating in sign.\n")
   }
   x
 }
@@ -82,7 +96,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   PP <- remPolyCoeffs(x, fn)
   errs <- sapply(x, remPolyErr, b = PP$b, fn = fn)
   i <- 0
-  while ((!isConverged(errs, PP$E, tol) && i <= maxiter)) {
+  repeat {
     i <- i + 1L
     r <- remPolyRoots(x, PP$b, fn, errs)
     x <- remPolySwitch(r, lower, upper, PP$b, fn)
@@ -92,6 +106,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
     if (showProgress) {
       message("i: ", i, " E: ", fN(PP$E), " maxErr: ", fN(mxae))
     }
+    if ((isConverged(errs, PP$E, tol) && i > 15) || i > maxiter) break
   }
 
   if (i >= maxiter) {
