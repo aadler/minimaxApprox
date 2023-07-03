@@ -6,9 +6,7 @@ fN <- function(x, d = 6) formatC(x, digits = d, format = "e")
 
 # Default Chebyeshev nodes
 chebNodes <- function(n, a, b) {
-  zapsmall(
-    sort(0.5 * (a + b + (b - a) * cos((2 * seq_len(n) - 1) * pi / (2 * n))))
-  )
+  sort(0.5 * (a + b + (b - a) * cos((2 * seq_len(n) - 1) * pi / (2 * n))))
 }
 
 # Create Vandermonde matrix to a polynomial degree n, or n + 1 terms
@@ -33,10 +31,10 @@ polyCalc <- function(x, a) sum(a * x ^ (seq_along(a) - 1L))
 isConverged <- function(errs, E, tol) {
   abserrs <- abs(errs)
   mabserrs <- max(abserrs)
-  all(diff(abserrs) < tol) &&  # All errors same magnitude
-    isOscil(errs) &&           # All error alternating signs
-    (mabserrs < abs(E) ||      # Either magnitude of all errors < E
-       isTRUE(all.equal(mabserrs, abs(E), tol = tol))) # Or equal to E
+  all(diff(abserrs) < tol) &&        # All errors same magnitude
+    isOscil(errs) &&                 # All error alternating signs
+    (mabserrs < abs(E) ||            # Either magnitude of all errors < E
+       all(abs(abserrs - abs(E)) < tol)) # Or equal to E
 }
 
 # Print method (hide i and basis but leave in list and not attribute)
