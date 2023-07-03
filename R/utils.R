@@ -63,4 +63,5 @@ plot.RatApprox <- function(x, ...) {
   plot(z, zz, type = 'l',  xlab = "x", ylab = "Error")
   abline(h = 0)
   points(x$basis, y, col = "red", pch = 16)
+  abline(h = c(-PP$EE, PP$EE), lty = 2, col = 'red')
 }
