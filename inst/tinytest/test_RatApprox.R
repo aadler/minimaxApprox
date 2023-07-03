@@ -4,6 +4,10 @@
 tol <- 1e-7
 cFErr <- "Unable to parse function."
 
+# Test fN
+expect_identical(fN(1.234567), "1.234567e+00")
+expect_identical(fN(1.234567, d = 2), "1.23e+00")
+
 # Test chebNodes
 n <- 6L
 k <- seq_len(n) - 1L
@@ -30,6 +34,16 @@ control <- c(-2, 1, -3, 4, -1, 6, -7)
 expect_true(isOscil(control))
 control <- c(-2, 1, -3, 4, -1, -6)
 expect_false(isOscil(control))
+
+# Check isConverged
+errs <- c(-0.1, 0.1, -0.1)
+E <- 0.1
+expect_true(isConverged(errs, E, tol))
+E <- 0.05
+expect_false(isConverged(errs, E, tol))
+E <- 0.1
+errs <- c(-0.2, 0.1, -0.1)
+expect_false(isConverged(errs, E, tol))
 
 # Test polyCalc
 x <- 3
