@@ -51,14 +51,15 @@ print.RatApprox <- function(x, ...) {
 # Plot method for errors and basis points
 plot.RatApprox <- function(x, ...) {
   rng <- attr(x, "range")
+  fn <- attr(x, "func")
   z <- seq(rng[1], rng[2], length.out = 1001L)
 
   if (attr(x, "type") == "Polynomial") {
-    zz <- sapply(z, remPolyErr, x$b, attr(x, "func"))
-    y <- sapply(x$basis, remPolyErr, x$b, attr(x, "func"))
+    zz <- sapply(z, remPolyErr, x$b, fn)
+    y <- sapply(x$basis, remPolyErr, x$b, fn)
   } else {
-    zz <- sapply(z, remRatErr, x$a, x$b, attr(x, "func"))
-    y <- sapply(x$basis, remRatErr, x$a, x$b, attr(x, "func"))
+    zz <- sapply(z, remRatErr, x$a, x$b, fn)
+    y <- sapply(x$basis, remRatErr, x$a, x$b, fn)
   }
 
   plot(z, zz, type = 'l',  xlab = "x", ylab = "Error")
