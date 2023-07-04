@@ -15,23 +15,29 @@ remPolyCoeffs <- function(x, fn) {
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
 remPolyRoots <- function(x, b, fn, tol) {
-  r <- double(length(x) - 1L)
-  for (i in seq_along(r)) {
-    intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remPolyErr, interval = intv, b = b, fn = fn),
-                     error = function(cond) simpleError(trimws(cond$message)))
-    if (inherits(root, "simpleError")) {
-      r[i] <- intv[which.min(abs(intv))]
-    } else {
-      r[i] <- root$root
+  if (all(abs(remPolyErr(x, b, fn)) < .Machine$double.eps)) {
+    stop("This code only functions to machine double precision. All error ",
+         "values are below machine double precision. Please try again using a ",
+         "lesser degree.")
+  } else {
+    r <- double(length(x) - 1L)
+    for (i in seq_along(r)) {
+      intv <- c(x[i], x[i + 1L])
+      root <- tryCatch(uniroot(remPolyErr, interval = intv, b = b, fn = fn),
+                       error = function(cond) simpleError(trimws(cond$message)))
+      if (inherits(root, "simpleError")) {
+        r[i] <- intv[which.min(abs(intv))]
+      } else {
+        r[i] <- root$root
+      }
     }
+    return(r)
   }
-  return(r)
 }
 
 remPolySwitch <- function(r, l, u, b, fn) {
   nodes <- data.frame(lower = c(l, r), upper = c(r, u))
-  x <- double(length(r) + 1L)
+  x <- double(dim(nodes)[1L])
   maximize <- sign(remPolyErr(l, b, fn)) == 1
   for (i in seq_along(x)) {
     x[i] <- optimize(remPolyErr,
@@ -54,7 +60,7 @@ remPolySwitch <- function(r, l, u, b, fn) {
 
   # Test Oscillation
   if (!isOscil(remPolyErr(x, b, fn))) {
-    stop("Control points do not cause oscillating errors.\n")
+    stop("Control points do not result in oscillating errors.")
   }
   x
 }
@@ -63,9 +69,15 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
 
   # Handle configuration options
   if ("maxiter" %in% names(opts)) {
-    maxiter <- opts$maxit
+    maxiter <- opts$maxiter
   } else {
     maxiter <- 2500L
+  }
+
+  if ("miniter" %in% names(opts)) {
+    miniter <- opts$miniter
+  } else {
+    miniter <- 15L
   }
 
   if ("showProgress" %in% names(opts)) {
@@ -96,18 +108,28 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
     if (showProgress) {
       message("i: ", i, " E: ", fN(PP$E), " maxErr: ", fN(mxae))
     }
-    if ((isConverged(errs, PP$E, tol) && i > 15L) || i > maxiter) break
+    if ((isConverged(errs, PP$E, tol) && i >= miniter) || i > maxiter) break
   }
+
+  gotWarning <- FALSE
 
   if (i >= maxiter) {
     mess <- paste("Convergence not acheived in", maxiter, "iterations.\n")
     mess <- paste0(mess, "Maximum observed error ",
                    formatC(mxae / PP$E, digits = 4L), " times expected.")
     warning(mess)
+    gotWarning <- TRUE
   }
 
-  ret <- list(b = PP$b, EE = abs(PP$E), OE = mxae, iterations = i,
-              basis = x)
+  if (all(abs(errs) < 10 * .Machine$double.eps)) {
+    warning("All errors very near machine double precision. The solution may ",
+            "not be optimal but should be best given the desired precision ",
+            "and floating point limitations. Try a lower degree if needed.")
+    gotWarning <- TRUE
+  }
+
+  ret <- list(b = PP$b, EE = abs(PP$E), OE = mxae, Diff = abs(abs(PP$E) - mxae),
+              iterations = i, x = x, Warning = gotWarning)
   attr(ret, "type") <- "Polynomial"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
