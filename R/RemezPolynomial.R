@@ -52,7 +52,6 @@ remPolySwitch <- function(r, l, u, b, fn) {
       x[i] <- testDF$p[which.min(testDF$E)]
     }
 
-
     # Flip maximize
     maximize <- !maximize
   }
@@ -70,7 +69,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   if ("maxiter" %in% names(opts)) {
     maxiter <- opts$maxit
   } else {
-    maxiter <- 2500
+    maxiter <- 2500L
   }
 
   if ("showProgress" %in% names(opts)) {
@@ -82,15 +81,15 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   if ("tol" %in% names(opts)) {
     tol <- opts$tol
   } else {
-    tol <- 5 * .Machine$double.eps
+    tol <- sqrt(.Machine$double.eps)
   }
 
   # Initial x's
-  x <- chebNodes(degree + 2, lower, upper)
+  x <- chebNodes(degree + 2L, lower, upper)
 
   # Initial Polynomial Guess
   PP <- remPolyCoeffs(x, fn)
-  i <- 0
+  i <- 0L
   repeat {
     i <- i + 1L
     r <- remPolyRoots(x, PP$b, fn, tol)
@@ -101,13 +100,13 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
     if (showProgress) {
       message("i: ", i, " E: ", fN(PP$E), " maxErr: ", fN(mxae))
     }
-    if ((isConverged(errs, PP$E, tol) && i > 15) || i > maxiter) break
+    if ((isConverged(errs, PP$E, tol) && i > 15L) || i > maxiter) break
   }
 
   if (i >= maxiter) {
     mess <- paste("Convergence not acheived in", maxiter, "iterations.\n")
     mess <- paste0(mess, "Maximum observed error ",
-                   formatC(mxae / PP$E, digits = 4), " times expected.")
+                   formatC(mxae / PP$E, digits = 4L), " times expected.")
     warning(mess)
   }
 
