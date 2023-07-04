@@ -15,7 +15,7 @@ remPolyCoeffs <- function(x, fn) {
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
 remPolyRoots <- function(x, b, fn, tol) {
-  if (all(abs(remPolyErr(x, b, fn)) < .Machine$double.eps)) {
+  if (all(abs(remPolyErr(x, b, fn)) <= tol)) {
     stop("This code only functions to machine double precision. All error ",
          "values are below machine double precision. Please try again using a ",
          "lesser degree.")
