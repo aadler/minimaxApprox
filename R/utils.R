@@ -25,7 +25,7 @@ callFun <- function(fn, x) {
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
 # Calculate the polynomial approximation. Use in numer & denom for rationals
-polyCalc <- function(x, a)  as.vector(vanderMat(x, length(a) - 1) %*% a)
+polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
 
 # Check Remez iterations for convergence
 isConverged <- function(errs, E, tol) {
