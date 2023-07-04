@@ -14,8 +14,8 @@ remPolyCoeffs <- function(x, fn) {
 
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
-remPolyRoots <- function(x, b, fn, errs, tol) {
-  if (all(abs(errs) < tol)) {
+remPolyRoots <- function(x, b, fn, tol) {
+  if (all(abs(remPolyErr(x, b, fn)) < tol)) {
     return(x[-length(x)])
   } else {
     r <- double(length(x) - 1L)
@@ -58,10 +58,8 @@ remPolySwitch <- function(r, l, u, b, fn) {
   }
 
   # Test Oscillation
-  errs <- remPolyErr(x, b, fn)
-
-  if (!isOscil(errs)) {
-    stop("Control points are not oscillating in sign.\n")
+  if (!isOscil(remPolyErr(x, b, fn))) {
+    stop("Control points do not cause oscillating errors.\n")
   }
   x
 }
@@ -92,11 +90,10 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
 
   # Initial Polynomial Guess
   PP <- remPolyCoeffs(x, fn)
-  errs <- remPolyErr(x, PP$b, fn)
   i <- 0
   repeat {
     i <- i + 1L
-    r <- remPolyRoots(x, PP$b, fn, errs, tol)
+    r <- remPolyRoots(x, PP$b, fn, tol)
     x <- remPolySwitch(r, lower, upper, PP$b, fn)
     PP <- remPolyCoeffs(x, fn)
     errs <- remPolyErr(x, PP$b, fn)
