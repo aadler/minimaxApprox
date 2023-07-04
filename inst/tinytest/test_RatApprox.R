@@ -61,3 +61,14 @@ expect_equal(c(control, control2), polyCalc(c(3, 5), coeffs), tolerance = tol)
 x <- c(-0.4, 0.1, 0.3, 0.4)
 control <- matrix(c(rep(1, 4L), x, x ^ 2, 1, -1, 1, -1), nrow = 4)
 expect_identical(control, remPolyMat(x))
+
+# Test remPolyCoeffs
+# If the function is a pure polynomial then coeffs should recover it exactly.
+# Therefore for, for 4 data points and the function x² + 2x + 3, the
+# coefficients should return c(3, 2, 1) and the error should be 0.
+fn <- function(x) x ^ 2 + 2 * x + 3
+x <- seq(0, 2, length.out = 4)
+control <- c(3, 2, 1)
+PP <- remPolyCoeffs(x, fn)
+expect_equal(PP$b, control, tolerance = tol)
+expect_equal(PP$E, 0, tolerance = tol)
