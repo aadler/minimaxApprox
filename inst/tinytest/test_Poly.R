@@ -34,10 +34,10 @@ expect_equal(remPolyErr(x, b, fn), control, tolerance = tol)
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 x <- chebNodes(3, 0, 1)
 QQ <- remPolyCoeffs(x, function(x) expm1(x))
-control <- remPolyRoots(x, QQ$b, function(x) expm1(x), 5 * .Machine$double.eps)
+control <- remPolyRoots(x, QQ$b, function(x) expm1(x))
 fn <- function(x) exp(x) - 1
 PP <- remPolyCoeffs(x, fn)
-r <- remPolyRoots(x, PP$b, fn, 5 * .Machine$double.eps)
+r <- remPolyRoots(x, PP$b, fn)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
@@ -45,10 +45,10 @@ expect_equal(r, control, tolerance = 1.2e-5)
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 x <- chebNodes(3, 0, 1)
 QQ <- remPolyCoeffs(x, function(x) expm1(x))
-control <- remPolyRoots(x, QQ$b, function(x) expm1(x), 5 * .Machine$double.eps)
+control <- remPolyRoots(x, QQ$b, function(x) expm1(x))
 fn <- function(x) exp(x) - 1
 PP <- remPolyCoeffs(x, fn)
-r <- remPolyRoots(x, PP$b, fn, 5 * .Machine$double.eps)
+r <- remPolyRoots(x, PP$b, fn)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
@@ -62,7 +62,7 @@ control <- c(-0.98638090340529549, -0.91141570324382248, -0.77736906513126558,
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(13, -1, 1)
 PP <- remPolyCoeffs(x, fn)
-r <- remPolyRoots(x, PP$b, fn, tol)
+r <- remPolyRoots(x, PP$b, fn)
 expect_equal(r, control, tolerance = tol)
 
 ## Test machine precision trapping
@@ -71,7 +71,7 @@ err_mess <- paste0("This code only functions to machine double precision. ",
                    "Please try again using a lesser degree.")
 x <- chebNodes(14, -1, 1)
 PP <- remPolyCoeffs(x, fn)
-expect_error(remPolyRoots(x, PP$b, fn, tol), err_mess)
+expect_error(remPolyRoots(x, PP$b, fn), err_mess)
 
 # Test other components of remPoly that have not been exposed above
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)

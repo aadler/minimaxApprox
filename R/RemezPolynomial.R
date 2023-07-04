@@ -14,8 +14,8 @@ remPolyCoeffs <- function(x, fn) {
 
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
-remPolyRoots <- function(x, b, fn, tol) {
-  if (all(abs(remPolyErr(x, b, fn)) <= tol)) {
+remPolyRoots <- function(x, b, fn) {
+  if (all(abs(remPolyErr(x, b, fn)) <= 5 * .Machine$double.eps)) {
     stop("This code only functions to machine double precision. All error ",
          "values are below machine double precision. Please try again using a ",
          "lesser degree.")
@@ -101,7 +101,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   i <- 0L
   repeat {
     i <- i + 1L
-    r <- remPolyRoots(x, PP$b, fn, tol)
+    r <- remPolyRoots(x, PP$b, fn)
     x <- remPolySwitch(r, lower, upper, PP$b, fn)
     PP <- remPolyCoeffs(x, fn)
     errs <- remPolyErr(x, PP$b, fn)
