@@ -15,22 +15,18 @@ remPolyCoeffs <- function(x, fn) {
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
 remPolyRoots <- function(x, b, fn, tol) {
-  if (all(abs(remPolyErr(x, b, fn)) < tol)) {
-    return(x[-length(x)])
-  } else {
-    r <- double(length(x) - 1L)
-    for (i in seq_along(r)) {
-      intv <- c(x[i], x[i + 1L])
-      root <- tryCatch(uniroot(remPolyErr, interval = intv, b = b, fn = fn),
-                       error = function(cond) simpleError(trimws(cond$message)))
-      if (inherits(root, "simpleError")) {
-        r[i] <- intv[which.min(abs(intv))]
-      } else {
-        r[i] <- root$root
-      }
+  r <- double(length(x) - 1L)
+  for (i in seq_along(r)) {
+    intv <- c(x[i], x[i + 1L])
+    root <- tryCatch(uniroot(remPolyErr, interval = intv, b = b, fn = fn),
+                     error = function(cond) simpleError(trimws(cond$message)))
+    if (inherits(root, "simpleError")) {
+      r[i] <- intv[which.min(abs(intv))]
+    } else {
+      r[i] <- root$root
     }
-    return(r)
   }
+  return(r)
 }
 
 remPolySwitch <- function(r, l, u, b, fn) {
@@ -81,7 +77,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   if ("tol" %in% names(opts)) {
     tol <- opts$tol
   } else {
-    tol <- sqrt(.Machine$double.eps)
+    tol <- 5 * .Machine$double.eps
   }
 
   # Initial x's

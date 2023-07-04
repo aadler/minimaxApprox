@@ -40,11 +40,3 @@ PP <- remPolyCoeffs(x, fn)
 r <- remPolyRoots(x, PP$b, fn, 5 * .Machine$double.eps)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
-
-## Use sinc function to check when nodes = roots
-fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-x <- chebNodes(7, -1, 1)
-control <- x[-length(x)]
-PP <- remPolyCoeffs(x, fn)
-r <- remPolyRoots(x, PP$b, fn, 1e7)
-expect_equal(r, control)
