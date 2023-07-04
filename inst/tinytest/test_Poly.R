@@ -53,7 +53,7 @@ r <- remPolyRoots(x, PP$b, fn, 5 * .Machine$double.eps)
 expect_equal(r, control, tolerance = 1.2e-5)
 
 # Test remPolySwitch
-# Assuming this is correct, replicate it.
+## Assuming this is correct, replicate it.
 control <- c(-0.98638090340529549, -0.91141570324382248, -0.77736906513126558,
              -0.59367521977973037, -0.37185874978471822, -0.12664154163425909,
              0.12670192344275352, 0.37178325071751533, 0.59358574126319796,
@@ -65,7 +65,7 @@ PP <- remPolyCoeffs(x, fn)
 r <- remPolyRoots(x, PP$b, fn, tol)
 expect_equal(r, control, tolerance = tol)
 
-# Test machine precision trapping
+## Test machine precision trapping
 err_mess <- paste0("This code only functions to machine double precision. ",
                    "All error values are below machine double precision. ",
                    "Please try again using a lesser degree.")
@@ -73,3 +73,20 @@ x <- chebNodes(14, -1, 1)
 PP <- remPolyCoeffs(x, fn)
 expect_error(remPolyRoots(x, PP$b, fn, tol), err_mess)
 
+# Test other components of remPoly that have not been exposed above
+fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
+PP <- remPoly(fn, -1, 1, 9, opts = list(tol = 1e-7, maxiter = 100))
+expect_false(PP$Warning)
+
+# Should show at least one line of output due to show progress
+expect_message(remPoly(fn, -1, 1, 11, opts = list(miniter = 0L,
+                                                  showProgress = TRUE)),
+               "i: 1 E: ")
+
+expect_warning(remPoly(fn, -1, 1, 11, opts = list(maxiter = 0)),
+               "Convergence not acheived in ")
+
+fn <- function(x) sin(x) + cos(x)
+expect_warning(remPoly(fn, -1, 1, 13), "All errors very near machine double")
+PP <- suppressWarnings(remPoly(fn, -1, 1, 13))
+expect_true(PP$Warning)
