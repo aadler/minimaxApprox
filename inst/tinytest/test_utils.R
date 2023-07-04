@@ -56,3 +56,8 @@ control2 = 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
 expect_equal(polyCalc(x, coeffs), control2, tolerance = tol)
 ## Test vectorized
 expect_equal(polyCalc(c(3, 5), coeffs), c(control, control2), tolerance = tol)
+
+# Test that print and plot produce output
+PP <- remPoly(function(x) exp(x), 0, 1, 5)
+expect_stdout(print(PP))
+expect_stdout(plot(PP))
