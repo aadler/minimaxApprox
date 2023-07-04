@@ -20,6 +20,7 @@ expect_equal(PP$b, control, tolerance = tol)
 expect_equal(PP$E, 0, tolerance = tol)
 
 # Test remPolyErr
+# Using fact that exp(1) has analytic answer for degree 1
 fn <- function(x) exp(x)
 m <- exp(1) - 1
 c <- (exp(1) - m * log(m)) / 2
@@ -28,3 +29,22 @@ x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
 b <- remPoly(fn, 0, 1, 1)$b
 expect_equal(remPolyErr(x, b, fn), control, tolerance = tol)
+
+# Test remPolyRoots
+## This one will rely on expm1(x) and exp(x) - 1 being close
+x <- chebNodes(3, 0, 1)
+QQ <- remPolyCoeffs(x, function(x) expm1(x))
+control <- remPolyRoots(x, QQ$b, function(x) expm1(x), 5 * .Machine$double.eps)
+fn <- function(x) exp(x) - 1
+PP <- remPolyCoeffs(x, fn)
+r <- remPolyRoots(x, PP$b, fn, 5 * .Machine$double.eps)
+## Need weaker tolerance here since functions are not exactly the same
+expect_equal(r, control, tolerance = 1.2e-5)
+
+## Use sinc function to check when nodes = roots
+fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
+x <- chebNodes(7, -1, 1)
+control <- x[-length(x)]
+PP <- remPolyCoeffs(x, fn)
+r <- remPolyRoots(x, PP$b, fn, 1e7)
+expect_equal(r, control)
