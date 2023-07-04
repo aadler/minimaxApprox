@@ -40,7 +40,11 @@ isConverged <- function(errs, E, tol) {
 # Print method (hide i and basis but leave in list and not attribute)
 print.RatApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
-    print(list(b = x$b, ExpErr = x$EE, ObsErr = x$OE))
+    print(list(b = x$b,
+               Errors = list(Expected = x$EE,
+                             Observed = x$OE,
+                             Diff = x$Diff),
+               Warnings = x$Warning))
   } else {
     print(list(a = x$a, b = x$b, ExpErr = x$EE, ObsErr = x$OE))
   }
@@ -54,14 +58,14 @@ plot.RatApprox <- function(x, ...) {
 
   if (attr(x, "type") == "Polynomial") {
     zz <- remPolyErr(z, x$b, fn)
-    y <- remPolyErr(x$basis, x$b, fn)
+    y <- remPolyErr(x$x, x$b, fn)
   } else {
     zz <- sapply(z, remRatErr, x$a, x$b, fn)
-    y <- sapply(x$basis, remRatErr, x$a, x$b, fn)
+    y <- sapply(x$x, remRatErr, x$a, x$b, fn)
   }
 
   plot(z, zz, type = 'l',  xlab = "x", ylab = "Error")
   abline(h = 0)
-  points(x$basis, y, col = "red", pch = 16)
+  points(x$x, y, col = "red", pch = 16)
   abline(h = c(-x$EE, x$EE), lty = 2, col = 'red')
 }
