@@ -25,6 +25,7 @@ remPolyRoots <- function(x, b, fn, tol) {
       intv <- c(x[i], x[i + 1L])
       root <- tryCatch(uniroot(remPolyErr, interval = intv, b = b, fn = fn),
                        error = function(cond) simpleError(trimws(cond$message)))
+      # If there is no root in the interval, take the lower endpoint
       if (inherits(root, "simpleError")) {
         r[i] <- intv[which.min(abs(intv))]
       } else {
@@ -45,7 +46,7 @@ remPolySwitch <- function(r, l, u, b, fn) {
                      upper = nodes$upper[i],
                      b = b, fn = fn,
                      maximum = maximize)[[1L]]
-    # Test endpoints
+    # Test endpoints for max/min
     p <- c(nodes$lower[i], x[i], nodes$upper[i])
     testDF <- data.frame(p = p, E = remPolyErr(p, b, fn))
     if (maximize) {
