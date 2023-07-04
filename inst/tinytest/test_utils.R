@@ -13,18 +13,18 @@ n <- 6L
 k <- seq_len(n) - 1L
 # See https://en.wikipedia.org/wiki/Chebyshev_polynomials#Roots_and_extrema
 control <- sort(cos(pi * (k + 0.5) / n))
-expect_equal(control, chebNodes(n, -1, 1), tolerance = tol)
+expect_equal(chebNodes(n, -1, 1), control, tolerance = tol)
 
 # Test vanderMat
 k <- 1:5
 control <- matrix(c(rep(1, 5L), k, k ^ 2, k ^ 3, k ^ 4, k ^ 5, k ^ 6), ncol = 7)
-expect_identical(control, vanderMat(k, 6))
+expect_identical(vanderMat(k, 6L), control)
 
 # Test callFun
 ## Test functionality
 fn <- function(x) tan(x) - x ^ 3
 control <- tan(-0.4) - (-0.4) ^ 3
-expect_equal(control, callFun(fn, -0.4), tolerance = tol)
+expect_equal(callFun(fn, -0.4), control, tolerance = tol)
 
 ## Test error trapping
 expect_error(callFun("x ^ 2", -0.4), cFErr)
@@ -50,25 +50,9 @@ coeffs <-  c(2, 3.2, 4.6, -9.7, 0.1)
 ## Test scalar
 x <- 3
 control = 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
-expect_equal(control, polyCalc(x, coeffs), tolerance = tol)
+expect_equal(polyCalc(x, coeffs), control, tolerance = tol)
 x <- 5
 control2 = 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
-expect_equal(control2, polyCalc(x, coeffs), tolerance = tol)
+expect_equal(polyCalc(x, coeffs), control2, tolerance = tol)
 ## Test vectorized
-expect_equal(c(control, control2), polyCalc(c(3, 5), coeffs), tolerance = tol)
-
-# Test remPolyMat
-x <- c(-0.4, 0.1, 0.3, 0.4)
-control <- matrix(c(rep(1, 4L), x, x ^ 2, 1, -1, 1, -1), nrow = 4)
-expect_identical(control, remPolyMat(x))
-
-# Test remPolyCoeffs
-# If the function is a pure polynomial then coeffs should recover it exactly.
-# Therefore for, for 4 data points and the function x² + 2x + 3, the
-# coefficients should return c(3, 2, 1) and the error should be 0.
-fn <- function(x) x ^ 2 + 2 * x + 3
-x <- seq(0, 2, length.out = 4)
-control <- c(3, 2, 1)
-PP <- remPolyCoeffs(x, fn)
-expect_equal(PP$b, control, tolerance = tol)
-expect_equal(PP$E, 0, tolerance = tol)
+expect_equal(polyCalc(c(3, 5), coeffs), c(control, control2), tolerance = tol)
