@@ -81,7 +81,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   }
 
   if ("showProgress" %in% names(opts)) {
-    maxiter <- opts$showProgress
+    showProgress <- opts$showProgress
   } else {
     showProgress <- FALSE
   }
