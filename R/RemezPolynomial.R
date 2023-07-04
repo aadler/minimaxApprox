@@ -14,7 +14,7 @@ remPolyCoeffs <- function(x, fn) {
 
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
-remPolyRoots <- function(x, b, fn, errs) {
+remPolyRoots <- function(x, b, fn, errs, tol) {
   if (all(abs(errs) < tol)) {
     return(x[-length(x)])
   } else {
@@ -98,7 +98,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   i <- 0
   repeat {
     i <- i + 1L
-    r <- remPolyRoots(x, PP$b, fn, errs)
+    r <- remPolyRoots(x, PP$b, fn, errs, tol)
     x <- remPolySwitch(r, lower, upper, PP$b, fn)
     PP <- remPolyCoeffs(x, fn)
     errs <- sapply(x, remPolyErr, b = PP$b, fn = fn)
