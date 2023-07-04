@@ -31,10 +31,10 @@ polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
 isConverged <- function(errs, E, tol) {
   abserrs <- abs(errs)
   mabserrs <- max(abserrs)
-  all(diff(abserrs) < tol) &&        # All errors same magnitude
-    isOscil(errs) &&                 # All error alternating signs
-    (mabserrs < abs(E) ||            # Either magnitude of all errors < E
-       all(abs(abserrs - abs(E)) < tol)) # Or equal to E
+  all(diff(abserrs) < tol) &&             # All errors same magnitude
+    isOscil(errs) &&                      # All error alternating signs
+    (mabserrs < abs(E) ||                 # Either all error < E
+       all(abs(abserrs - abs(E)) < tol))  # Or differences within tolerance
 }
 
 # Print method (hide i and basis but leave in list and not attribute)
