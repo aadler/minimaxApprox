@@ -25,7 +25,7 @@ callFun <- function(fn, x) {
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
 # Calculate the polynomial approximation. Use in numer & denom for rationals
-polyCalc <- function(x, a) sum(a * x ^ (seq_along(a) - 1L))
+polyCalc <- function(x, a)  as.vector(vanderMat(x, length(a) - 1) %*% a)
 
 # Check Remez iterations for convergence
 isConverged <- function(errs, E, tol) {
@@ -53,8 +53,8 @@ plot.RatApprox <- function(x, ...) {
   z <- seq(rng[1], rng[2], length.out = 1001L)
 
   if (attr(x, "type") == "Polynomial") {
-    zz <- sapply(z, remPolyErr, x$b, fn)
-    y <- sapply(x$basis, remPolyErr, x$b, fn)
+    zz <- remPolyErr(z, x$b, fn)
+    y <- remPolyErr(x$basis, x$b, fn)
   } else {
     zz <- sapply(z, remRatErr, x$a, x$b, fn)
     y <- sapply(x$basis, remRatErr, x$a, x$b, fn)

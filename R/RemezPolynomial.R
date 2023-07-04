@@ -44,10 +44,8 @@ remPolySwitch <- function(r, l, u, b, fn) {
                      b = b, fn = fn,
                      maximum = maximize)[[1L]]
     # Test endpoints
-    testDF <- data.frame(p = c(nodes$lower[i], x[i], nodes$upper[i]),
-                         E = c(remPolyErr(nodes$lower[i], b, fn),
-                                remPolyErr(x[i], b, fn),
-                                remPolyErr(nodes$upper[i], b, fn)))
+    p <- c(nodes$lower[i], x[i], nodes$upper[i])
+    testDF <- data.frame(p = p, E = remPolyErr(p, b, fn))
     if (maximize) {
       x[i] <- testDF$p[which.max(testDF$E)]
     } else {
@@ -60,7 +58,7 @@ remPolySwitch <- function(r, l, u, b, fn) {
   }
 
   # Test Oscillation
-  errs <- sapply(x, remPolyErr, b = b, fn = fn)
+  errs <- remPolyErr(x, b, fn)
 
   if (!isOscil(errs)) {
     stop("Control points are not oscillating in sign.\n")
@@ -94,14 +92,14 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
 
   # Initial Polynomial Guess
   PP <- remPolyCoeffs(x, fn)
-  errs <- sapply(x, remPolyErr, b = PP$b, fn = fn)
+  errs <- remPolyErr(x, PP$b, fn)
   i <- 0
   repeat {
     i <- i + 1L
     r <- remPolyRoots(x, PP$b, fn, errs, tol)
     x <- remPolySwitch(r, lower, upper, PP$b, fn)
     PP <- remPolyCoeffs(x, fn)
-    errs <- sapply(x, remPolyErr, b = PP$b, fn = fn)
+    errs <- remPolyErr(x, PP$b, fn)
     mxae <- max(abs(errs))
     if (showProgress) {
       message("i: ", i, " E: ", fN(PP$E), " maxErr: ", fN(mxae))
