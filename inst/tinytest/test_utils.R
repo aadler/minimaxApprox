@@ -61,3 +61,7 @@ expect_equal(polyCalc(c(3, 5), coeffs), c(control, control2), tolerance = tol)
 PP <- remPoly(function(x) exp(x), 0, 1, 5)
 expect_stdout(print(PP))
 expect_stdout(plot(PP))
+
+RR <- remRat(function(x) exp(x), 0, 1, 2, 2)
+expect_stdout(print(RR))
+expect_stdout(plot(RR))
