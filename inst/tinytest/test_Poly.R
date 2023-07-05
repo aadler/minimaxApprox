@@ -41,26 +41,28 @@ r <- remPolyRoots(x, PP$b, fn)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
+## Test machine precision trapping
+err_mess <- paste0("This code only functions to machine double precision. ",
+                   "All error values are below machine double precision. ",
+                   "Please try again using a lesser degree.")
+fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
+x <- chebNodes(14, -1, 1)
+PP <- remPolyCoeffs(x, fn)
+expect_error(remPolyRoots(x, PP$b, fn), err_mess)
+
 # Test remPolySwitch
-## Assuming this is correct, replicate it.
-control <- c(-0.98638090340529549, -0.91141570324382248, -0.77736906513126558,
-             -0.59367521977973037, -0.37185874978471822, -0.12664154163425909,
-             0.12670192344275352, 0.37178325071751533, 0.59358574126319796,
-             0.77738179686207598, 0.91139804459486751, 0.98638183512531563)
+## Assuming function is correct, replicate a previous result
+control <- c(-1, -0.9573490966327286, -0.85225234748254508,
+             -0.69292951715411044, -0.4882291458330954, -0.25370091408242235,
+             -0.0010783059838432767,0.25245704289602244, 0.48776180816991693,
+             0.69209059408134277, 0.85313489191266234, 0.95823124164360574, 1)
 
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(13, -1, 1)
 PP <- remPolyCoeffs(x, fn)
 r <- remPolyRoots(x, PP$b, fn)
-expect_equal(r, control, tolerance = tol)
-
-## Test machine precision trapping
-err_mess <- paste0("This code only functions to machine double precision. ",
-                   "All error values are below machine double precision. ",
-                   "Please try again using a lesser degree.")
-x <- chebNodes(14, -1, 1)
-PP <- remPolyCoeffs(x, fn)
-expect_error(remPolyRoots(x, PP$b, fn), err_mess)
+x <- remPolySwitch(r, -1, 1, PP$b, fn)
+expect_equal(x, control, tolerance = tol)
 
 # Test other components of remPoly that have not been exposed above
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
