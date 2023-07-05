@@ -71,8 +71,8 @@ plot.RatApprox <- function(x, ...) {
     zz <- remPolyErr(z, x$b, fn)
     y <- remPolyErr(x$x, x$b, fn)
   } else {
-    zz <- sapply(z, remRatErr, x$a, x$b, fn)
-    y <- sapply(x$x, remRatErr, x$a, x$b, fn)
+    zz <- remRatErr(z, x$a, x$b, fn)
+    y <- remRatErr(x$x, x$a, x$b, fn)
   }
 
   plot(z, zz, type = 'l',  xlab = "x", ylab = "Error")
