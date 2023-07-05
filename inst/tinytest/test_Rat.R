@@ -59,3 +59,26 @@ RR <- remRatCoeffs(x, 0, fn, 1, 0)
 r <- remRatRoots(x, RR$a, RR$b, fn)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
+
+## Test machine precision trapping
+err_mess <- paste0("This code only functions to machine double precision. ",
+                   "All error values are below machine double precision. ",
+                   "Please try again using a lesser degree.")
+fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
+x <- chebNodes(6, -1, 1)
+RR <- remRatCoeffs(x, 0, fn, 2, 2)
+expect_error(remRatRoots(x, RR$a, RR$b, fn), err_mess)
+
+# Test remRatSwitch
+## Assuming function is correct, replicate a previous result
+control <- c(-1, -0.67069355653021767, 4.7351012000262926e-14,
+             0.67069355653044971, 1)
+fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
+x <- chebNodes(5, -1, 1)
+RR <- remRatCoeffs(x, 0, fn, 2, 1)
+r <- remRatRoots(x, RR$a, RR$b, fn)
+x <- remRatSwitch(r, -1, 1, RR$a, RR$b, fn)
+expect_equal(x, control, tolerance = tol)
+
+# Test other components of remPoly that have not been exposed above
+
