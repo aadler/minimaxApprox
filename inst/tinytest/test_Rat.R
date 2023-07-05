@@ -80,5 +80,19 @@ r <- remRatRoots(x, RR$a, RR$b, fn)
 x <- remRatSwitch(r, -1, 1, RR$a, RR$b, fn)
 expect_equal(x, control, tolerance = tol)
 
-# Test other components of remPoly that have not been exposed above
+# Test other components of remRat that have not been exposed above
+fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 
+expect_false(remRat(fn, -1, 1, 1, 2)$Warning)
+
+# Should show at least one line of output due to show progress
+expect_message(remRat(fn, -1, 1, 1, 2, opts = list(miniter = 2L,
+                                                   showProgress = TRUE)),
+               "i: 1 E: ")
+expect_warning(remRat(fn, -1, 1, 2, 2,
+                      opts = list(maxiter = 0L, tol = 1e-12,
+                                  xi = chebNodes(6, -1, 1))),
+               "Convergence not acheived in ")
+
+expect_true(suppressWarnings(remRat(fn, -1, 1, 2, 2,
+                                    opts = list(maxiter = 0L))$Warning))
