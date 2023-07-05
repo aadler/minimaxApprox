@@ -8,7 +8,7 @@ remPolyMat <- function(x) {
   cbind(A, (-1) ^ (seq_len(n) - 1))
 }
 
-# Function to calculate coeefficients given matrix and known values
+# Function to calculate coefficients given matrix and known values
 remPolyCoeffs <- function(x, fn) {
   PP <- solve(remPolyMat(x), callFun(fn, x))
   list(b = PP[-length(PP)], E = PP[length(PP)])
@@ -24,21 +24,20 @@ remPolyRoots <- function(x, b, fn) {
     stop("This code only functions to machine double precision. All error ",
          "values are below machine double precision. Please try again using a ",
          "lesser degree.")
-  } else {
-    r <- double(length(x) - 1L)
-    for (i in seq_along(r)) {
-      intv <- c(x[i], x[i + 1L])
-      root <- tryCatch(uniroot(remPolyErr, interval = intv, b = b, fn = fn),
-                       error = function(cond) simpleError(trimws(cond$message)))
-      # If there is no root in the interval, take the lower endpoint
-      if (inherits(root, "simpleError")) {
-        r[i] <- intv[which.min(abs(intv))]
-      } else {
-        r[i] <- root$root
-      }
-    }
-    return(r)
   }
+  r <- double(length(x) - 1L)
+  for (i in seq_along(r)) {
+    intv <- c(x[i], x[i + 1L])
+    root <- tryCatch(uniroot(remPolyErr, interval = intv, b = b, fn = fn),
+                     error = function(cond) simpleError(trimws(cond$message)))
+    # If there is no root in the interval, take the lower endpoint
+    if (inherits(root, "simpleError")) {
+      r[i] <- intv[which.min(abs(intv))]
+    } else {
+      r[i] <- root$root
+    }
+  }
+  r
 }
 
 # Function to identify new x positions. This algorithm uses the multi-switch
