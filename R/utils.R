@@ -37,6 +37,17 @@ isConverged <- function(errs, E, tol) {
        all(abs(abserrs - abs(E)) < tol))  # Or differences within tolerance
 }
 
+# Check denominator polynomial for zero in the requested range
+checkDenom <- function(b, l, u) {
+  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), a = b),
+                     error = function(cond) simpleError(trimws(cond$message)))
+  if (inherits(dngrRt, "simpleError")) {
+    return(NULL)
+  } else {
+    return(dngrRt$root)
+  }
+}
+
 # Print method (hide i and basis but leave in list and not attribute)
 print.RatApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
