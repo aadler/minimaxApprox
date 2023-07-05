@@ -15,7 +15,9 @@ remRatMat <- function(x, E, y, nD, dD) {
 # Function to calculate coefficients given matrix and known values
 remRatCoeffs <- function(x, E, fn, nD, dD) {
   y <- callFun(fn, x)
-  P <- solve(remRatMat(x, E, y, nD, dD), y)
+  # P <- solve(remRatMat(x, E, y, nD, dD), y)
+  PQ <- qr(remRatMat(x, E, y, nD, dD), LAPACK = TRUE)
+  P <- solve.qr(PQ, y)
   RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
              b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
              E = P[length(P)])
@@ -57,11 +59,12 @@ remRatRoots <- function(x, a, b, fn) {
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
 remRatSwitch <- function(r, l, u, a, b, fn) {
-  nodes <- data.frame(lower = c(l, r), upper = c(r, u))
-  x <- double(dim(nodes)[1L])
+  bottoms <- c(l, r)
+  tops <- c(r, u)
+  x <- double(length(bottoms))
   maximize <- sign(remRatErr(l, a, b, fn)) == 1
   for (i in seq_along(x)) {
-    intv <- unlist(nodes[i, ])
+    intv <- c(bottoms[i], tops[i])
     extrma <- tryCatch(optimize(remRatErr, interval = intv,
                                 a = a, b = b, fn = fn, maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
@@ -78,12 +81,13 @@ remRatSwitch <- function(r, l, u, a, b, fn) {
     }
 
     # Test endpoints for max/min
-    p <- c(nodes$lower[i], x[i], nodes$upper[i])
-    testDF <- data.frame(p = p, E = remRatErr(p, a, b, fn))
+    p <- c(bottoms[i], x[i], tops[i])
+    E <- remRatErr(p, a, b, fn)
+
     if (maximize) {
-      x[i] <- testDF$p[which.max(testDF$E)]
+      x[i] <- p[which.max(E)]
     } else {
-      x[i] <- testDF$p[which.min(testDF$E)]
+      x[i] <- p[which.min(E)]
     }
 
     # Flip maximize
@@ -122,7 +126,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   if ("tol" %in% names(opts)) {
     tol <- opts$tol
   } else {
-    tol <- 5 * .Machine$double.eps
+    tol <- 1e-10
   }
 
   # Initial x's
@@ -169,7 +173,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
     RR <- convergeErr(x, fn, tol, numerd, denomd)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
-      stop("The ", denomd, " degree polynomial in the denominator has a zero ",
+     stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fN(dngr), " which makes rational approximation perilous for ",
            "this function over the interval [", lower, ", ", upper, "].")
     }
