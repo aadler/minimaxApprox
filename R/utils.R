@@ -30,10 +30,10 @@ polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
 # Check Remez iterations for convergence
 isConverged <- function(errs, E, tol) {
   abserrs <- abs(errs)
-  mabserrs <- max(abserrs)
+  mxae <- max(abserrs)
   all(diff(abserrs) < tol) &&             # All errors same magnitude
     isOscil(errs) &&                      # All error alternating signs
-    (mabserrs < abs(E) ||                 # Either all error < E
+    (mxae < abs(E) ||                     # Either all error < E
        all(abs(abserrs - abs(E)) < tol))  # Or differences within tolerance
 }
 
@@ -80,7 +80,7 @@ plot.RatApprox <- function(x, ...) {
   points(x$x, y, col = "red", pch = 16)
   abline(h = c(-x$EE, x$EE), lty = 2, col = 'red')
   abline(h = c(-x$OE, x$OE), lty = 3, col = 'blue')
-  legend(x = "bottomleft", inset = 0.1, col = c("red", "red", "blue"),
+  legend(x = "bottomleft", inset = c(0.35, 1), col = c("red", "red", "blue"),
          lty = c(NA, 2, 3), legend = c("Basis", "Exp Err", "Obs Err"),
-         pch = c(16, NA, NA), bg = "transparent")
+         pch = c(16, NA, NA), bg = "transparent", xpd = TRUE)
 }
