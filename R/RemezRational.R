@@ -148,7 +148,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
     j <- 0L
     repeat {
       j <- j + 1L
-      if (j > maxiter / 100) break  # Otherwise this would take FOREVER
+      if (j > max(maxiter / 100, 1)) break  # Otherwise this would take FOREVER
       RR <- remRatCoeffs(x, E, fn, nD, dD)
       if (all(abs(abs(E) - abs(RR$E)) < tol)) break
       E <- (E + RR$E) / 2
