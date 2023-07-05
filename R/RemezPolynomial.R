@@ -1,19 +1,24 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
+# Function to create augmented Vandermonde matrix
 remPolyMat <- function(x) {
   n <- length(x)
   A <- vanderMat(x, n - 2)
   cbind(A, (-1) ^ (seq_len(n) - 1))
 }
 
+# Function to calculate coeefficients given matrix and known values
 remPolyCoeffs <- function(x, fn) {
   PP <- solve(remPolyMat(x), callFun(fn, x))
   list(b = PP[-length(PP)], E = PP[length(PP)])
 }
 
+# Function to calculate error between known and calculated values
 remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 
+# Function to identify roots of the error equation for use as bounds in finding
+# the maxima and minima
 remPolyRoots <- function(x, b, fn) {
   if (all(abs(remPolyErr(x, b, fn)) <= 5 * .Machine$double.eps)) {
     stop("This code only functions to machine double precision. All error ",
@@ -36,6 +41,8 @@ remPolyRoots <- function(x, b, fn) {
   }
 }
 
+# Function to identify new x positions. This algorithm uses the multi-switch
+# paradigm, not the single switch.
 remPolySwitch <- function(r, l, u, b, fn) {
   nodes <- data.frame(lower = c(l, r), upper = c(r, u))
   x <- double(dim(nodes)[1L])
@@ -66,6 +73,7 @@ remPolySwitch <- function(r, l, u, b, fn) {
   x
 }
 
+# Main function to calculate and return the minimax polynomial approximation
 remPoly <- function(fn, lower, upper, degree, opts = list()) {
 
   # Handle configuration options
