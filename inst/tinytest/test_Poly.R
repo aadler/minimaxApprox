@@ -41,17 +41,6 @@ r <- remPolyRoots(x, PP$b, fn)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
-# Test remPolyRoots
-## This one will rely on expm1(x) and exp(x) - 1 being close
-x <- chebNodes(3, 0, 1)
-QQ <- remPolyCoeffs(x, function(x) expm1(x))
-control <- remPolyRoots(x, QQ$b, function(x) expm1(x))
-fn <- function(x) exp(x) - 1
-PP <- remPolyCoeffs(x, fn)
-r <- remPolyRoots(x, PP$b, fn)
-## Need weaker tolerance here since functions are not exactly the same
-expect_equal(r, control, tolerance = 1.2e-5)
-
 # Test remPolySwitch
 ## Assuming this is correct, replicate it.
 control <- c(-0.98638090340529549, -0.91141570324382248, -0.77736906513126558,
