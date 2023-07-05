@@ -79,4 +79,8 @@ plot.RatApprox <- function(x, ...) {
   abline(h = 0)
   points(x$x, y, col = "red", pch = 16)
   abline(h = c(-x$EE, x$EE), lty = 2, col = 'red')
+  abline(h = c(-x$OE, x$OE), lty = 3, col = 'blue')
+  legend(x = "bottomleft", inset = 0.1, col = c("red", "red", "blue"),
+         lty = c(NA, 2, 3), legend = c("Basis", "Exp Err", "Obs Err"),
+         pch = c(16, NA, NA), bg = "transparent")
 }
