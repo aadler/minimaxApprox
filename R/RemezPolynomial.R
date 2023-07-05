@@ -113,9 +113,11 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
     PP <- remPolyCoeffs(x, fn)
     errs <- remPolyErr(x, PP$b, fn)
     mxae <- max(abs(errs))
+
     if (showProgress) {
       message("i: ", i, " E: ", fN(PP$E), " maxErr: ", fN(mxae))
     }
+
     if ((isConverged(errs, PP$E, tol) && i >= miniter) || i > maxiter) break
   }
 
