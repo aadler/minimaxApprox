@@ -5,18 +5,18 @@
 remRatMat <- function(x, E, y, nD, dD) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1)
-  Ev <- altSgn * E
-  yv <- -(y + Ev)
+  Evctr <- altSgn * E
+  yvctr <- -(y + Evctr)
   AMat <- vanderMat(x, nD)
-  BMat <- vanderMat(x, dD)[, -1] * yv
+  BMat <- vanderMat(x, dD)[, -1] * yvctr
   cbind(AMat, BMat, -altSgn, deparse.level = 0)
 }
 
 remRatCoeffs <- function(x, E, fn, nD, dD) {
   y <- callFun(fn, x)
   P <- solve(remRatMat(x, E, y, nD, dD), y)
-  RR <- list(a = P[1:(nD + 1L)],
-             b = c(1, P[(nD + 2L):(nD + dD + 1L)]),
+  RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
+             b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
              E = P[length(P)])
   if (sum(sapply(RR, length)) != (length(x) + 1)) {
     stop("Catastrophic Error. Result vector not of required length.")
@@ -24,9 +24,7 @@ remRatCoeffs <- function(x, E, fn, nD, dD) {
   RR
 }
 
-remRatFunc <- function(x, a, b) {
-  sum(a * x ^ (seq_along(a) - 1)) / sum(b * x ^ (seq_along(b) - 1))
-}
+remRatFunc <- function(x, a, b)  polyCalc(x, a) / polyCalc(x, b)
 
 remRatErr <- function(x, a, b, fn) {remRatFunc(x, a, b) - callFun(fn, x)}
 
