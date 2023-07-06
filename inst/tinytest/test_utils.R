@@ -35,15 +35,19 @@ expect_true(isOscil(control))
 control <- c(-2, 1, -3, 4, -1, -6)
 expect_false(isOscil(control))
 
+# Test CheckDenom
+expect_equal(checkDenom(c(-0.5, 1), 0, 1), 0.5)
+expect_true(is.null(checkDenom(c(-0.5, 1), 1, 2)))
+
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)
 E <- 0.1
-expect_true(isConverged(errs, E, tol))
+expect_true(isConverged(errs, E, 1.05, 1e-12))
 E <- 0.05
-expect_false(isConverged(errs, E, tol))
+expect_false(isConverged(errs, E, 1.05, 1e-12))
 E <- 0.1
 errs <- c(-0.2, 0.1, -0.1)
-expect_false(isConverged(errs, E, tol))
+expect_false(isConverged(errs, E, 1.05, 1e-12))
 
 # Test polyCalc
 coeffs <-  c(2, 3.2, 4.6, -9.7, 0.1)
@@ -57,11 +61,14 @@ expect_equal(polyCalc(x, coeffs), control2, tolerance = tol)
 ## Test vectorized
 expect_equal(polyCalc(c(3, 5), coeffs), c(control, control2), tolerance = tol)
 
-# Test that print and plot produce output
+# Test print, plot, and coef methods
 PP <- remPoly(function(x) exp(x), 0, 1, 5)
+expect_equal(unlist(coef(PP), use.names = FALSE), PP$b)
 expect_stdout(print(PP))
 expect_stdout(plot(PP))
 
 RR <- remRat(function(x) exp(x), 0, 1, 2, 2)
+expect_equal(unlist(coef(RR)$a, use.names = FALSE), RR$a)
+expect_equal(unlist(coef(RR)$b, use.names = FALSE), RR$b)
 expect_stdout(print(RR))
 expect_stdout(plot(RR))

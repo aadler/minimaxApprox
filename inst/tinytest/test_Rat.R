@@ -27,6 +27,10 @@ expect_equal(RR$a, control, tolerance = tol)
 expect_identical(RR$b, 1)
 expect_equal(RR$E, 0, tolerance = tol)
 
+## Test error trapping
+fn <- function(x) exp(x) - 1
+# expect_error(remRat(fn, 0, 1, 3, 3), "the tolerance or increasing maxiter.")
+
 # Test remRatFunc
 a <- 1:4
 b <- c(1, 2.2, 4.1)
@@ -89,10 +93,10 @@ expect_false(remRat(fn, -1, 1, 1, 2)$Warning)
 expect_message(remRat(fn, -1, 1, 1, 2, opts = list(miniter = 2L,
                                                    showProgress = TRUE)),
                "i: 1 E: ")
-expect_warning(remRat(fn, -1, 1, 2, 2,
-                      opts = list(maxiter = 0L, tol = 1e-12,
-                                  xi = chebNodes(6, -1, 1))),
+
+expect_warning(remRat(fn, -1, 1, 1, 2, xi = chebNodes(5, -1, 1),
+                      opts = list(maxiter = 10L)),
                "Convergence not acheived in ")
 
-expect_true(suppressWarnings(remRat(fn, -1, 1, 2, 2,
-                                    opts = list(maxiter = 0L))$Warning))
+expect_true(suppressWarnings(remRat(fn, -1, 1, 1, 2, xi = chebNodes(5, -1, 1),
+                                    opts = list(maxiter = 10L))$Warning))
