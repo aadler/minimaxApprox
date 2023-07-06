@@ -4,10 +4,9 @@ Title: What the Package Does (Title Case)
 Version: 0.1.0
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))
-Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: MPL-2.0
 Encoding: UTF-8
-Imports: stats
+Imports: stats, graphics
 Suggests: tinytest
