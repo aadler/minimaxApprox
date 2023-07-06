@@ -17,11 +17,18 @@ remRatCoeffs <- function(x, E, fn, nD, dD) {
   y <- callFun(fn, x)
   # P <- solve(remRatMat(x, E, y, nD, dD), y)
   PQ <- qr(remRatMat(x, E, y, nD, dD), LAPACK = TRUE)
-  P <- solve.qr(PQ, y)
+  P <- tryCatch(solve.qr(PQ, y),
+                error = function(cond) simpleError(trimws(cond$message)))
+  if (inherits(P, "simpleError")) {
+    stop("This code only functions to machine double precision. The ",
+         "algorithm resulted in a singular matrix. Perhaps try reducing ",
+         "the tolerance or increasing maxiter.")
+  }
   RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
              b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
              E = P[length(P)])
-  if (sum(lengths(RR)) != (length(x) + 1)) {
+
+  if (sum(lengths(RR)) != (length(x) + 1)) { # Not sure this is needed
     stop("Catastrophic Error. Result vector not of required length.")
   }
   RR
@@ -46,7 +53,8 @@ remRatRoots <- function(x, a, b, fn) {
     intv <- c(x[i], x[i + 1L])
     root <- tryCatch(uniroot(remRatErr, interval = intv, a = a, b = b, fn = fn),
                      error = function(cond) simpleError(trimws(cond$message)))
-    # If there is no root in the interval, take the lower endpoint
+
+    # If there is no root in the interval, take the endpoint closest to zero
     if (inherits(root, "simpleError")) {
       r[i] <- intv[which.min(abs(intv))]
     } else {
@@ -93,11 +101,6 @@ remRatSwitch <- function(r, l, u, a, b, fn) {
     # Flip maximize
     maximize <- !maximize
   }
-
-  # Test Oscillation
-  # if (!isOscil(remRatErr(x, a, b, fn))) {
-  #   stop("Control points do not result in oscillating errors.")
-  # }
   x
 }
 
@@ -108,7 +111,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   if ("maxiter" %in% names(opts)) {
     maxiter <- opts$maxiter
   } else {
-    maxiter <- 3000L
+    maxiter <- 5000L
   }
 
   if ("miniter" %in% names(opts)) {
@@ -123,10 +126,16 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
     showProgress <- FALSE
   }
 
+  if ("cnvgRatio" %in% names(opts)) {
+    cnvgRatio <- opts$cnvgRatio
+  } else {
+    cnvgRatio <- 1.001
+  }
+
   if ("tol" %in% names(opts)) {
     tol <- opts$tol
   } else {
-    tol <- 1e-10
+    tol <- 1e-14
   }
 
   # Initial x's
@@ -143,20 +152,20 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   # Since E is initially a guess we need to iterate solving the system of
   # equations until E converges. This function has no other use so defined
   # INSIDE the remRat call.
-  convergeErr <- function(x, fn, tol, nD, dD) {
+  convergeErr <- function(x, fn, cnvgRatio, nD, dD) {
     E <- 1
     j <- 0L
     repeat {
       j <- j + 1L
-      if (j > max(maxiter / 100, 1)) break  # Otherwise this would take FOREVER
+      if (j >= max(maxiter)) break  # Otherwise this would take FOREVER
       RR <- remRatCoeffs(x, E, fn, nD, dD)
-      if (all(abs(abs(E) - abs(RR$E)) < tol)) break
+      if (abs(E) / abs(RR$E) <= cnvgRatio) break
       E <- (E + RR$E) / 2
     }
     RR
   }
 
-  RR <- convergeErr(x, fn, tol, numerd, denomd)
+  RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
   i <- 0L
   repeat {
     i <- i + 1L
@@ -170,7 +179,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
     #   x[closeabove] <- x[closeabove] * 1.1
     #   x <- sort(x)
     # }
-    RR <- convergeErr(x, fn, tol, numerd, denomd)
+    RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
      stop("The ", denomd, " degree polynomial in the denominator has a zero ",
@@ -185,16 +194,16 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
               " Diff:", fN(abs(mxae - abs(RR$E))))
     }
 
-    if ((isConverged(errs, RR$E, tol) && i >= miniter) || i > maxiter) break
+    if ((isConverged(errs, abs(RR$E), cnvgRatio, tol) && i >= miniter) ||
+        i > maxiter) break
   }
 
   gotWarning <- FALSE
 
   if (i >= maxiter) {
-    mess <- paste("Convergence not acheived in", maxiter, "iterations.\n")
-    mess <- paste0(mess, "Maximum observed error ",
-                   formatC(mxae / RR$E, digits = 6L), " times expected.")
-    warning(mess)
+    warning("Convergence not acheived in ", maxiter, " iterations.\n",
+            "Maximum observed error is ", formatC(mxae / RR$E, digits = 6L),
+            " times expected.")
     gotWarning <- TRUE
   }
 
@@ -205,9 +214,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
     gotWarning <- TRUE
   }
 
-  ret <- list(a = RR$a, b = RR$b, EE = abs(RR$E), OE = mxae,
-              Diff = abs(abs(RR$E) - mxae), iterations = i, x = x,
-              Warning = gotWarning)
+  ret <- list(a = RR$a, b = RR$b, EE = abs(RR$E), OE = mxae, iterations = i,
+              x = x, Warning = gotWarning)
   attr(ret, "type") <- "Rational"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
