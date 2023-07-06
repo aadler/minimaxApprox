@@ -22,8 +22,8 @@ remPolyErr <- function(x, b, fn) polyCalc(x, b) - callFun(fn, x)
 remPolyRoots <- function(x, b, fn) {
   if (all(abs(remPolyErr(x, b, fn)) <= 5 * .Machine$double.eps)) {
     stop("This code only functions to machine double precision. All error ",
-         "values are below machine double precision. Please try again using a ",
-         "lesser degree.")
+         "values are too near machine double precision. Please try again ",
+         "using a lesser degree.")
   }
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
@@ -64,11 +64,6 @@ remPolySwitch <- function(r, l, u, b, fn) {
     # Flip maximize
     maximize <- !maximize
   }
-
-  # Test Oscillation
-  if (!isOscil(remPolyErr(x, b, fn))) {
-    stop("Control points do not result in oscillating errors.")
-  }
   x
 }
 
@@ -94,10 +89,16 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
     showProgress <- FALSE
   }
 
+  if ("cnvgRatio" %in% names(opts)) {
+    cnvgRatio <- opts$cnvgRatio
+  } else {
+    cnvgRatio <- 1.001
+  }
+
   if ("tol" %in% names(opts)) {
     tol <- opts$tol
   } else {
-    tol <- 5 * .Machine$double.eps
+    tol <- 1e-14
   }
 
   # Initial x's
@@ -118,16 +119,16 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
       message("i: ", i, " E: ", fN(PP$E), " maxErr: ", fN(mxae))
     }
 
-    if ((isConverged(errs, PP$E, tol) && i >= miniter) || i > maxiter) break
+    if ((isConverged(errs, abs(PP$E), cnvgRatio, tol) && i >= miniter) ||
+        i > maxiter) break
   }
 
   gotWarning <- FALSE
 
   if (i >= maxiter) {
-    mess <- paste("Convergence not acheived in", maxiter, "iterations.\n")
-    mess <- paste0(mess, "Maximum observed error ",
-                   formatC(mxae / PP$E, digits = 4L), " times expected.")
-    warning(mess)
+    warning("Convergence not acheived in ", maxiter, " iterations.\n",
+            "Maximum observed error is ", formatC(mxae / PP$E, digits = 6L),
+            " times expected.")
     gotWarning <- TRUE
   }
 
@@ -138,8 +139,8 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
     gotWarning <- TRUE
   }
 
-  ret <- list(b = PP$b, EE = abs(PP$E), OE = mxae, Diff = abs(abs(PP$E) - mxae),
-              iterations = i, x = x, Warning = gotWarning)
+  ret <- list(b = PP$b, EE = abs(PP$E), OE = mxae,  iterations = i, x = x,
+              Warning = gotWarning)
   attr(ret, "type") <- "Polynomial"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
