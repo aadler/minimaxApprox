@@ -28,13 +28,16 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
 
 # Check Remez iterations for convergence
-isConverged <- function(errs, E, tol) {
+isConverged <- function(errs, E, cnvgRatio, tol) {
   abserrs <- abs(errs)
   mxae <- max(abserrs)
-  all(diff(abserrs) < tol) &&             # All errors same magnitude
-    isOscil(errs) &&                      # All error alternating signs
-    (mxae < abs(E) ||                     # Either all error < E
-       all(abs(abserrs - abs(E)) < tol))  # Or differences within tolerance
+  # Check errors are of same magnitude by ratio or tolerance
+  errMagnitude <- all(mxae / abserrs < cnvgRatio) || all(diff(abserrs) <= tol)
+  # Check observed errors are close enough to expected by ratio or tolerance
+  errDistance <- mxae / E < cnvgRatio || abs(mxae - E) <= tol
+
+  # Converged if magnitude and distance are close and error oscillate
+  isOscil(errs) && errMagnitude && errDistance
 }
 
 # Check denominator polynomial for zero in the requested range
@@ -51,16 +54,28 @@ checkDenom <- function(b, l, u) {
 # Print method (hide i and basis but leave in list and not attribute)
 print.RatApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
-    print(list(b = x$b,
-               Errors = list(Expected = x$EE,
-                             Observed = x$OE,
-                             Diff = x$Diff),
-               Warnings = x$Warning))
+    ret <- list(b = x$b)
   } else {
-    print(list(a = x$a, b = x$b, ExpErr = x$EE, ObsErr = x$OE))
+    ret <- list(a = x$a, b = x$b)
   }
+
+  ret <- c(ret, list(ExpectedError = x$EE,
+                     ObservedError = x$OE,
+                     Ratio = round(x$OE / x$EE, 6L),
+                     Difference = abs(x$OE - x$EE),
+                     Warnings = x$Warning))
+  print(ret)
 }
 
+coef.RatApprox <- function(x, ...) {
+  if (attr(x, "type") == "Polynomial") {
+    coef <- list(b = x$b)
+  } else {
+    coef <- list(a = x$a, b = x$b)
+  }
+
+  coef
+}
 # Plot method for errors and basis points
 plot.RatApprox <- function(x, ...) {
   rng <- attr(x, "range")
@@ -75,7 +90,8 @@ plot.RatApprox <- function(x, ...) {
     y <- remRatErr(x$x, x$a, x$b, fn)
   }
 
-  plot(z, zz, type = 'l',  xlab = "x", ylab = "Error")
+  ybnd <- max(abs(x$EE), abs(x$OE))
+  plot(z, zz, type = 'l',  xlab = "x", ylab = "Error", ylim = c(-ybnd, ybnd))
   abline(h = 0)
   points(x$x, y, col = "red", pch = 16)
   abline(h = c(-x$EE, x$EE), lty = 2, col = 'red')
