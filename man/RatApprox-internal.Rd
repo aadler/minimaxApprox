@@ -6,19 +6,24 @@
 \description{Internal RatApprox functions}
 \details{These are not to be called directly by the user.}
 
-%% \alias{chebNodes}
-%% \alias{vanderMat}
-%% \alias{callFun}
-%% \alias{remPolyMat}
-%% \alias{remPolyCoeffs}
-%% \alias{remPolyErr}
-%% \alias{remPolyRoots}
-%% \alias{remPolySwitch}
-%% \alias{remRatMat}
-%% \alias{remRatCoeffs}
-%% \alias{remRatErr}
-%% \alias{remRatRoots}
-%% \alias{remRatSwitch}
-
+\alias{fN}
+\alias{chebNodes}
+\alias{vanderMat}
+\alias{callFun}
+\alias{isOscil}
+\alias{polyCalc}
+\alias{isConverged}
+\alias{checkDenom}
+\alias{remPolyMat}
+\alias{remPolyCoeffs}
+\alias{remPolyErr}
+\alias{remPolyRoots}
+\alias{remPolySwitch}
+\alias{remRatMat}
+\alias{remRatCoeffs}
+\alias{remRatFunc}
+\alias{remRatErr}
+\alias{remRatRoots}
+\alias{remRatSwitch}
 
 \keyword{internal}
