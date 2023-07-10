@@ -36,7 +36,7 @@ isConverged <- function(errs, E, cnvgRatio, tol) {
   # Check observed errors are close enough to expected by ratio or tolerance
   errDistance <- mxae / E < cnvgRatio || abs(mxae - E) <= tol
 
-  # Converged if magnitude and distance are close and error oscillate
+  # Converged if magnitude and distance are close and error oscillates in sign
   isOscil(errs) && errMagnitude && errDistance
 }
 
@@ -51,7 +51,7 @@ checkDenom <- function(b, l, u) {
   }
 }
 
-# Print method (hide i and basis but leave in list and not attribute)
+# Print method (hide i and basis/x but leave in list and not in attribute)
 print.MiniMaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
     ret <- list(b = x$b)
