@@ -40,7 +40,7 @@ remRatFunc <- function(x, a, b)  polyCalc(x, a) / polyCalc(x, b)
 # Function to calculate error between known and calculated values
 remRatErr <- function(x, a, b, fn, absErr) {
   y <- callFun(fn, x)
-  (remRatFunc(x, a, b) - y) / if (absErr) 1 else y
+  (remRatFunc(x, a, b) - y) / if (absErr) 1 else abs(y)
 
 }
 # Function to identify roots of the error equation for use as bounds in finding
@@ -102,6 +102,14 @@ remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
       x[i] <- p[which.max(E)]
     } else {
       x[i] <- p[which.min(E)]
+    }
+
+    # Test for 0 value at function if relative error
+    if (!absErr) {
+      if (callFun(fn, x[i]) == 0) {
+        stop("Algorithm is choosing basis point where functional value is ",
+             "0. Please approximate using absolute, and not relative error.")
+      }
     }
 
     # Flip maximize
@@ -168,7 +176,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   # Since E is initially a guess we need to iterate solving the system of
   # equations until E converges. This function has no other use so defined
   # INSIDE the remRat call.
-  convergeErr <- function(x, fn, cnvgRatio, nD, dD, absErr) {
+  convergeErr <- function(x, fn, cnvgRatio, nD, dD) {
     E <- 0
     E_last <- 1
     j <- 0L
@@ -189,8 +197,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     RR
   }
 
-  RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd, absErr)
-  errs_last <- remRatErr(x, a = RR$a, b = RR$b, fn = fn, absErr = absErr)
+  RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
+  errs_last <- remRatErr(x, RR$a, RR$b, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
   unchanging_i <- 0L
@@ -200,14 +208,14 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     if (i >= maxiter) break
     r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
     x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
-    RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd, absErr)
+    RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
      stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fN(dngr), " which makes rational approximation perilous for ",
            "this function over the interval [", lower, ", ", upper, "].")
     }
-    errs <- remRatErr(x, a = RR$a, b = RR$b, fn = fn, absErr)
+    errs <- remRatErr(x, RR$a, RR$b, fn, absErr)
     mxae <- max(abs(errs))
     expe <- abs(RR$E)
 
