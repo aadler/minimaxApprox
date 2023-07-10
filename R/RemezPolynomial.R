@@ -17,7 +17,7 @@ remPolyCoeffs <- function(x, fn) {
 # Function to calculate error between known and calculated values
 remPolyErr <- function(x, a, fn, absErr) {
   y <-  callFun(fn, x)
-  (polyCalc(x, a) - y) / if (absErr) 1 else y
+  (polyCalc(x, a) - y) / if (absErr) 1 else abs(y)
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
