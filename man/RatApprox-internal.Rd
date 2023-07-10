@@ -19,11 +19,13 @@
 \alias{remPolyErr}
 \alias{remPolyRoots}
 \alias{remPolySwitch}
+\alias{remPoly}
 \alias{remRatMat}
 \alias{remRatCoeffs}
 \alias{remRatFunc}
 \alias{remRatErr}
 \alias{remRatRoots}
 \alias{remRatSwitch}
+\alias{remRat}
 
 \keyword{internal}

@@ -66,19 +66,19 @@ expect_equal(x, control, tolerance = tol)
 
 # Test other components of remPoly that have not been exposed above
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-PP <- remPoly(fn, -1, 1, 9, opts = list(maxiter = 100, cnvgRatio = 1.5))
+PP <- MinMaxApprox(fn, -1, 1, 9, opts = list(maxiter = 100, cnvgRatio = 1.5))
 expect_false(PP$Warning)
 
 # Should show at least one line of output due to show progress
-expect_message(remPoly(fn, -1, 1, 9,
-                       opts = list(miniter = 0L, showProgress = TRUE)),
+expect_message(MinMaxApprox(fn, -1, 1, 9,
+                            opts = list(miniter = 0L, showProgress = TRUE)),
                "i: 1 E: ")
 
 fn <- function(x) sin(x) + cos(x)
-expect_warning(remPoly(fn, -1, 1, 13),
+expect_warning(MinMaxApprox(fn, -1, 1, 13),
                "All errors very near machine double precision.")
-expect_warning(remPoly(fn, -1, 1, 9, opts = list(maxiter = 0)),
+expect_warning(MinMaxApprox(fn, -1, 1, 9, opts = list(maxiter = 0)),
                "Convergence not acheived in ")
 
-PP <- suppressWarnings(remPoly(fn, -1, 1, 13, opts = list(tol = 1e-14)))
+PP <- suppressWarnings(MinMaxApprox(fn, -1, 1, 13, opts = list(tol = 1e-14)))
 expect_true(PP$Warning)

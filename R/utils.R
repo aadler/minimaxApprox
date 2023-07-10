@@ -51,6 +51,32 @@ checkDenom <- function(a, l, u) {
   }
 }
 
+# Master user-exposed function
+MiniMaxApprox <- function(fn, lower, upper, degree, xi = NULL, opts = list()) {
+  if (length(degree) == 2L) {        # If rational approximation requested
+    numerd <- degree[1L]
+    denomd <- degree[2L]
+    ratApprox <- TRUE
+  } else if (length(degree) == 1L) {
+    ratApprox <- FALSE               #  Polynomial approximation requested
+    if (!is.null(xi)) {
+      warning("Polynomial approximation uses Chebyeshev nodes for initial ",
+              "guess. Any passed xi is ignored.")
+    }
+  } else {
+    # All else is an error
+    stop("Polynomial approximation takes one value for degree and rational ",
+         "approximation takes a vector of two values for numerator and ",
+         "denominator. Any other inputs are invalid.")
+  }
+
+  if (ratApprox) {
+    remRat(fn, lower, upper, numerd, denomd, xi, opts)
+  } else {
+    remPoly(fn, lower, upper, degree, opts)
+  }
+}
+
 # Print method (hide i and basis/x but leave in list and not in attribute)
 print.MiniMaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {

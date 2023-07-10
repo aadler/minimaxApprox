@@ -86,17 +86,19 @@ expect_equal(x, control, tolerance = tol)
 
 # Test other components of remRat that have not been exposed above
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
+dg <- 1:2
 
-expect_false(remRat(fn, -1, 1, 1, 2)$Warning)
+expect_false(MinMaxApprox(fn, -1, 1, dg)$Warning)
 
 # Should show at least one line of output due to show progress
-expect_message(remRat(fn, -1, 1, 1, 2, opts = list(miniter = 2L,
-                                                   showProgress = TRUE)),
+expect_message(MinMaxApprox(fn, -1, 1, dg, opts = list(miniter = 2L,
+                                                       showProgress = TRUE)),
                "i: 1 E: ")
 
-expect_warning(remRat(fn, -1, 1, 1, 2, xi = chebNodes(5, -1, 1),
-                      opts = list(maxiter = 10L)),
+expect_warning(MinMaxApprox(fn, -1, 1, dg, xi = chebNodes(5, -1, 1),
+                            opts = list(maxiter = 10L)),
                "Convergence not acheived in ")
 
-expect_true(suppressWarnings(remRat(fn, -1, 1, 1, 2, xi = chebNodes(5, -1, 1),
-                                    opts = list(maxiter = 10L))$Warning))
+expect_true(suppressWarnings(MinMaxApprox(fn, -1, 1, dg,
+                                          xi = chebNodes(5, -1, 1),
+                                          opts = list(maxiter = 10L))$Warning))
