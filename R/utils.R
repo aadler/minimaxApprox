@@ -52,7 +52,7 @@ checkDenom <- function(b, l, u) {
 }
 
 # Print method (hide i and basis but leave in list and not attribute)
-print.RatApprox <- function(x, ...) {
+print.MiniMaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
     ret <- list(b = x$b)
   } else {
@@ -67,7 +67,7 @@ print.RatApprox <- function(x, ...) {
   print(ret)
 }
 
-coef.RatApprox <- function(x, ...) {
+coef.MiniMaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
     coef <- list(b = x$b)
   } else {
@@ -77,7 +77,7 @@ coef.RatApprox <- function(x, ...) {
   coef
 }
 # Plot method for errors and basis points
-plot.RatApprox <- function(x, ...) {
+plot.MiniMaxApprox <- function(x, ...) {
   rng <- attr(x, "range")
   fn <- attr(x, "func")
   z <- seq(rng[1], rng[2], length.out = 1001L)

@@ -144,7 +144,7 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   attr(ret, "type") <- "Polynomial"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
-  class(ret) <- c("RatApprox", class(ret))
+  class(ret) <- c("MiniMaxApprox", class(ret))
 
   ret
 }

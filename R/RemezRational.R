@@ -219,6 +219,6 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   attr(ret, "type") <- "Rational"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
-  class(ret) <- c("RatApprox", class(ret))
+  class(ret) <- c("MiniMaxApprox", class(ret))
   ret
 }

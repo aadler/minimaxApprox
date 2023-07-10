@@ -1,12 +1,16 @@
-Package: RatApprox
+Package: MiniMaxApprox
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
+Title: Implements Remez Algorithm for Polynomial and Rational Function
+    Approximation
+Version: 0.0.1
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Implements the basic Remez algorithm for polynomial approximation
+    and a form of the Fraser-Hart version <doi:10.1007/BF02162506> for rational
+    approximation.
 License: MPL-2.0
 Encoding: UTF-8
 Imports: stats, graphics
 Suggests: tinytest
+ByteCompile: yes
+NeedsCompilation: no
