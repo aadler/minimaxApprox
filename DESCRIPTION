@@ -1,6 +1,6 @@
 Package: MiniMaxApprox
 Type: Package
-Title: Implements Remez Algorithm for Polynomial and Rational Function
+Title: Implemention of Remez Algorithm for Polynomial and Rational Function
     Approximation
 Version: 0.0.1
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
@@ -11,6 +11,6 @@ Description: Implements the basic Remez algorithm for polynomial approximation
 License: MPL-2.0
 Encoding: UTF-8
 Imports: stats, graphics
-Suggests: tinytest
+Suggests: tinytest, covr
 ByteCompile: yes
 NeedsCompilation: no
