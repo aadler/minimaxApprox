@@ -111,13 +111,13 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   if ("maxiter" %in% names(opts)) {
     maxiter <- opts$maxiter
   } else {
-    maxiter <- 5000L
+    maxiter <- 100L
   }
 
   if ("miniter" %in% names(opts)) {
     miniter <- opts$miniter
   } else {
-    miniter <- 15L
+    miniter <- 10L
   }
 
   if ("showProgress" %in% names(opts)) {

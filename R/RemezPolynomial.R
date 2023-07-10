@@ -74,13 +74,13 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   if ("maxiter" %in% names(opts)) {
     maxiter <- opts$maxiter
   } else {
-    maxiter <- 2500L
+    maxiter <- 100L
   }
 
   if ("miniter" %in% names(opts)) {
     miniter <- opts$miniter
   } else {
-    miniter <- 15L
+    miniter <- 10L
   }
 
   if ("showProgress" %in% names(opts)) {
