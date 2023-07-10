@@ -15,12 +15,15 @@ remPolyCoeffs <- function(x, fn) {
 }
 
 # Function to calculate error between known and calculated values
-remPolyErr <- function(x, a, fn) polyCalc(x, a) - callFun(fn, x)
+remPolyErr <- function(x, a, fn, absErr) {
+  y <-  callFun(fn, x)
+  (polyCalc(x, a) - y) / if (absErr) 1 else y
+}
 
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
-remPolyRoots <- function(x, a, fn) {
-  if (all(abs(remPolyErr(x, a, fn)) <= 5 * .Machine$double.eps)) {
+remPolyRoots <- function(x, a, fn, absErr) {
+  if (all(abs(remPolyErr(x, a, fn, absErr)) <= 5 * .Machine$double.eps)) {
     stop("This code only functions to machine double precision. All error ",
          "values are too near machine double precision. Please try again ",
          "using a lesser degree.")
@@ -28,7 +31,8 @@ remPolyRoots <- function(x, a, fn) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remPolyErr, interval = intv, a = a, fn = fn),
+    root <- tryCatch(uniroot(remPolyErr, interval = intv, a = a, fn = fn,
+                             absErr = absErr),
                      error = function(cond) simpleError(trimws(cond$message)))
     # If there is no root in the interval, take the lower endpoint
     if (inherits(root, "simpleError")) {
@@ -42,19 +46,19 @@ remPolyRoots <- function(x, a, fn) {
 
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
-remPolySwitch <- function(r, l, u, a, fn) {
+remPolySwitch <- function(r, l, u, a, fn, absErr) {
   nodes <- data.frame(lower = c(l, r), upper = c(r, u))
   x <- double(dim(nodes)[1L])
-  maximize <- sign(remPolyErr(l, a, fn)) == 1
+  maximize <- sign(remPolyErr(l, a, fn, absErr)) == 1
   for (i in seq_along(x)) {
     x[i] <- optimize(remPolyErr,
                      lower = nodes$lower[i],
                      upper = nodes$upper[i],
-                     a = a, fn = fn,
+                     a = a, fn = fn, absErr = absErr,
                      maximum = maximize)[[1L]]
     # Test endpoints for max/min
     p <- c(nodes$lower[i], x[i], nodes$upper[i])
-    testDF <- data.frame(p = p, E = remPolyErr(p, a, fn))
+    testDF <- data.frame(p = p, E = remPolyErr(p, a, fn, absErr))
     if (maximize) {
       x[i] <- testDF$p[which.max(testDF$E)]
     } else {
@@ -68,7 +72,7 @@ remPolySwitch <- function(r, l, u, a, fn) {
 }
 
 # Main function to calculate and return the minimax polynomial approximation
-remPoly <- function(fn, lower, upper, degree, opts = list()) {
+remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
 
   # Handle configuration options
   if ("maxiter" %in% names(opts)) {
@@ -109,10 +113,10 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   i <- 0L
   repeat {
     i <- i + 1L
-    r <- remPolyRoots(x, PP$a, fn)
-    x <- remPolySwitch(r, lower, upper, PP$a, fn)
+    r <- remPolyRoots(x, PP$a, fn, absErr)
+    x <- remPolySwitch(r, lower, upper, PP$a, fn, absErr)
     PP <- remPolyCoeffs(x, fn)
-    errs <- remPolyErr(x, PP$a, fn)
+    errs <- remPolyErr(x, PP$a, fn, absErr)
     mxae <- max(abs(errs))
 
     if (showProgress) {
@@ -144,6 +148,9 @@ remPoly <- function(fn, lower, upper, degree, opts = list()) {
   attr(ret, "type") <- "Polynomial"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
+  attr(ret, "absErr") <- absErr
+  attr(ret, "tol") <- tol
+  attr(ret, "cnvgRatio") <- cnvgRatio
   class(ret) <- c("MiniMaxApprox", class(ret))
 
   ret

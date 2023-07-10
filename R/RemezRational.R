@@ -38,20 +38,25 @@ remRatCoeffs <- function(x, E, fn, nD, dD) {
 remRatFunc <- function(x, a, b)  polyCalc(x, a) / polyCalc(x, b)
 
 # Function to calculate error between known and calculated values
-remRatErr <- function(x, a, b, fn) remRatFunc(x, a, b) - callFun(fn, x)
+remRatErr <- function(x, a, b, fn, absErr) {
+  y <- callFun(fn, x)
+  (remRatFunc(x, a, b) - y) / if (absErr) 1 else y
 
+}
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
-remRatRoots <- function(x, a, b, fn) {
-  if (all(abs(remRatErr(x, a, b, fn)) <= 5 * .Machine$double.eps)) {
-    stop("This code only functions to machine double precision. All error ",
-         "values are below machine double precision. Please try again using a ",
-         "lesser degree.")
-  }
+remRatRoots <- function(x, a, b, fn, absErr) {
+  # if (all(abs(remRatErr(x, a, b, fn, absErr)) <= 5 * .Machine$double.eps)) {
+  #   warning("This code only functions near machine double precision. During ",
+  #           "the algorithm, at least one step had all calculated error values ",
+  #           "below machine double precision. You may wish to try using a ",
+  #           "lesser degree.")
+  # }
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remRatErr, interval = intv, a = a, b = b, fn = fn),
+    root <- tryCatch(uniroot(remRatErr, interval = intv, a = a, b = b, fn = fn,
+                             absErr = absErr),
                      error = function(cond) simpleError(trimws(cond$message)))
 
     # If there is no root in the interval, take the endpoint closest to zero
@@ -66,19 +71,20 @@ remRatRoots <- function(x, a, b, fn) {
 
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
-remRatSwitch <- function(r, l, u, a, b, fn) {
+remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
   bottoms <- c(l, r)
   tops <- c(r, u)
   x <- double(length(bottoms))
-  maximize <- sign(remRatErr(l, a, b, fn)) == 1
+  maximize <- sign(remRatErr(l, a, b, fn, absErr)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
     extrma <- tryCatch(optimize(remRatErr, interval = intv,
-                                a = a, b = b, fn = fn, maximum = maximize),
+                                a = a, b = b, fn = fn,
+                                absErr = absErr, maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remRatErr(intv, a, b, fn)
+      endPtErr <- remRatErr(intv, a, b, fn, absErr)
       if (maximize) {
         x[i] <- intv[which.max(endPtErr)]
       } else {
@@ -90,7 +96,7 @@ remRatSwitch <- function(r, l, u, a, b, fn) {
 
     # Test endpoints for max/min
     p <- c(bottoms[i], x[i], tops[i])
-    E <- remRatErr(p, a, b, fn)
+    E <- remRatErr(p, a, b, fn, absErr)
 
     if (maximize) {
       x[i] <- p[which.max(E)]
@@ -105,7 +111,8 @@ remRatSwitch <- function(r, l, u, a, b, fn) {
 }
 
 # Main function to calculate and return the minimax rational approximation
-remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
+remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
+                   opts = list()) {
 
   # Handle configuration options
   if ("maxiter" %in% names(opts)) {
@@ -117,7 +124,13 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   if ("miniter" %in% names(opts)) {
     miniter <- opts$miniter
   } else {
-    miniter <- 10L
+    miniter <- 5L
+  }
+
+  if ("unchangeiter" %in% names(opts)) {
+    unchangeiter <- opts$unchangeiter
+  } else {
+    unchangeiter <- 2L
   }
 
   if ("showProgress" %in% names(opts)) {
@@ -129,14 +142,17 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   if ("cnvgRatio" %in% names(opts)) {
     cnvgRatio <- opts$cnvgRatio
   } else {
-    cnvgRatio <- 1.001
+    cnvgRatio <- 1 + 1e-11 # Per Cody (1968) can reasonably expect 12 signdig
   }
 
   if ("tol" %in% names(opts)) {
     tol <- opts$tol
   } else {
-    tol <- 1e-14
+    tol <- 1e-13
   }
+
+  # If passing unchangeiter > maxiter assume want at least that many iterations
+  maxiter <- max(maxiter, unchangeiter)
 
   # Initial x's
   if (is.null(xi)) {
@@ -152,66 +168,101 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   # Since E is initially a guess we need to iterate solving the system of
   # equations until E converges. This function has no other use so defined
   # INSIDE the remRat call.
-  convergeErr <- function(x, fn, cnvgRatio, nD, dD) {
-    E <- 1
+  convergeErr <- function(x, fn, cnvgRatio, nD, dD, absErr) {
+    E <- 0
+    E_last <- 1
     j <- 0L
     repeat {
       j <- j + 1L
-      if (j >= max(maxiter)) break  # Otherwise this would take FOREVER
       RR <- remRatCoeffs(x, E, fn, nD, dD)
-      if (abs(E) / abs(RR$E) <= cnvgRatio) break
-      E <- (E + RR$E) / 2
+
+      if (j > maxiter ||                     # Iteration check
+          abs(E) / abs(RR$E) <= cnvgRatio || # Ratio check
+          abs(abs(E) - abs(RR$E)) <= tol  # || # Difference check
+          # abs(abs(E) - abs(E_last)) <= tol   # Unchanging check
+          ) break
+
+      E_last <- E
+      E <- (RR$E + E) / 2
     }
+
     RR
   }
 
-  RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
+  RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd, absErr)
+  errs_last <- remRatErr(x, a = RR$a, b = RR$b, fn = fn, absErr = absErr)
+  converged <- FALSE
+  unchanged <- FALSE
+  unchanging_i <- 0L
   i <- 0L
   repeat {
     i <- i + 1L
-    r <- remRatRoots(x, RR$a, RR$b, fn)
-    x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn)
-    # if (!is.null(dngr)) {
-    #   xrat <- x / dngr
-    #   closebelow <- which(xrat <= 1 & xrat > 0.99)
-    #   closeabove <- which(xrat > 1 & xrat <= 1.01)
-    #   x[closebelow] <- x[closebelow] * 0.9
-    #   x[closeabove] <- x[closeabove] * 1.1
-    #   x <- sort(x)
-    # }
-    RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
+    if (i >= maxiter) break
+    r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
+    x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
+    RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd, absErr)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
      stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fN(dngr), " which makes rational approximation perilous for ",
            "this function over the interval [", lower, ", ", upper, "].")
     }
-    errs <- remRatErr(x, a = RR$a, b = RR$b, fn = fn)
+    errs <- remRatErr(x, a = RR$a, b = RR$b, fn = fn, absErr)
     mxae <- max(abs(errs))
+    expe <- abs(RR$E)
 
     if (showProgress) {
-      message("i: ", i, " E: ", fN(RR$E), " maxErr: ", fN(mxae),
-              " Diff:", fN(abs(mxae - abs(RR$E))))
+      message("i: ", i, " E: ", fN(expe), " maxErr: ", fN(mxae),
+              " Ratio: ", fN(mxae / expe), " Diff:", fN(abs(mxae - expe)))
     }
 
-    if ((isConverged(errs, abs(RR$E), cnvgRatio, tol) && i >= miniter) ||
-        i > maxiter) break
+    if (isConverged(errs, expe, cnvgRatio, tol) && i >= miniter) {
+      converged <- TRUE
+      break
+    }
+
+    # Check that solution is evolving. If solution is not evolving then further
+    # iterations will just not help.
+    if (all(errs / errs_last <= cnvgRatio) ||
+        all(abs(errs - errs_last) <= tol)) {
+      unchanging_i <- unchanging_i + 1L
+      if (unchanging_i > unchangeiter) {
+        unchanged <- TRUE
+        break
+      }
+    }
+
+    errs_last <- errs
   }
 
   gotWarning <- FALSE
 
-  if (i >= maxiter) {
-    warning("Convergence not acheived in ", maxiter, " iterations.\n",
-            "Maximum observed error is ", formatC(mxae / RR$E, digits = 6L),
-            " times expected.")
+  if (i >= maxiter && !converged) {
+    warning("Convergence to requested ratio and tolerance not acheived in ",
+            i, " iterations.\n", "The ratio is ",
+            formatC(mxae / expe, digits = 6L, width = -1), " times expected ",
+            "and the difference is ",
+            formatC(abs(mxae - expe), digits = 6L, format = "g"),
+            " from the expected.")
+    gotWarning <- TRUE
+  }
+
+  if (unchanged && !converged) {
+    warning("Convergence to requested ratio and tolerance not acheived in ",
+            i, " iterations.\n", unchanging_i, " succesive calculated errors ",
+            "were too close to each other to warrant further iterations.\n",
+            "The ratio is ",
+            formatC(mxae / expe, digits = 6L, width = -1), " times expected ",
+            "and the difference is ",
+            formatC(abs(mxae - expe), digits = 6L, format = "g"),
+            " from the expected.")
     gotWarning <- TRUE
   }
 
   if (all(abs(errs) < 10 * .Machine$double.eps)) {
-    warning("All errors very near machine double precision. The solution may ",
+    message("All errors very near machine double precision. The solution may ",
             "not be optimal but should be best given the desired precision ",
             "and floating point limitations. Try a lower degree if needed.")
-    gotWarning <- TRUE
   }
 
   ret <- list(a = RR$a, b = RR$b, EE = abs(RR$E), OE = mxae, iterations = i,
@@ -219,6 +270,9 @@ remRat <- function(fn, lower, upper, numerd, denomd, xi = NULL, opts = list()) {
   attr(ret, "type") <- "Rational"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
+  attr(ret, "absErr") <- absErr
+  attr(ret, "tol") <- tol
+  attr(ret, "cnvgRatio") <- cnvgRatio
   class(ret) <- c("MiniMaxApprox", class(ret))
   ret
 }
