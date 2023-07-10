@@ -16,7 +16,7 @@ fn <- function(x) x ^ 2 + 2 * x + 3
 x <- seq(0, 2, length.out = 4)
 control <- c(3, 2, 1)
 PP <- remPolyCoeffs(x, fn)
-expect_equal(PP$b, control, tolerance = tol)
+expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$E, 0, tolerance = tol)
 
 # Test remPolyErr
@@ -27,17 +27,17 @@ c <- (exp(1) - m * log(m)) / 2
 tstFn <- function(x) m * x + c
 x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
-b <- remPoly(fn, 0, 1, 1)$b
-expect_equal(remPolyErr(x, b, fn), control, tolerance = tol)
+a <- remPoly(fn, 0, 1, 1, TRUE)$a
+expect_equal(remPolyErr(x, a, fn, TRUE), control, tolerance = tol)
 
 # Test remPolyRoots
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 x <- chebNodes(3, 0, 1)
 QQ <- remPolyCoeffs(x, function(x) expm1(x))
-control <- remPolyRoots(x, QQ$b, function(x) expm1(x))
+control <- remPolyRoots(x, QQ$a, function(x) expm1(x), TRUE)
 fn <- function(x) exp(x) - 1
 PP <- remPolyCoeffs(x, fn)
-r <- remPolyRoots(x, PP$b, fn)
+r <- remPolyRoots(x, PP$a, fn, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
@@ -48,7 +48,7 @@ err_mess <- paste("This code only functions to machine double precision.",
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(14, -1, 1)
 PP <- remPolyCoeffs(x, fn)
-expect_error(remPolyRoots(x, PP$b, fn), err_mess)
+expect_error(remPolyRoots(x, PP$a, fn, TRUE), err_mess)
 
 # Test remPolySwitch
 ## Assuming function is correct, replicate a previous result
@@ -60,25 +60,26 @@ control <- c(-1, -0.9573490966327286, -0.85225234748254508,
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(13, -1, 1)
 PP <- remPolyCoeffs(x, fn)
-r <- remPolyRoots(x, PP$b, fn)
-x <- remPolySwitch(r, -1, 1, PP$b, fn)
+r <- remPolyRoots(x, PP$a, fn, TRUE)
+x <- remPolySwitch(r, -1, 1, PP$a, fn, TRUE)
 expect_equal(x, control, tolerance = tol)
 
 # Test other components of remPoly that have not been exposed above
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-PP <- MinMaxApprox(fn, -1, 1, 9, opts = list(maxiter = 100, cnvgRatio = 1.5))
+PP <- MiniMaxApprox(fn, -1, 1, 9, errType = "rel",
+                    opts = list(maxiter = 100, cnvgRatio = 1.5))
 expect_false(PP$Warning)
 
 # Should show at least one line of output due to show progress
-expect_message(MinMaxApprox(fn, -1, 1, 9,
+expect_message(MiniMaxApprox(fn, -1, 1, 9,
                             opts = list(miniter = 0L, showProgress = TRUE)),
                "i: 1 E: ")
 
 fn <- function(x) sin(x) + cos(x)
-expect_warning(MinMaxApprox(fn, -1, 1, 13),
+expect_warning(MiniMaxApprox(fn, -1, 1, 13),
                "All errors very near machine double precision.")
-expect_warning(MinMaxApprox(fn, -1, 1, 9, opts = list(maxiter = 0)),
+expect_warning(MiniMaxApprox(fn, -1, 1, 9, opts = list(maxiter = 0)),
                "Convergence not acheived in ")
 
-PP <- suppressWarnings(MinMaxApprox(fn, -1, 1, 13, opts = list(tol = 1e-14)))
+PP <- suppressWarnings(MiniMaxApprox(fn, -1, 1, 13, opts = list(tol = 1e-14)))
 expect_true(PP$Warning)

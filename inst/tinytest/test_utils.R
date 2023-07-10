@@ -62,12 +62,12 @@ expect_equal(polyCalc(x, coeffs), control2, tolerance = tol)
 expect_equal(polyCalc(c(3, 5), coeffs), c(control, control2), tolerance = tol)
 
 # Test print, plot, and coef methods
-PP <- remPoly(function(x) exp(x), 0, 1, 5)
-expect_equal(unlist(coef(PP), use.names = FALSE), PP$b)
+PP <- remPoly(function(x) exp(x), 0, 1, 5, TRUE)
+expect_equal(unlist(coef(PP), use.names = FALSE), PP$a)
 expect_stdout(print(PP))
 expect_stdout(plot(PP))
 
-RR <- remRat(function(x) exp(x), 0, 1, 2, 2)
+RR <- suppressWarnings(remRat(function(x) exp(x), 0, 1, 2, 2, TRUE))
 expect_equal(unlist(coef(RR)$a, use.names = FALSE), RR$a)
 expect_equal(unlist(coef(RR)$b, use.names = FALSE), RR$b)
 expect_stdout(print(RR))

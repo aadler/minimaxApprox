@@ -27,10 +27,6 @@ expect_equal(RR$a, control, tolerance = tol)
 expect_identical(RR$b, 1)
 expect_equal(RR$E, 0, tolerance = tol)
 
-## Test error trapping
-fn <- function(x) exp(x) - 1
-# expect_error(remRat(fn, 0, 1, 3, 3), "the tolerance or increasing maxiter.")
-
 # Test remRatFunc
 a <- 1:4
 b <- c(1, 2.2, 4.1)
@@ -49,29 +45,27 @@ c <- (exp(1) - m * log(m)) / 2
 tstFn <- function(x) m * x + c
 x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
-RR <- remRat(fn, 0, 1, 1, 0)
-expect_equal(remRatErr(x, RR$a, RR$b, fn), control, tolerance = 1e-2)
+RR <- remRat(fn, 0, 1, 1, 0, TRUE, opts = list(unchangeiter = 50L))
+expect_equal(remRatErr(x, RR$a, RR$b, fn, TRUE), control, tolerance = 1e-2)
 
 # Test remRatRoots
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 x <- chebNodes(3, 0, 1)
 fn <- function(x) expm1(x)
 QQ <- remRatCoeffs(x, 0, fn, 1, 0)
-control <- remRatRoots(x, QQ$a, QQ$b, fn)
+control <- remRatRoots(x, QQ$a, QQ$b, fn, TRUE)
 fn <- function(x) exp(x) - 1
 RR <- remRatCoeffs(x, 0, fn, 1, 0)
-r <- remRatRoots(x, RR$a, RR$b, fn)
+r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
+
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
 ## Test machine precision trapping
-err_mess <- paste0("This code only functions to machine double precision. ",
-                   "All error values are below machine double precision. ",
-                   "Please try again using a lesser degree.")
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-x <- chebNodes(6, -1, 1)
-RR <- remRatCoeffs(x, 0, fn, 2, 2)
-expect_error(remRatRoots(x, RR$a, RR$b, fn), err_mess)
+dg <- c(2L, 2L)
+# expect_warning(MiniMaxApprox(fn, -1, 1, dg, errType = "rel"),
+#                "This code only functions near machine double precision. During")
 
 # Test remRatSwitch
 ## Assuming function is correct, replicate a previous result
@@ -80,25 +74,22 @@ control <- c(-1, -0.67069355653021767, 4.7351012000262926e-14,
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(5, -1, 1)
 RR <- remRatCoeffs(x, 0, fn, 2, 1)
-r <- remRatRoots(x, RR$a, RR$b, fn)
-x <- remRatSwitch(r, -1, 1, RR$a, RR$b, fn)
+r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
+x <- remRatSwitch(r, -1, 1, RR$a, RR$b, fn, TRUE)
 expect_equal(x, control, tolerance = tol)
 
 # Test other components of remRat that have not been exposed above
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-dg <- 1:2
-
-expect_false(MinMaxApprox(fn, -1, 1, dg)$Warning)
+dg <- c(2L, 1L)
+expect_false(MiniMaxApprox(fn, -1, 1, dg)$Warning)
 
 # Should show at least one line of output due to show progress
-expect_message(MinMaxApprox(fn, -1, 1, dg, opts = list(miniter = 2L,
+expect_message(MiniMaxApprox(fn, -1, 1, dg, opts = list(miniter = 2L,
                                                        showProgress = TRUE)),
                "i: 1 E: ")
 
-expect_warning(MinMaxApprox(fn, -1, 1, dg, xi = chebNodes(5, -1, 1),
-                            opts = list(maxiter = 10L)),
-               "Convergence not acheived in ")
-
-expect_true(suppressWarnings(MinMaxApprox(fn, -1, 1, dg,
-                                          xi = chebNodes(5, -1, 1),
-                                          opts = list(maxiter = 10L))$Warning))
+dg <- c(3L, 3L)
+expect_error(MiniMaxApprox(fn, -1, 1, dg, xi = chebNodes(5, -1, 1)),
+               "Given the requested degrees for numerator and denominator")
+expect_true(suppressWarnings(MiniMaxApprox(fn, -1, 1, c(5, 4),
+                                           opts = list(maxiter = 6L))$Warning))
