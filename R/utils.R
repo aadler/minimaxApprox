@@ -31,12 +31,13 @@ polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
 isConverged <- function(errs, expE, cnvgRatio, tol) {
   aerrs <- abs(errs)
   mxae <- max(aerrs)
+  mnae <- min(aerrs)
 
   # Check observed errors are close enough to expected by ratio or tolerance
   errDistance <- mxae / expE <= cnvgRatio || abs(mxae - expE) <= tol
 
   # Check observed errors are close enough to each other by ratio or tolerance
-  errMag <- all(mxae / aerrs <= cnvgRatio) || all(mxae - aerrs <= tol)
+  errMag <- mxae / mnae <= cnvgRatio || mxae - mnae <= tol
 
 
   # Converged if magnitude and distance are close and error oscillates in sign
