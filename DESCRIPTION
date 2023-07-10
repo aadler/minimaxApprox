@@ -6,8 +6,8 @@ Title: Implemention of Remez Algorithm for Polynomial and Rational Function
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))
 Description: Implements the basic Remez algorithm for polynomial approximation
-    and a form of the Fraser-Hart version <doi:10.1007/BF02162506> for rational
-    approximation.
+    and a form of the Fraser-Hart version <doi:10.1145/368273.368578> for
+    rational approximation.
 License: MPL-2.0
 Encoding: UTF-8
 Date: 2023-07-10
