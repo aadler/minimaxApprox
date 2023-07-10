@@ -41,8 +41,8 @@ isConverged <- function(errs, E, cnvgRatio, tol) {
 }
 
 # Check denominator polynomial for zero in the requested range
-checkDenom <- function(b, l, u) {
-  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), a = b),
+checkDenom <- function(a, l, u) {
+  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), a = a),
                      error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(dngrRt, "simpleError")) {
     return(NULL)
@@ -54,7 +54,7 @@ checkDenom <- function(b, l, u) {
 # Print method (hide i and basis/x but leave in list and not in attribute)
 print.MiniMaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
-    ret <- list(b = x$b)
+    ret <- list(a = x$a)
   } else {
     ret <- list(a = x$a, b = x$b)
   }
@@ -69,7 +69,7 @@ print.MiniMaxApprox <- function(x, ...) {
 
 coef.MiniMaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
-    coef <- list(b = x$b)
+    coef <- list(a = x$a)
   } else {
     coef <- list(a = x$a, b = x$b)
   }
@@ -83,8 +83,8 @@ plot.MiniMaxApprox <- function(x, ...) {
   z <- seq(rng[1], rng[2], length.out = 1001L)
 
   if (attr(x, "type") == "Polynomial") {
-    zz <- remPolyErr(z, x$b, fn)
-    y <- remPolyErr(x$x, x$b, fn)
+    zz <- remPolyErr(z, x$a, fn)
+    y <- remPolyErr(x$x, x$a, fn)
   } else {
     zz <- remRatErr(z, x$a, x$b, fn)
     y <- remRatErr(x$x, x$a, x$b, fn)
