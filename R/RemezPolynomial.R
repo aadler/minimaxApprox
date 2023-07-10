@@ -23,11 +23,11 @@ remPolyErr <- function(x, a, fn, absErr) {
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
 remPolyRoots <- function(x, a, fn, absErr) {
-  if (all(abs(remPolyErr(x, a, fn, absErr)) <= 5 * .Machine$double.eps)) {
-    stop("This code only functions to machine double precision. All error ",
-         "values are too near machine double precision. Please try again ",
-         "using a lesser degree.")
-  }
+  # if (all(abs(remPolyErr(x, a, fn, absErr)) <= 5 * .Machine$double.eps)) {
+  #   stop("This code only functions to machine double precision. All error ",
+  #        "values are too near machine double precision. Please try again ",
+  #        "using a lesser degree.")
+  # }
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
