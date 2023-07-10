@@ -52,13 +52,11 @@ expect_error(remPolyRoots(x, PP$a, fn, TRUE), err_mess)
 
 # Test remPolySwitch
 ## Assuming function is correct, replicate a previous result
-control <- c(-1, -0.9573490966327286, -0.85225234748254508,
-             -0.69292951715411044, -0.4882291458330954, -0.25370091408242235,
-             -0.0010783059838432767,0.25245704289602244, 0.48776180816991693,
-             0.69209059408134277, 0.85313489191266234, 0.95823124164360574, 1)
+control <- c(-1, 0.10264319209405934, 0.33737347892134784, 0.62760323678827878,
+             0.88067525674799318, 1)
 
-fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-x <- chebNodes(13, -1, 1)
+fn <- function(x) sin(x) + cos(x)
+x <- chebNodes(6, 0, 1)
 PP <- remPolyCoeffs(x, fn)
 r <- remPolyRoots(x, PP$a, fn, TRUE)
 x <- remPolySwitch(r, -1, 1, PP$a, fn, TRUE)
