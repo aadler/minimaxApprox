@@ -1,8 +1,8 @@
 Package: MiniMaxApprox
 Type: Package
+Version: 0.0.1
 Title: Implemention of Remez Algorithm for Polynomial and Rational Function
     Approximation
-Version: 0.0.1
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))
 Description: Implements the basic Remez algorithm for polynomial approximation
@@ -10,6 +10,9 @@ Description: Implements the basic Remez algorithm for polynomial approximation
     approximation.
 License: MPL-2.0
 Encoding: UTF-8
+Date: 2023-07-10
+URL: https://github.com/aadler/MiniMaxApprox
+BugReports: https://github.com/aadler/MiniMaxApprox/issues
 Imports: stats, graphics
 Suggests: tinytest, covr
 ByteCompile: yes
