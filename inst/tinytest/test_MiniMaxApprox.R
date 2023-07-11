@@ -37,14 +37,29 @@ expect_message(MiniMaxApprox(fn, -1, 1, dg, opts = list(miniter = 2L,
                "i: 1 E: ")
 
 dg <- c(3L, 3L)
+# Test error message
 expect_error(MiniMaxApprox(fn, -1, 1, dg, xi = chebNodes(5, -1, 1)),
              "Given the requested degrees for numerator and denominator")
 
+expect_error(MiniMaxApprox(fn, -1, 1, 1:3),
+             "Polynomial approximation takes one value for degree and")
+
+# Test warning flag
 expect_true(suppressWarnings(MiniMaxApprox(fn, -1, 1, c(5, 4),
                                            opts = list(maxiter = 6L))$Warning))
 
-expect_error(MiniMaxApprox(fn, -1, 1, 1:3),
-             "Polynomial approximation takes one value for degree and")
+# Test informational message
+fn <- function(x) exp(x) - 1
+expect_message(MiniMaxApprox(fn, -0.15, 0.15, c(3, 4)),
+               "All errors very near machine double precision. The solution")
+
+# Test passing some parameters
+expect_silent(MiniMaxApprox(fn, -0.15, 0.15, c(2, 2),
+                            opts = list(cnvgRatio = 1.05, tol = 1e-4)))
+
+# Test denominator error message
+expect_error(MiniMaxApprox(tan, 1, 2, c(2, 3)),
+             "The 3 degree polynomial in the denominator has a zero at 1.57")
 
 # Test print, plot, and coef methods
 PP <- MiniMaxApprox(function(x) exp(x), 0, 1, 5, "abs")
