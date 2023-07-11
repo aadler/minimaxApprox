@@ -1,8 +1,10 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Print method
-fN <- function(x, d = 6) formatC(x, digits = d, format = "e")
+# Printing convenience function
+fC <- function(x, d = 6L, f = "g", w = -1) {
+  formatC(x, digits = d, format = f, width = w)
+}
 
 # Default Chebyeshev nodes
 chebNodes <- function(n, a, b) {

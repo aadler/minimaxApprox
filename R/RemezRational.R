@@ -212,7 +212,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
      stop("The ", denomd, " degree polynomial in the denominator has a zero ",
-           "at ", fN(dngr), " which makes rational approximation perilous for ",
+           "at ", fC(dngr), " which makes rational approximation perilous for ",
            "this function over the interval [", lower, ", ", upper, "].")
     }
     errs <- remRatErr(x, RR$a, RR$b, fn, absErr)
@@ -220,8 +220,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     expe <- abs(RR$E)
 
     if (showProgress) {
-      message("i: ", i, " E: ", fN(expe), " maxErr: ", fN(mxae),
-              " Ratio: ", fN(mxae / expe), " Diff:", fN(abs(mxae - expe)))
+      message("i: ", i, " E: ", fC(expe), " maxErr: ", fC(mxae),
+              " Ratio: ", fC(mxae / expe), " Diff:", fC(abs(mxae - expe)))
     }
 
     if (isConverged(errs, expe, cnvgRatio, tol) && i >= miniter) {
@@ -247,10 +247,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
 
   if (i >= maxiter && !converged) {
     warning("Convergence to requested ratio and tolerance not acheived in ",
-            i, " iterations.\n", "The ratio is ",
-            formatC(mxae / expe, digits = 6L, width = -1), " times expected ",
-            "and the difference is ",
-            formatC(abs(mxae - expe), digits = 6L, format = "g"),
+            i, " iterations.\n", "The ratio is ", fC(mxae / expe),
+            " times expected and the difference is ", fC(abs(mxae - expe)),
             " from the expected.")
     gotWarning <- TRUE
   }
@@ -259,10 +257,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     warning("Convergence to requested ratio and tolerance not acheived in ",
             i, " iterations.\n", unchanging_i, " succesive calculated errors ",
             "were too close to each other to warrant further iterations.\n",
-            "The ratio is ",
-            formatC(mxae / expe, digits = 6L, width = -1), " times expected ",
-            "and the difference is ",
-            formatC(abs(mxae - expe), digits = 6L, format = "g"),
+            "The ratio is ", fC(mxae / expe), " times expected and the ",
+            "difference is ", fC(abs(mxae - expe)),
             " from the expected.")
     gotWarning <- TRUE
   }

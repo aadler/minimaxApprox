@@ -120,7 +120,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
     mxae <- max(abs(errs))
 
     if (showProgress) {
-      message("i: ", i, " E: ", fN(PP$E), " maxErr: ", fN(mxae))
+      message("i: ", i, " E: ", fC(PP$E), " maxErr: ", fC(mxae))
     }
 
     if ((isConverged(errs, abs(PP$E), cnvgRatio, tol) && i >= miniter) ||
@@ -131,8 +131,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
 
   if (i >= maxiter) {
     warning("Convergence not acheived in ", maxiter, " iterations.\n",
-            "Maximum observed error is ", formatC(mxae / PP$E, digits = 6L),
-            " times expected.")
+            "Maximum observed error is ", fC(mxae / PP$E), " times expected.")
     gotWarning <- TRUE
   }
 

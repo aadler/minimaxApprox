@@ -5,8 +5,8 @@ tol <- 1e-7
 cFErr <- "Unable to parse function."
 
 # Test fN
-expect_identical(fN(1.234567), "1.234567e+00")
-expect_identical(fN(1.234567, d = 2), "1.23e+00")
+expect_identical(fC(1.234567, f = "e"), "1.234567e+00")
+expect_identical(fC(1.234567, d = 2, f = "e"), "1.23e+00")
 
 # Test chebNodes
 n <- 6L
