@@ -52,17 +52,17 @@ print.minimaxApprox <- function(x, ...) {
   print(ret)
 }
 
-coef.minimaxApprox <- function(x, ...) {
-  if (attr(x, "type") == "Polynomial") {
-    coef <- list(a = x$a)
+coef.minimaxApprox <- function(object, ...) {
+  if (attr(object, "type") == "Polynomial") {
+    coef <- list(a = object$a)
   } else {
-    coef <- list(a = x$a, b = x$b)
+    coef <- list(a = object$a, b = object$b)
   }
 
   coef
 }
 # Plot method for errors and basis points
-plot.minimaxApprox <- function(x, ...) {
+plot.minimaxApprox <- function(x, y, ...) {
   args <- list(...)
   rng <- attr(x, "range")
   fn <- attr(x, "func")
