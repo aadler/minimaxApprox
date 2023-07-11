@@ -26,6 +26,7 @@
 \alias{remRatErr}
 \alias{remRatRoots}
 \alias{remRatSwitch}
+\alias{convergeErr}
 \alias{remRat}
 
 \keyword{internal}
