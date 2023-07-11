@@ -208,7 +208,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     if (all(errs / errs_last <= cnvgRatio) ||
         all(abs(errs - errs_last) <= tol)) {
       unchanging_i <- unchanging_i + 1L
-      if (unchanging_i > conviter) {
+      if (unchanging_i >= conviter) {
         unchanged <- TRUE
         break
       }
@@ -243,8 +243,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
             "and floating point limitations. Try a lower degree if needed.")
   }
 
-  ret <- list(a = RR$a, b = RR$b, EE = abs(RR$E), OE = mxae, iterations = i,
-              x = x, Warning = gotWarning)
+  ret <- list(a = RR$a, b = RR$b, EE = expe, OE = mxae, iterations = i, x = x,
+              Warning = gotWarning)
   attr(ret, "type") <- "Rational"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
