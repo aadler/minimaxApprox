@@ -118,6 +118,18 @@ remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
   x
 }
 
+# Since E is initially a guess we need to iterate solving the system of
+# equations until E converges.
+convergeErr <- function(x, fn, cnvgRatio, nD, dD) {
+  E <- 0
+  repeat {
+    RR <- remRatCoeffs(x, E, fn, nD, dD)
+    if (abs(RR$E - E) <= tol) break
+    E <- (RR$E + E) / 2
+  }
+  RR
+}
+
 # Main function to calculate and return the minimax rational approximation
 remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
                    opts = list()) {
@@ -132,13 +144,13 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   if ("miniter" %in% names(opts)) {
     miniter <- opts$miniter
   } else {
-    miniter <- 5L
+    miniter <- 10L
   }
 
   if ("unchangeiter" %in% names(opts)) {
     unchangeiter <- opts$unchangeiter
   } else {
-    unchangeiter <- 2L
+    unchangeiter <- 10L
   }
 
   if ("showProgress" %in% names(opts)) {
@@ -156,7 +168,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   if ("tol" %in% names(opts)) {
     tol <- opts$tol
   } else {
-    tol <- 1e-13
+    tol <- 1e-14
   }
 
   # If passing unchangeiter > maxiter assume want at least that many iterations
@@ -171,30 +183,6 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
       stop("Given the requested degrees for numerator and denominator, ",
            "the x-vector needs to have ", numerd + denomd + 2, " elements.")
     }
-  }
-
-  # Since E is initially a guess we need to iterate solving the system of
-  # equations until E converges. This function has no other use so defined
-  # INSIDE the remRat call.
-  convergeErr <- function(x, fn, cnvgRatio, nD, dD) {
-    E <- 0
-    E_last <- 1
-    j <- 0L
-    repeat {
-      j <- j + 1L
-      RR <- remRatCoeffs(x, E, fn, nD, dD)
-
-      if (j > maxiter ||                     # Iteration check
-          abs(E) / abs(RR$E) <= cnvgRatio || # Ratio check
-          abs(abs(E) - abs(RR$E)) <= tol  # || # Difference check
-          # abs(abs(E) - abs(E_last)) <= tol   # Unchanging check
-          ) break
-
-      E_last <- E
-      E <- (RR$E + E) / 2
-    }
-
-    RR
   }
 
   RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
@@ -229,16 +217,16 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
       break
     }
 
-    # Check that solution is evolving. If solution is not evolving then further
-    # iterations will just not help.
-    if (all(errs / errs_last <= cnvgRatio) ||
-        all(abs(errs - errs_last) <= tol)) {
-      unchanging_i <- unchanging_i + 1L
-      if (unchanging_i > unchangeiter) {
-        unchanged <- TRUE
-        break
-      }
-    }
+    # # Check that solution is evolving. If solution is not evolving then further
+    # # iterations will just not help.
+    # if (all(errs / errs_last <= cnvgRatio) ||
+    #     all(abs(errs - errs_last) <= tol)) {
+    #   unchanging_i <- unchanging_i + 1L
+    #   if (unchanging_i > unchangeiter) {
+    #     unchanged <- TRUE
+    #     break
+    #   }
+    # }
 
     errs_last <- errs
   }
