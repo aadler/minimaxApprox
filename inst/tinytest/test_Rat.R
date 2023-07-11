@@ -85,5 +85,6 @@ expect_message(MiniMaxApprox(fn, -1, 1, dg, opts = list(miniter = 2L,
 dg <- c(3L, 3L)
 expect_error(MiniMaxApprox(fn, -1, 1, dg, xi = chebNodes(5, -1, 1)),
                "Given the requested degrees for numerator and denominator")
+
 expect_true(suppressWarnings(MiniMaxApprox(fn, -1, 1, c(5, 4),
                                            opts = list(maxiter = 6L))$Warning))
