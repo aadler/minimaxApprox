@@ -104,18 +104,6 @@ remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
   x
 }
 
-# Since E is initially a guess we need to iterate solving the system of
-# equations until E converges.
-convergeErr <- function(x, fn, tol, nD, dD) {
-  E <- 0
-  repeat {
-    RR <- remRatCoeffs(x, E, fn, nD, dD)
-    if (abs(RR$E - E) <= tol) break
-    E <- (RR$E + E) / 2
-  }
-  RR
-}
-
 # Main function to calculate and return the minimax rational approximation
 remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
                    opts = list()) {
@@ -135,6 +123,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
 
   if ("conviter" %in% names(opts)) {
     conviter <- opts$conviter
+    # If passing conviter then assume maxiter wants at least that much too
+    maxiter <- max(maxiter, conviter)
   } else {
     conviter <- 10L
   }
@@ -157,9 +147,6 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     tol <- 1e-14
   }
 
-  # If passing conviter > maxiter assume want at least that many iterations
-  maxiter <- max(maxiter, conviter)
-
   # Initial x's
   if (is.null(xi)) {
     x <- chebNodes(numerd + denomd + 2, lower, upper)
@@ -171,18 +158,35 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     }
   }
 
-  RR <- convergeErr(x, fn, tol, numerd, denomd)
+  # Since E is initially a guess we need to iterate solving the system of
+  # equations until E converges. Function may remain inside of remRat.
+  # Everything but "x" is previously defined and constant inside the main remRat
+  # function and thus does not need to be passed.
+  convergeErr <- function(x) {
+    E <- 0
+    j <- 0L
+    repeat {
+      if (j > maxiter) break
+      RR <- remRatCoeffs(x, E, fn, numerd, denomd)
+      if (abs(RR$E - E) <= tol) break
+      E <- (RR$E + E) / 2
+      j <- j + 1
+    }
+    RR
+  }
+
+  RR <- convergeErr(x)
   errs_last <- remRatErr(x, RR$a, RR$b, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
   unchanging_i <- 0L
   i <- 0L
   repeat {
+    if (i >= maxiter) break
     i <- i + 1L
-    if (i >= maxiter) break                            # Maxiter Check
     r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
     x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
-    RR <- convergeErr(x, fn, tol, numerd, denomd)
+    RR <- convergeErr(x)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
@@ -198,6 +202,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
               " Ratio: ", fC(mxae / expe), " Diff:", fC(abs(mxae - expe)))
     }
 
+    # Check for convergence
     if (isConverged(errs, expe, cnvgRatio, tol) && i >= miniter) {
       converged <- TRUE
       break
@@ -213,7 +218,6 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
         break
       }
     }
-
     errs_last <- errs
   }
 
