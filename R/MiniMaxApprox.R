@@ -34,22 +34,24 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
 # Print method (hide i and basis/x but leave in list and not in attribute)
 print.minimaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
-    ret <- list(a = x$a)
+    coefficients <- list(a = x$a)
   } else {
-    ret <- list(a = x$a, b = x$b)
+    coefficients <- list(a = x$a, b = x$b)
   }
 
-  ret <- c(ret, list(x$EE,
-                     x$OE,
-                     Ratio = round(x$OE / x$EE, 6L),
-                     Difference = abs(x$OE - x$EE),
-                     Warnings = x$Warning))
-  if (attr(x, "absErr")) {
-    names(ret)[3:4] <- c("ExpectedAbsError", "ObservedAbsError")
+  diags <- list(x$EE,
+                x$OE,
+                Ratio = round(x$OE / x$EE, 6L),
+                Difference = abs(x$OE - x$EE),
+                Warnings = x$Warning)
+
+  names(diags)[1:2] <- if (attr(x, "absErr")) {
+     c("ExpectedAbsError", "ObservedAbsError")
   } else {
-    names(ret)[3:4] <- c("ExpectedRelError", "ObservedRelError")
+    c("ExpectedRelError", "ObservedRelError")
   }
-  print(ret)
+
+  print(c(coefficients, diags))
 }
 
 coef.minimaxApprox <- function(object, ...) {
