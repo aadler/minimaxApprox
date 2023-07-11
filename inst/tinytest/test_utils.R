@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 tol <- 1e-7
-cFErr <- "Unable to parse function."
 
-# Test fN
+# Test fC
 expect_identical(fC(1.234567, f = "e"), "1.234567e+00")
 expect_identical(fC(1.234567, d = 2, f = "e"), "1.23e+00")
 
@@ -27,7 +26,7 @@ control <- tan(-0.4) - (-0.4) ^ 3
 expect_equal(callFun(fn, -0.4), control, tolerance = tol)
 
 ## Test error trapping
-expect_error(callFun("x ^ 2", -0.4), cFErr)
+expect_error(callFun("x ^ 2", -0.4), "Unable to parse function.")
 
 # Test isOscil
 control <- c(-2, 1, -3, 4, -1, 6, -7)
@@ -67,7 +66,7 @@ expect_equal(unlist(coef(PP), use.names = FALSE), PP$a)
 expect_stdout(print(PP))
 expect_stdout(plot(PP))
 
-RR <- suppressWarnings(remRat(function(x) exp(x), 0, 1, 2, 2, TRUE))
+RR <- remRat(function(x) exp(x), 0, 1, 2, 2, TRUE)
 expect_equal(unlist(coef(RR)$a, use.names = FALSE), RR$a)
 expect_equal(unlist(coef(RR)$b, use.names = FALSE), RR$b)
 expect_stdout(print(RR))
