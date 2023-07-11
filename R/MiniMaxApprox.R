@@ -8,8 +8,8 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
                    stop("Error type must be either 'abs'olute or 'rel'ative."))
 
   if (length(degree) == 2L) {        # If rational approximation requested
-    numerd <- degree[1L]
-    denomd <- degree[2L]
+    numerd <- as.integer(degree[1L])
+    denomd <- as.integer(degree[2L])
     ratApprox <- TRUE
   } else if (length(degree) == 1L) {
     ratApprox <- FALSE               #  Polynomial approximation requested
@@ -27,7 +27,7 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
   if (ratApprox) {
     remRat(fn, lower, upper, numerd, denomd, absErr, xi, opts)
   } else {
-    remPoly(fn, lower, upper, degree, absErr, opts)
+    remPoly(fn, lower, upper, as.integer(degree), absErr, opts)
   }
 }
 
