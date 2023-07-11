@@ -30,13 +30,13 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
 
 # Check Remez iterations for convergence
-isConverged <- function(errs, expE, cnvgRatio, tol) {
+isConverged <- function(errs, expe, cnvgRatio, tol) {
   aerrs <- abs(errs)
   mxae <- max(aerrs)
   mnae <- min(aerrs)
 
   # Check observed errors are close enough to expected by ratio or tolerance
-  errDistance <- mxae / expE <= cnvgRatio || abs(mxae - expE) <= tol
+  errDistance <- mxae / expe <= cnvgRatio || abs(mxae - expe) <= tol
 
   # Check observed errors are close enough to each other by ratio or tolerance
   errMag <- mxae / mnae <= cnvgRatio || mxae - mnae <= tol
