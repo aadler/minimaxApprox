@@ -38,12 +38,6 @@ remRatErr <- function(x, a, b, fn, absErr) {
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
 remRatRoots <- function(x, a, b, fn, absErr) {
-  # if (all(abs(remRatErr(x, a, b, fn, absErr)) <= 5 * .Machine$double.eps)) {
-  #   warning("This code only functions near machine double precision. During ",
-  #           "the algorithm, at least one step had all calculated error values ",
-  #           "below machine double precision. You may wish to try using a ",
-  #           "lesser degree.")
-  # }
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])

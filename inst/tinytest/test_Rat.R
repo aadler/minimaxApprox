@@ -61,12 +61,6 @@ r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
-## Test machine precision trapping
-fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-dg <- c(2L, 2L)
-# expect_warning(MiniMaxApprox(fn, -1, 1, dg, errType = "rel"),
-#                "This code only functions near machine double precision. During")
-
 # Test remRatSwitch
 ## Assuming function is correct, replicate a previous result
 control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
