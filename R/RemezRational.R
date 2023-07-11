@@ -32,7 +32,7 @@ remRatFunc <- function(x, a, b)  polyCalc(x, a) / polyCalc(x, b)
 # Function to calculate error between known and calculated values
 remRatErr <- function(x, a, b, fn, absErr) {
   y <- callFun(fn, x)
-  (remRatFunc(x, a, b) - y) / if (absErr) 1 else abs(y)
+  (remRatFunc(x, a, b) - y) / if (absErr) 1 else y
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
@@ -138,7 +138,9 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   if ("convRatio" %in% names(opts)) {
     convRatio <- opts$convRatio
   } else {
-    convRatio <- 1 + 1e-11 # Per Cody (1968) can reasonably expect 12 signdig
+    # Using 1 + 1e-9 - See Cody (1968) page 250. Can reasonably expect between
+    # 9 & 12 significant figures.
+    convRatio <- 1.000000001
   }
 
   if ("tol" %in% names(opts)) {
@@ -241,7 +243,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     gotWarning <- TRUE
   }
 
-  if (all(abs(errs) < 10 * .Machine$double.eps)) {
+  if (mxae < 10 * .Machine$double.eps) {
     message("All errors very near machine double precision. The solution may ",
             "not be optimal but should be best given the desired precision ",
             "and floating point limitations. Try a lower degree if needed.")
@@ -256,5 +258,6 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   attr(ret, "tol") <- tol
   attr(ret, "convRatio") <- convRatio
   class(ret) <- c("minimaxApprox", class(ret))
+
   ret
 }

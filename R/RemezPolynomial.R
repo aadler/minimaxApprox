@@ -17,7 +17,7 @@ remPolyCoeffs <- function(x, fn) {
 # Function to calculate error between known and calculated values
 remPolyErr <- function(x, a, fn, absErr) {
   y <-  callFun(fn, x)
-  (polyCalc(x, a) - y) / if (absErr) 1 else abs(y)
+  (polyCalc(x, a) - y) / if (absErr) 1 else y
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
@@ -96,16 +96,26 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
     miniter <- 10L
   }
 
+  if ("conviter" %in% names(opts)) {
+    conviter <- opts$conviter
+    # If passing conviter then assume maxiter wants at least that much too
+    maxiter <- max(maxiter, conviter)
+  } else {
+    conviter <- 10L
+  }
+
   if ("showProgress" %in% names(opts)) {
     showProgress <- opts$showProgress
   } else {
     showProgress <- FALSE
   }
 
-  if ("cnvgRatio" %in% names(opts)) {
-    cnvgRatio <- opts$cnvgRatio
+  if ("convRatio" %in% names(opts)) {
+    convRatio <- opts$convRatio
   } else {
-    cnvgRatio <- 1 + 1e-11 # Per Cody (1968) can reasonably expect 12 signdig
+    # Using 1 + 1e-9 - See Cody (1968) page 250. Can reasonably expect between
+    # 9 & 12 significant figures.
+    convRatio <- 1.000000001
   }
 
   if ("tol" %in% names(opts)) {
@@ -119,8 +129,14 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
 
   # Initial Polynomial Guess
   PP <- remPolyCoeffs(x, fn)
+  errs_last <- remPolyErr(x, PP$a, fn, absErr)
+  converged <- FALSE
+  unchanged <- FALSE
+  unchanging_i <- 0L
   i <- 0L
   repeat {
+    # Check for maxiter
+    if (i >= maxiter) break
     i <- i + 1L
     r <- remPolyRoots(x, PP$a, fn, absErr)
     x <- remPolySwitch(r, lower, upper, PP$a, fn, absErr)
@@ -133,15 +149,42 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
       message("i: ", i, " E: ", fC(expe), " maxErr: ", fC(mxae))
     }
 
-    if ((isConverged(errs, expe, cnvgRatio, tol) && i >= miniter) ||
-        i > maxiter) break
+    # Check for convergence
+    if (isConverged(errs, expe, convRatio, tol) && i >= miniter) {
+      converged <- TRUE
+      break
+    }
+
+    # Check that solution is evolving. If solution is not evolving then further
+    # iterations will just not help.
+    if (all(errs / errs_last <= convRatio) ||
+        all(abs(errs - errs_last) <= tol)) {
+      unchanging_i <- unchanging_i + 1L
+      if (unchanging_i >= conviter) {
+        unchanged <- TRUE
+        break
+      }
+    }
+    errs_last <- errs
   }
 
   gotWarning <- FALSE
 
-  if (i >= maxiter) {
-    warning("Convergence not acheived in ", maxiter, " iterations.\n",
-            "Maximum observed error is ", fC(mxae / expe), " times expected.")
+  if (i >= maxiter && !converged) {
+    warning("Convergence to requested ratio and tolerance not acheived in ",
+            i, " iterations.\n", "The ratio is ", fC(mxae / expe),
+            " times expected and the difference is ", fC(abs(mxae - expe)),
+            " from the expected.")
+    gotWarning <- TRUE
+  }
+
+  if (unchanged && !converged) {
+    warning("Convergence to requested ratio and tolerance not acheived in ",
+            i, " iterations.\n", unchanging_i, " succesive calculated errors ",
+            "were too close to each other to warrant further iterations.\n",
+            "The ratio is ", fC(mxae / expe), " times expected and the ",
+            "difference is ", fC(abs(mxae - expe)),
+            " from the expected.")
     gotWarning <- TRUE
   }
 
@@ -159,7 +202,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
   attr(ret, "range") <- c(lower, upper)
   attr(ret, "absErr") <- absErr
   attr(ret, "tol") <- tol
-  attr(ret, "cnvgRatio") <- cnvgRatio
+  attr(ret, "convRatio") <- convRatio
   class(ret) <- c("minimaxApprox", class(ret))
 
   ret
