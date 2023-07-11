@@ -15,15 +15,7 @@ remRatMat <- function(x, E, y, nD, dD) {
 # Function to calculate coefficients given matrix and known values
 remRatCoeffs <- function(x, E, fn, nD, dD) {
   y <- callFun(fn, x)
-  # P <- solve(remRatMat(x, E, y, nD, dD), y)
-  PQ <- qr(remRatMat(x, E, y, nD, dD), LAPACK = TRUE)
-  P <- tryCatch(solve.qr(PQ, y),
-                error = function(cond) simpleError(trimws(cond$message)))
-  if (inherits(P, "simpleError")) {
-    stop("This code only functions to machine double precision. The ",
-         "algorithm resulted in a singular matrix. Perhaps try reducing ",
-         "the tolerance or increasing maxiter.")
-  }
+  P <- solve(remRatMat(x, E, y, nD, dD), y)
   RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
              b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
              E = P[length(P)])

@@ -69,8 +69,8 @@ dg <- c(2L, 2L)
 
 # Test remRatSwitch
 ## Assuming function is correct, replicate a previous result
-control <- c(-1, -0.67069355653021767, 4.7351012000262926e-14,
-             0.67069355653044971, 1)
+control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
+             0.67069355653042717, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(5, -1, 1)
 RR <- remRatCoeffs(x, 0, fn, 2, 1)
