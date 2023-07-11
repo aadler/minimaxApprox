@@ -1,5 +1,5 @@
 # Master user-exposed function
-MiniMaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
+minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
                           opts = list()) {
 
   absErr <- switch(tolower(substring(errType, 1, 3)),
@@ -32,7 +32,7 @@ MiniMaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
 }
 
 # Print method (hide i and basis/x but leave in list and not in attribute)
-print.MiniMaxApprox <- function(x, ...) {
+print.minimaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
     ret <- list(a = x$a)
   } else {
@@ -52,7 +52,7 @@ print.MiniMaxApprox <- function(x, ...) {
   print(ret)
 }
 
-coef.MiniMaxApprox <- function(x, ...) {
+coef.minimaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {
     coef <- list(a = x$a)
   } else {
@@ -62,7 +62,7 @@ coef.MiniMaxApprox <- function(x, ...) {
   coef
 }
 # Plot method for errors and basis points
-plot.MiniMaxApprox <- function(x, ...) {
+plot.minimaxApprox <- function(x, ...) {
   args <- list(...)
   rng <- attr(x, "range")
   fn <- attr(x, "func")
@@ -85,11 +85,11 @@ plot.MiniMaxApprox <- function(x, ...) {
     ylim <- c(-ybnd, ybnd)
   }
 
-  plot(z, zz, type = 'l', xlab = "x", ylab = ylab, ylim = ylim)
+  plot(z, zz, type = "l", xlab = "x", ylab = ylab, ylim = ylim)
   abline(h = 0)
   points(x$x, y, col = "red", pch = 16)
-  abline(h = c(-x$EE, x$EE), lty = 2, col = 'red')
-  abline(h = c(-x$OE, x$OE), lty = 3, col = 'blue')
+  abline(h = c(-x$EE, x$EE), lty = 2, col = "red")
+  abline(h = c(-x$OE, x$OE), lty = 3, col = "blue")
   legend(x = "bottomleft", inset = c(0.35, 1), col = c("red", "red", "blue"),
          lty = c(NA, 2, 3), legend = c("Basis", "Exp Err", "Obs Err"),
          pch = c(16, NA, NA), bg = "transparent", xpd = TRUE)

@@ -160,7 +160,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
   attr(ret, "absErr") <- absErr
   attr(ret, "tol") <- tol
   attr(ret, "cnvgRatio") <- cnvgRatio
-  class(ret) <- c("MiniMaxApprox", class(ret))
+  class(ret) <- c("minimaxApprox", class(ret))
 
   ret
 }

@@ -5,11 +5,11 @@
 remRatMat <- function(x, E, y, nD, dD) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1)
-  Evctr <- altSgn * E
-  yvctr <- -(y + Evctr)
-  AMat <- vanderMat(x, nD)
-  BMat <- vanderMat(x, dD)[, -1] * yvctr
-  cbind(AMat, BMat, -altSgn, deparse.level = 0)
+  altE <- altSgn * E
+  yvctr <- -(y + altE)
+  aMat <- vanderMat(x, nD)
+  bMat <- vanderMat(x, dD)[, -1] * yvctr
+  cbind(aMat, bMat, -altSgn, deparse.level = 0)
 }
 
 # Function to calculate coefficients given matrix and known values
@@ -255,6 +255,6 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   attr(ret, "absErr") <- absErr
   attr(ret, "tol") <- tol
   attr(ret, "cnvgRatio") <- cnvgRatio
-  class(ret) <- c("MiniMaxApprox", class(ret))
+  class(ret) <- c("minimaxApprox", class(ret))
   ret
 }

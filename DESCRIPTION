@@ -1,4 +1,4 @@
-Package: MiniMaxApprox
+Package: minimaxApprox
 Type: Package
 Version: 0.0.1
 Title: Implemention of Remez Algorithm for Polynomial and Rational Function

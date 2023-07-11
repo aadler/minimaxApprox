@@ -4,19 +4,19 @@
 [![](http://cranlogs.r-pkg.org/badges/last-month/Delaporte)](https://cran.r-project.org/package=Delaporte)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5880051.svg)](https://doi.org/10.5281/zenodo.5880051)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2011/badge)](https://bestpractices.coreinfrastructure.org/projects/2011) -->
- [![R-CMD-check](https://github.com/aadler/MiniMaxApprox/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aadler/MiniMaxApprox/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/aadler/MiniMaxApprox/branch/master/graph/badge.svg)](https://app.codecov.io/gh/aadler/MiniMaxApprox?branch=master)
+ [![R-CMD-check](https://github.com/aadler/minimaxApprox/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aadler/minimaxApprox/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/aadler/minimaxApprox/branch/master/graph/badge.svg)](https://app.codecov.io/gh/aadler/minimaxApprox?branch=master)
 <!-- badges: end -->
 
-# MiniMaxApprox
-**MiniMaxApprox** is an `R` package which Implements the basic Remez algorithm
+# minimaxApprox
+**minimaxApprox** is an `R` package which Implements the basic Remez algorithm
 for polynomial approximation and a form of the Fraser-Hart version
 <doi:10.1007/BF02162506> for rational approximation.
 
 ## Citation
 If you use the package, please cite it as:
 
-  Avraham Adler (2023). MiniMaxApprox: Implemention of Remez Algorithm for
+  Avraham Adler (2023). minimaxApprox: Implemention of Remez Algorithm for
                         Polynomial and Rational Function Approximation.
   R package version 0.0.1.
 

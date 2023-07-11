@@ -36,7 +36,7 @@ expect_false(isOscil(control))
 
 # Test CheckDenom
 expect_equal(checkDenom(c(-0.5, 1), 0, 1), 0.5)
-expect_true(is.null(checkDenom(c(-0.5, 1), 1, 2)))
+expect_null(checkDenom(c(-0.5, 1), 1, 2))
 
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)
@@ -52,10 +52,10 @@ expect_false(isConverged(errs, E, 1.05, 1e-12))
 coeffs <-  c(2, 3.2, 4.6, -9.7, 0.1)
 ## Test scalar
 x <- 3
-control = 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
+control <- 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
 expect_equal(polyCalc(x, coeffs), control, tolerance = tol)
 x <- 5
-control2 = 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
+control2 <- 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
 expect_equal(polyCalc(x, coeffs), control2, tolerance = tol)
 ## Test vectorized
 expect_equal(polyCalc(c(3, 5), coeffs), c(control, control2), tolerance = tol)

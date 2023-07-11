@@ -1,8 +1,8 @@
-\name{MiniMaxApprox}
-\alias{MiniMaxApprox}
-\alias{print.MiniMaxApprox}
-\alias{plot.MiniMaxApprox}
-\alias{coef.MiniMaxApprox}
+\name{minimaxApprox}
+\alias{minimaxApprox}
+\alias{print.minimaxApprox}
+\alias{plot.minimaxApprox}
+\alias{coef.minimaxApprox}
 
 \title{Minimax Approximation of Functions}
 \description{
@@ -11,27 +11,30 @@ the second Remez algorithm. Rational approximation uses a form of the
 Fraser-Hart algorithm.
 }
 \usage{
-MiniMaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list())
+minimaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{fn}{
-%%     ~~Describe \code{fn} here~~
-}
-  \item{lower}{
-%%     ~~Describe \code{lower} here~~
-}
-  \item{upper}{
-%%     ~~Describe \code{upper} here~~
-}
+  \strong{function}: A univariate function having \strong{x} as its first value
+  }
+  \item{lower}{\strong{numeric}: The lower bound of the approximation interval}
+  \item{upper}{\strong{numeric}: The upper bound of the approximation interval}
   \item{degree}{
-%%     ~~Describe \code{degree} here~~
+  Either a single \strong{integer} representing the requested degree for
+  polynomial approximation or an \strong{integer} vector of length 2
+  representing the requested degrees of the numerator and denominator for
+  rational approximation.
 }
-  \item{errType}{
-%%     ~~Describe \code{errType} here~~
+  \item{errType}{\strong{character}: The type of error to be minimized over the
+  interval. Either '\strong{abs}'olute or '\strong{rel}'ative.
 }
   \item{xi}{
-%%     ~~Describe \code{xi} here~~
+  \strong{numeric}: OPTIONAL: A vector of initial points of the correct length,
+  \eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}, for use in rational
+  approximation. Polynomial approximation will ignore \code{xi} with a message
+  as it always uses the appropriate Chebyeshev nodes as a starting point. If
+  left out, rational approximation will also use the Chebyeshev nodes.
 }
   \item{opts}{
 %%     ~~Describe \code{opts} here~~
@@ -51,7 +54,7 @@ MiniMaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list(
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Avraham Adler \email{Avraham.Adler@gmail.com}
 }
 \note{
 %%  ~~further notes~~
@@ -63,8 +66,8 @@ MiniMaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list(
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-PP <- MiniMaxApprox(exp, 0, 1, 5)
-RR <- MiniMaxApprox(exp, 0, 1, c(2, 3))
+PP <- minimaxApprox(exp, 0, 1, 5)
+RR <- minimaxApprox(exp, 0, 1, c(2, 3))
 }
 
 \keyword{NumericalMathematics}
