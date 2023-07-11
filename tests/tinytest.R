@@ -1,3 +1,3 @@
 if (requireNamespace("tinytest", quietly = TRUE)) {
-  tinytest::test_package("MiniMaxApprox")
+  tinytest::test_package("minimaxApprox")
 }
