@@ -179,15 +179,15 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   i <- 0L
   repeat {
     i <- i + 1L
-    if (i >= maxiter) break
+    if (i >= maxiter) break                            # Maxiter Check
     r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
     x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
     RR <- convergeErr(x, fn, tol, numerd, denomd)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
-     stop("The ", denomd, " degree polynomial in the denominator has a zero ",
-           "at ", fC(dngr), " which makes rational approximation perilous for ",
-           "this function over the interval [", lower, ", ", upper, "].")
+      stop("The ", denomd, " degree polynomial in the denominator has a zero ",
+           "at ", fC(dngr), " which makes rational approximation perilous ",
+           "over the interval [", fC(lower), ", ", fC(upper), "].")
     }
     errs <- remRatErr(x, RR$a, RR$b, fn, absErr)
     mxae <- max(abs(errs))
