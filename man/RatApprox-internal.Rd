@@ -6,7 +6,7 @@
 \description{Internal RatApprox functions}
 \details{These are not to be called directly by the user.}
 
-\alias{fN}
+\alias{fC}
 \alias{chebNodes}
 \alias{vanderMat}
 \alias{callFun}
@@ -26,7 +26,6 @@
 \alias{remRatErr}
 \alias{remRatRoots}
 \alias{remRatSwitch}
-\alias{convergeErr}
 \alias{remRat}
 
 \keyword{internal}
