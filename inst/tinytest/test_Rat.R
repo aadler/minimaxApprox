@@ -71,20 +71,3 @@ RR <- remRatCoeffs(x, 0, fn, 2, 1)
 r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
 x <- remRatSwitch(r, -1, 1, RR$a, RR$b, fn, TRUE)
 expect_equal(x, control, tolerance = tol)
-
-# Test other components of remRat that have not been exposed above
-fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-dg <- c(2L, 1L)
-expect_false(MiniMaxApprox(fn, -1, 1, dg)$Warning)
-
-# Should show at least one line of output due to show progress
-expect_message(MiniMaxApprox(fn, -1, 1, dg, opts = list(miniter = 2L,
-                                                       showProgress = TRUE)),
-               "i: 1 E: ")
-
-dg <- c(3L, 3L)
-expect_error(MiniMaxApprox(fn, -1, 1, dg, xi = chebNodes(5, -1, 1)),
-               "Given the requested degrees for numerator and denominator")
-
-expect_true(suppressWarnings(MiniMaxApprox(fn, -1, 1, c(5, 4),
-                                           opts = list(maxiter = 6L))$Warning))

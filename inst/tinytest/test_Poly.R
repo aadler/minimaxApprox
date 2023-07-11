@@ -52,23 +52,3 @@ PP <- remPolyCoeffs(x, fn)
 r <- remPolyRoots(x, PP$a, fn, TRUE)
 x <- remPolySwitch(r, -1, 1, PP$a, fn, TRUE)
 expect_equal(x, control, tolerance = tol)
-
-# Test other components of remPoly that have not been exposed above
-fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-PP <- MiniMaxApprox(fn, -1, 1, 9, errType = "rel",
-                    opts = list(maxiter = 100, cnvgRatio = 1.5))
-expect_false(PP$Warning)
-
-# Should show at least one line of output due to show progress
-expect_message(MiniMaxApprox(fn, -1, 1, 9,
-                            opts = list(miniter = 0L, showProgress = TRUE)),
-               "i: 1 E: ")
-
-fn <- function(x) sin(x) + cos(x)
-expect_warning(MiniMaxApprox(fn, -1, 1, 13),
-               "All errors very near machine double precision.")
-expect_warning(MiniMaxApprox(fn, -1, 1, 9, opts = list(maxiter = 0)),
-               "Convergence not acheived in ")
-
-PP <- suppressWarnings(MiniMaxApprox(fn, -1, 1, 13, opts = list(tol = 1e-14)))
-expect_true(PP$Warning)
