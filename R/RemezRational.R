@@ -33,8 +33,8 @@ remRatFunc <- function(x, a, b)  polyCalc(x, a) / polyCalc(x, b)
 remRatErr <- function(x, a, b, fn, absErr) {
   y <- callFun(fn, x)
   (remRatFunc(x, a, b) - y) / if (absErr) 1 else abs(y)
-
 }
+
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
 remRatRoots <- function(x, a, b, fn, absErr) {
