@@ -96,7 +96,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
   if ("cnvgRatio" %in% names(opts)) {
     cnvgRatio <- opts$cnvgRatio
   } else {
-    cnvgRatio <- 1.001
+    cnvgRatio <- 1 + 1e-11 # Per Cody (1968) can reasonably expect 12 signdig
   }
 
   if ("tol" %in% names(opts)) {
