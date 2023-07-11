@@ -13,6 +13,7 @@ k <- seq_len(n) - 1L
 # See https://en.wikipedia.org/wiki/Chebyshev_polynomials#Roots_and_extrema
 control <- sort(cos(pi * (k + 0.5) / n))
 expect_equal(chebNodes(n, -1, 1), control, tolerance = tol)
+expect_equal(chebNodes(6.2, -1, 1), chebNodes(n, -1, 1), tolerance = tol)
 
 # Test vanderMat
 k <- 1:5

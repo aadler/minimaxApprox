@@ -8,6 +8,7 @@ fC <- function(x, d = 6L, f = "g", w = -1) {
 
 # Default Chebyeshev nodes
 chebNodes <- function(n, a, b) {
+  n <- as.integer(n)
   sort(0.5 * (a + b + (b - a) * cos((2 * seq_len(n) - 1) * pi / (2 * n))))
 }
 
