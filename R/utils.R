@@ -41,7 +41,6 @@ isConverged <- function(errs, expe, cnvgRatio, tol) {
   # Check observed errors are close enough to each other by ratio or tolerance
   errMag <- mxae / mnae <= cnvgRatio || mxae - mnae <= tol
 
-
   # Converged if magnitude and distance are close and error oscillates in sign
   isOscil(errs) && errDistance && errMag
 }
