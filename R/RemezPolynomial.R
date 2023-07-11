@@ -127,12 +127,13 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
     PP <- remPolyCoeffs(x, fn)
     errs <- remPolyErr(x, PP$a, fn, absErr)
     mxae <- max(abs(errs))
+    expe <- abs(PP$E)
 
     if (showProgress) {
-      message("i: ", i, " E: ", fC(PP$E), " maxErr: ", fC(mxae))
+      message("i: ", i, " E: ", fC(expe), " maxErr: ", fC(mxae))
     }
 
-    if ((isConverged(errs, abs(PP$E), cnvgRatio, tol) && i >= miniter) ||
+    if ((isConverged(errs, expe, cnvgRatio, tol) && i >= miniter) ||
         i > maxiter) break
   }
 
@@ -140,18 +141,18 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
 
   if (i >= maxiter) {
     warning("Convergence not acheived in ", maxiter, " iterations.\n",
-            "Maximum observed error is ", fC(mxae / PP$E), " times expected.")
+            "Maximum observed error is ", fC(mxae / expe), " times expected.")
     gotWarning <- TRUE
   }
 
-  if (all(abs(errs) < 10 * .Machine$double.eps)) {
+  if (mxae < 10 * .Machine$double.eps) {
     warning("All errors very near machine double precision. The solution may ",
             "not be optimal but should be best given the desired precision ",
             "and floating point limitations. Try a lower degree if needed.")
     gotWarning <- TRUE
   }
 
-  ret <- list(a = PP$a, EE = abs(PP$E), OE = mxae,  iterations = i, x = x,
+  ret <- list(a = PP$a, EE = mxae, OE = mxae,  iterations = i, x = x,
               Warning = gotWarning)
   attr(ret, "type") <- "Polynomial"
   attr(ret, "func") <- fn
