@@ -41,15 +41,6 @@ r <- remPolyRoots(x, PP$a, fn, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
-## Test machine precision trapping
-# err_mess <- paste("This code only functions to machine double precision.",
-#                   "All error values are too near machine double precision.",
-#                   "Please try again using a lesser degree.")
-# fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-# x <- chebNodes(20, -1, 1)
-# PP <- remPolyCoeffs(x, fn)
-# expect_error(remPolyRoots(x, PP$a, fn, TRUE), err_mess)
-
 # Test remPolySwitch
 ## Assuming function is correct, replicate a previous result
 control <- c(-1, 0.10264319209405934, 0.33737347892134784, 0.62760323678827878,
