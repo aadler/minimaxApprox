@@ -135,10 +135,10 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     showProgress <- FALSE
   }
 
-  if ("cnvgRatio" %in% names(opts)) {
-    cnvgRatio <- opts$cnvgRatio
+  if ("convRatio" %in% names(opts)) {
+    convRatio <- opts$convRatio
   } else {
-    cnvgRatio <- 1 + 1e-11 # Per Cody (1968) can reasonably expect 12 signdig
+    convRatio <- 1 + 1e-11 # Per Cody (1968) can reasonably expect 12 signdig
   }
 
   if ("tol" %in% names(opts)) {
@@ -203,14 +203,14 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     }
 
     # Check for convergence
-    if (isConverged(errs, expe, cnvgRatio, tol) && i >= miniter) {
+    if (isConverged(errs, expe, convRatio, tol) && i >= miniter) {
       converged <- TRUE
       break
     }
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will just not help.
-    if (all(errs / errs_last <= cnvgRatio) ||
+    if (all(errs / errs_last <= convRatio) ||
         all(abs(errs - errs_last) <= tol)) {
       unchanging_i <- unchanging_i + 1L
       if (unchanging_i >= conviter) {
@@ -254,7 +254,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   attr(ret, "range") <- c(lower, upper)
   attr(ret, "absErr") <- absErr
   attr(ret, "tol") <- tol
-  attr(ret, "cnvgRatio") <- cnvgRatio
+  attr(ret, "convRatio") <- convRatio
   class(ret) <- c("minimaxApprox", class(ret))
   ret
 }
