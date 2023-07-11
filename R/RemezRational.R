@@ -120,7 +120,7 @@ remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
 
 # Since E is initially a guess we need to iterate solving the system of
 # equations until E converges.
-convergeErr <- function(x, fn, cnvgRatio, nD, dD) {
+convergeErr <- function(x, fn, tol, nD, dD) {
   E <- 0
   repeat {
     RR <- remRatCoeffs(x, E, fn, nD, dD)
@@ -185,7 +185,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     }
   }
 
-  RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
+  RR <- convergeErr(x, fn, tol, numerd, denomd)
   errs_last <- remRatErr(x, RR$a, RR$b, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
@@ -196,7 +196,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     if (i >= maxiter) break
     r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
     x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
-    RR <- convergeErr(x, fn, cnvgRatio, numerd, denomd)
+    RR <- convergeErr(x, fn, tol, numerd, denomd)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
      stop("The ", denomd, " degree polynomial in the denominator has a zero ",
