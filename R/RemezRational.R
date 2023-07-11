@@ -147,10 +147,10 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     miniter <- 10L
   }
 
-  if ("unchangeiter" %in% names(opts)) {
-    unchangeiter <- opts$unchangeiter
+  if ("conviter" %in% names(opts)) {
+    conviter <- opts$conviter
   } else {
-    unchangeiter <- 10L
+    conviter <- 10L
   }
 
   if ("showProgress" %in% names(opts)) {
@@ -171,8 +171,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     tol <- 1e-14
   }
 
-  # If passing unchangeiter > maxiter assume want at least that many iterations
-  maxiter <- max(maxiter, unchangeiter)
+  # If passing conviter > maxiter assume want at least that many iterations
+  maxiter <- max(maxiter, conviter)
 
   # Initial x's
   if (is.null(xi)) {
@@ -222,7 +222,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     # if (all(errs / errs_last <= cnvgRatio) ||
     #     all(abs(errs - errs_last) <= tol)) {
     #   unchanging_i <- unchanging_i + 1L
-    #   if (unchanging_i > unchangeiter) {
+    #   if (unchanging_i > conviter) {
     #     unchanged <- TRUE
     #     break
     #   }

@@ -45,7 +45,7 @@ c <- (exp(1) - m * log(m)) / 2
 tstFn <- function(x) m * x + c
 x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
-RR <- remRat(fn, 0, 1, 1, 0, TRUE, opts = list(unchangeiter = 50L))
+RR <- remRat(fn, 0, 1, 1, 0, TRUE, opts = list(conviter = 50L))
 expect_equal(remRatErr(x, RR$a, RR$b, fn, TRUE), control, tolerance = 1e-2)
 
 # Test remRatRoots
