@@ -29,7 +29,7 @@ remPolyRoots <- function(x, a, fn, absErr) {
     root <- tryCatch(uniroot(remPolyErr, interval = intv, a = a, fn = fn,
                              absErr = absErr),
                      error = function(cond) simpleError(trimws(cond$message)))
-    # If there is no root in the interval, take the lower endpoint
+    # If there is no root in the interval, take the endpoint closer to 0 (root)
     if (inherits(root, "simpleError")) {
       r[i] <- intv[which.min(abs(intv))]
     } else {
@@ -42,22 +42,36 @@ remPolyRoots <- function(x, a, fn, absErr) {
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
 remPolySwitch <- function(r, l, u, a, fn, absErr) {
-  nodes <- data.frame(lower = c(l, r), upper = c(r, u))
-  x <- double(dim(nodes)[1L])
+  bottoms <- c(l, r)
+  tops <- c(r, u)
+  x <- double(length(bottoms))
   maximize <- sign(remPolyErr(l, a, fn, absErr)) == 1
   for (i in seq_along(x)) {
-    x[i] <- optimize(remPolyErr,
-                     lower = nodes$lower[i],
-                     upper = nodes$upper[i],
-                     a = a, fn = fn, absErr = absErr,
-                     maximum = maximize)[[1L]]
-    # Test endpoints for max/min
-    p <- c(nodes$lower[i], x[i], nodes$upper[i])
-    testDF <- data.frame(p = p, E = remPolyErr(p, a, fn, absErr))
-    if (maximize) {
-      x[i] <- testDF$p[which.max(testDF$E)]
+    intv <- c(bottoms[i], tops[i])
+    extrma <- tryCatch(optimize(remPolyErr, interval = intv, a = a, fn = fn,
+                                absErr = absErr, maximum = maximize),
+                       error = function(cond) simpleError(trimws(cond$message)))
+
+    # Check if no root in interval and return appropriate endpoint
+    if (inherits(extrma, "simpleError")) {
+      endPtErr <- remPolyErr(intv, a, fn, absErr)
+      if (maximize) {
+        x[i] <- intv[which.max(endPtErr)]
+      } else {
+        x[i] <- intv[which.min(endPtErr)]
+      }
     } else {
-      x[i] <- testDF$p[which.min(testDF$E)]
+      x[i] <- extrma[[1L]]
+    }
+
+    # Test endpoints for max/min
+    p <- c(bottoms[i], x[i], tops[i])
+    E <- remPolyErr(p, a, fn, absErr)
+
+    if (maximize) {
+      x[i] <- p[which.max(E)]
+    } else {
+      x[i] <- p[which.min(E)]
     }
 
     # Flip maximize
