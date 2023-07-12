@@ -12,7 +12,7 @@ Evctr <- E * altSign
 yvctr <- y + Evctr
 control <- matrix(c(rep(1, 4L), x, x ^ 2, -(yvctr) * x, -(yvctr) * x ^ 2,
                     -altSign), nrow = length(x))
-expect_identical(remRatMat(x, E, y, 2L, 2L), control)
+expect_identical(remRatMat(x, E, y, 2L, 2L, TRUE), control)
 
 # Test remRatCoeffs
 # If the function is a pure polynomial then coeffs should recover it exactly IF
@@ -22,7 +22,7 @@ expect_identical(remRatMat(x, E, y, 2L, 2L), control)
 fn <- function(x) x ^ 2 + 2 * x + 3
 x <- seq(0, 2, length.out = 4)
 control <- c(3, 2, 1)
-RR <- remRatCoeffs(x, 0, fn, 2, 0)
+RR <- remRatCoeffs(x, 0, fn, 2L, 0L, TRUE)
 expect_equal(RR$a, control, tolerance = tol)
 expect_identical(RR$b, 1)
 expect_equal(RR$E, 0, tolerance = tol)
@@ -52,10 +52,10 @@ expect_equal(remRatErr(x, RR$a, RR$b, fn, TRUE), control, tolerance = 1e-2)
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 x <- chebNodes(3, 0, 1)
 fn <- function(x) expm1(x)
-QQ <- remRatCoeffs(x, 0, fn, 1, 0)
+QQ <- remRatCoeffs(x, 0, fn, 1L, 0L, TRUE)
 control <- remRatRoots(x, QQ$a, QQ$b, fn, TRUE)
 fn <- function(x) exp(x) - 1
-RR <- remRatCoeffs(x, 0, fn, 1, 0)
+RR <- remRatCoeffs(x, 0, fn, 1L, 0L, TRUE)
 r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
 
 ## Need weaker tolerance here since functions are not exactly the same
@@ -72,7 +72,7 @@ control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
              0.67069355653042717, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(5, -1, 1)
-RR <- remRatCoeffs(x, 0, fn, 2, 1)
+RR <- remRatCoeffs(x, 0, fn, 2L, 1L, TRUE)
 r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
 x <- remRatSwitch(r, -1, 1, RR$a, RR$b, fn, TRUE)
 expect_equal(x, control, tolerance = 3e-7) #Github macOS complains otherwise
