@@ -2,22 +2,32 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix
-remPolyMat <- function(x) {
+remPolyMat <- function(x, y, absErr) {
   n <- length(x)
-  A <- vanderMat(x, n - 2)
-  cbind(A, (-1) ^ (seq_len(n) - 1))
+  A <- vanderMat(x, n - 2L)
+  altSgn <- (-1) ^ (seq_len(n) - 1L)
+  # For relative error, need to weight the E by f(x)
+  if (!absErr) {
+    altSgn <- altSgn * y
+  }
+  cbind(A, altSgn, deparse.level = 0L)
 }
 
 # Function to calculate coefficients given matrix and known values
-remPolyCoeffs <- function(x, fn) {
-  PP <- solve(remPolyMat(x), callFun(fn, x))
+remPolyCoeffs <- function(x, fn, absErr) {
+  y <- callFun(fn, x)
+  PP <- solve(remPolyMat(x, y, absErr), y)
   list(a = PP[-length(PP)], E = PP[length(PP)])
 }
 
 # Function to calculate error between known and calculated values
 remPolyErr <- function(x, a, fn, absErr) {
-  y <-  callFun(fn, x)
-  (polyCalc(x, a) - y) / if (absErr) 1 else y
+  if (absErr) {
+    polyCalc(x, a) - callFun(fn, x)
+  } else {
+    y <- callFun(fn, x)
+    (polyCalc(x, a) - y) / y
+  }
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
@@ -128,7 +138,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
   x <- chebNodes(degree + 2L, lower, upper)
 
   # Initial Polynomial Guess
-  PP <- remPolyCoeffs(x, fn)
+  PP <- remPolyCoeffs(x, fn, absErr)
   errs_last <- remPolyErr(x, PP$a, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
@@ -140,7 +150,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts = list()) {
     i <- i + 1L
     r <- remPolyRoots(x, PP$a, fn, absErr)
     x <- remPolySwitch(r, lower, upper, PP$a, fn, absErr)
-    PP <- remPolyCoeffs(x, fn)
+    PP <- remPolyCoeffs(x, fn, absErr)
     errs <- remPolyErr(x, PP$a, fn, absErr)
     mxae <- max(abs(errs))
     expe <- abs(PP$E)

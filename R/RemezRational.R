@@ -2,20 +2,24 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix
-remRatMat <- function(x, E, y, nD, dD) {
+remRatMat <- function(x, E, y, nD, dD, absErr) {
   n <- length(x)
-  altSgn <- (-1) ^ (seq_len(n) - 1)
+  altSgn <- (-1) ^ (seq_len(n) - 1L)
+  # For relative error, need to weight the E by f(x)
+  if (!absErr) {
+    altSgn <- altSgn * y
+  }
   altE <- altSgn * E
   yvctr <- -(y + altE)
   aMat <- vanderMat(x, nD)
-  bMat <- vanderMat(x, dD)[, -1] * yvctr
-  cbind(aMat, bMat, -altSgn, deparse.level = 0)
+  bMat <- vanderMat(x, dD)[, -1L] * yvctr
+  cbind(aMat, bMat, -altSgn, deparse.level = 0L)
 }
 
 # Function to calculate coefficients given matrix and known values
-remRatCoeffs <- function(x, E, fn, nD, dD) {
+remRatCoeffs <- function(x, E, fn, nD, dD, absErr) {
   y <- callFun(fn, x)
-  P <- solve(remRatMat(x, E, y, nD, dD), y)
+  P <- solve(remRatMat(x, E, y, nD, dD, absErr), y)
   RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
              b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
              E = P[length(P)])
@@ -27,8 +31,12 @@ remRatFunc <- function(x, a, b)  polyCalc(x, a) / polyCalc(x, b)
 
 # Function to calculate error between known and calculated values
 remRatErr <- function(x, a, b, fn, absErr) {
-  y <- callFun(fn, x)
-  (remRatFunc(x, a, b) - y) / if (absErr) 1 else y
+  if (absErr) {
+    remRatFunc(x, a, b) - callFun(fn, x)
+  } else {
+    y <- callFun(fn, x)
+    (remRatFunc(x, a, b) - y) / y
+  }
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
@@ -160,12 +168,12 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   # equations until E converges. Function may remain inside of remRat.
   # Everything but "x" is previously defined and constant inside the main remRat
   # function and thus does not need to be passed.
-  convergeErr <- function(x) {
+  convergeErr <- function(x, absErr) {
     E <- 0
     j <- 0L
     repeat {
       if (j > maxiter) break
-      RR <- remRatCoeffs(x, E, fn, numerd, denomd)
+      RR <- remRatCoeffs(x, E, fn, numerd, denomd, absErr)
       if (abs(RR$E - E) <= tol) break
       E <- (RR$E + E) / 2
       j <- j + 1
@@ -173,7 +181,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     RR
   }
 
-  RR <- convergeErr(x)
+  RR <- convergeErr(x, absErr)
   errs_last <- remRatErr(x, RR$a, RR$b, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
@@ -184,7 +192,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     i <- i + 1L
     r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
     x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
-    RR <- convergeErr(x)
+    RR <- convergeErr(x, absErr)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
