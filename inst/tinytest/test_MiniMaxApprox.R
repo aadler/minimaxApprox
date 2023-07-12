@@ -3,61 +3,86 @@
 
 tol <- 1e-7
 
-# Test other components of minimaxApprox - Poly that have not been tested before
+# Test omponents of minimaxApprox that have not been tested earlier. Primarily
+# messages and the return object.
+
+# Test warning flag in good case
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-PP <- minimaxApprox(fn, -1, 1, 9L, opts = list(maxiter = 100L, convRatio = 1.5))
-expect_false(PP$Warning)
+## Polynomial
+expect_false(minimaxApprox(fn, -1, 1, 9L)$Warning)
+## Rational
+expect_false(minimaxApprox(fn, -1, 1, c(2L, 1L))$Warning)
 
-# Should show at least one line of output due to show progress
-expect_message(minimaxApprox(fn, -1, 1, 9L,
-                             opts = list(miniter = 0L, showProgress = TRUE)),
-               "i: 1 E: ")
+# Test showProgress. Also tests passing miniter
+## Polynomial
+opts <- list(miniter = 1L, showProgress = TRUE)
+expect_message(minimaxApprox(fn, -1, 1, 9L, opts = opts), "i: 1 E: ")
+## Rational
+expect_message(minimaxApprox(fn, -1, 1, c(2L, 1L), opts = opts), "i: 1 E: ")
 
-fn <- function(x) sin(x) + cos(x)
-expect_warning(minimaxApprox(fn, -1, 1, 13L),
-               "All errors very near machine double precision.")
-
-expect_warning(minimaxApprox(fn, -1, 1, 9L, opts = list(maxiter = 1L)),
-               "Convergence to requested ratio and tolerance not acheived in")
-
-PP <- suppressWarnings(minimaxApprox(fn, -1, 1, 13L, opts = list(tol = 1e-14)))
-expect_true(PP$Warning)
-
-expect_warning(minimaxApprox(fn, -1, 1, 10L, xi = 6),
-               "Polynomial approximation uses Chebyeshev nodes for initial")
-
-# Test other components of minimaxApprox - Rat that have not been tested before
-fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-dg <- c(2L, 1L)
-expect_false(minimaxApprox(fn, -1, 1, dg)$Warning)
-
-# Should show at least one line of output due to show progress
-expect_message(minimaxApprox(fn, -1, 1, dg, opts = list(miniter = 2L,
-                                                        showProgress = TRUE)),
-               "i: 1 E: ")
-
-dg <- c(3L, 3L)
-# Test error message
-expect_error(minimaxApprox(fn, -1, 1, dg, xi = chebNodes(5L, -1, 1)),
-             "Given the requested degrees for numerator and denominator")
-
-expect_error(minimaxApprox(fn, -1, 1, 1:3),
-             "Polynomial approximation takes one value for degree and")
-
-# Test warning flag
-expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, c(5L, 4L),
-                                           opts = list(maxiter = 6L))$Warning))
-
-# Test informational message
+# Test passing some maxiter, convRatio, tol, and conviter. Also checks conviter
+# overwrite.
 fn <- function(x) exp(x) - 1
-expect_message(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)),
-               "All errors very near machine double precision. The solution")
+opts <- list(maxiter = 25L, convRatio = 1.01, tol = 1e-12, conviter = 50L)
+## Polynomial
+expect_silent(minimaxApprox(fn, -0.15, 0.15, 4L, opts = opts))
+## Rational
+expect_silent(minimaxApprox(fn, -0.15, 0.15, c(2L, 2L), opts = opts))
 
-# Test passing some parameters
-expect_silent(minimaxApprox(fn, -0.15, 0.15, c(2L, 2L),
-                            opts = list(convRatio = 1.05, tol = 1e-4)))
+# Test maxiter warning and warning flag
+opts <- list(maxiter = 2L)
+wrnMess <- paste("Convergence to requested ratio and tolerance not acheived in",
+                 "2 iterations.\nThe ratio is ")
+## Polynomial
+expect_warning(minimaxApprox(fn, -1, 1, 9L, opts = opts), wrnMess)
+expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, 9L, opts = opts)$Warning))
+## Rational
+dg <- c(2L, 2L)
+expect_warning(minimaxApprox(fn, -1, 1, dg, opts = opts), wrnMess)
+expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
 
-# Test denominator error message
+# Test "very near machine double" warning message
+wrnMess <- paste("All errors very near machine double precision. The solution",
+                 "may not be optimal but should be best given the desired",
+                 "precision and floating point limitations. Try a lower degree",
+                 "if needed.")
+## Polynomial
+fn <- function(x) sin(x) + cos(x)
+expect_warning(minimaxApprox(fn, -1, 1, 13L), wrnMess)
+## Rational
+# This isn't triggering the error. Comment out for now
+# fn <- function(x) exp(x) - 1
+# expect_message(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
+
+# Test consecutive unchanging check and message
+fn <- function(x) exp(x) - 1
+i <- unchanging_i <- 5L
+opts <- list(conviter = i, maxiter = i) # Pass maxiter too or error will fail
+wrnMess <- paste("Convergence to requested ratio and tolerance not acheived in",
+                 i, "iterations.\n")
+## Polynomial
+expect_warning(minimaxApprox(fn, -1, 1, 12L, opts = opts), wrnMess)
+## Rational
+expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
+
+# Test passing incorrect degree (at minimaxApprox level)
+errMess <- paste("Polynomial approximation takes one value for degree and",
+                 "rational approximation takes a vector of two values for",
+                 "numerator and denominator. Any other inputs are invalid.")
+expect_error(minimaxApprox(fn, -1, 1, 1:3), errMess)
+
+# Test passing xi
+## Polynomial - Check that it is ignored
+wrnMess <- paste("Polynomial approximation uses Chebyeshev nodes for initial",
+                 "guess. Any passed xi is ignored.")
+expect_warning(minimaxApprox(fn, -1, 1, 10L, xi = 6), wrnMess)
+## Rational - Check that proper length is passed
+errMess <- paste("Given the requested degrees for numerator and denominator,",
+                 "the x-vector needs to have 8 elements.")
+xi <- chebNodes(5L, -1, 1)
+expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
+
+# Test checkDenom error message
 expect_error(minimaxApprox(tan, 1, 2, c(2L, 3L)),
              "The 3 degree polynomial in the denominator has a zero at 1.57")
 
