@@ -81,14 +81,16 @@ the lead maintainer.
 ### Major
 
  * Consider moving some calculations into a compiled language (C, Fortran, C++)
- for efficiency.
+ for efficiency
  * Research
  [barycentric representations](https://www.chebfun.org/publications/remez.pdf)
- to consider if possible to implement in R.
+ to consider if possible to implement in R
+ * Alternatively, research if possible to use [Rmpfr](https://CRAN.R-project.org/package=Rmpfr ) package for increased
+ precision
 
 ### Minor
 
- * There are no plans for minor changes at current.
+ * Write a vignette
 
 ## Security
 ### Expectations
