@@ -56,10 +56,10 @@ expect_warning(minimaxApprox(fn, -1, 1, 13L), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
-i <- unchanging_i <- 5L
-opts <- list(conviter = i, maxiter = i) # Pass maxiter too or error will fail
-wrnMess <- paste("Convergence to requested ratio and tolerance not acheived in",
-                 i, "iterations.\n")
+i <- 5L
+opts <- list(conviter = i)
+wrnMess <- paste(i, "succesive calculated errors were too close to each other",
+                 "to warrant further iterations.\n")
 ## Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 12L, opts = opts), wrnMess)
 ## Rational
