@@ -1,9 +1,9 @@
-\name{RatApprox-internal}
+\name{minimaxApprox-internal}
 
 %% Internal-only functions need to be listed here wrapped in \alias{}
 
-\title{Internal RatApprox Functions}
-\description{Internal RatApprox functions}
+\title{Internal minimaxApprox Functions}
+\description{Internal minimaxApprox functions}
 \details{These are not to be called directly by the user.}
 
 \alias{fC}
