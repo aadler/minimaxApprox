@@ -19,10 +19,6 @@ remRatCoeffs <- function(x, E, fn, nD, dD) {
   RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
              b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
              E = P[length(P)])
-
-  if (sum(lengths(RR)) != (length(x) + 1)) { # Not sure this is needed anymore
-    stop("Catastrophic Error. Result vector not of required length.")
-  }
   RR
 }
 
