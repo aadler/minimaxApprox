@@ -31,6 +31,15 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
   }
 }
 
+# Evaluation convenience function
+minimaxEval <- function(x, mmA) {
+  if (attr(mmA, "type") == "Polynomial") {
+    polyCalc(x, mmA$a)
+  } else {
+    remRatFunc(x, mmA$a, mmA$b)
+  }
+}
+
 # Print method (hide i and basis/x but leave in list and not in attribute)
 print.minimaxApprox <- function(x, ...) {
   if (attr(x, "type") == "Polynomial") {

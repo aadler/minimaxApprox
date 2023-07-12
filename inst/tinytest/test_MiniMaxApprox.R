@@ -61,6 +61,13 @@ expect_silent(minimaxApprox(fn, -0.15, 0.15, c(2L, 2L),
 expect_error(minimaxApprox(tan, 1, 2, c(2L, 3L)),
              "The 3 degree polynomial in the denominator has a zero at 1.57")
 
+# Test evaluation function
+x <- seq(0.1, 0.4, 0.025)
+mmA <- minimaxApprox(exp, 0, 0.5, 5L)
+expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
+mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
+expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
+
 # Test print, plot, and coef methods
 PP <- minimaxApprox(function(x) exp(x), 0, 1, 5L, "abs")
 expect_identical(unlist(coef(PP), use.names = FALSE), PP$a)
