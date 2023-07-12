@@ -27,7 +27,9 @@ minimaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list(
   requested degrees of the numerator and denominator for rational approximation.
 }
   \item{errType}{character; The type of error to be minimized over the interval.
-  Either '\strong{abs}'olute (default) or '\strong{rel}'ative.
+  Either '\strong{abs}'olute (default) or '\strong{rel}'ative. \strong{Note:}
+  Consider relative error to be \emph{experimental} as it does not seem to work
+  as well as absolute in many cases.
 }
   \item{xi}{numeric; For rational approximation, a vector of initial points of
   the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
@@ -99,6 +101,10 @@ equations}, \emph{Numerische Mathematik}, \bold{12}, 242--251,
 }
 \author{
 Avraham Adler \email{Avraham.Adler@gmail.com}
+}
+\section{Warning}{
+Consider relative error to be \emph{experimental} as it does not seem to work
+as well as absolute in many cases.
 }
 \note{
 As of this version, the algorithms are implemented using machine double
