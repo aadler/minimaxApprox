@@ -2,8 +2,6 @@
 \encoding{UTF-8}
 \alias{minimaxApprox}
 \alias{print.minimaxApprox}
-\alias{plot.minimaxApprox}
-\alias{coef.minimaxApprox}
 
 \title{Minimax Approximation of Functions}
 \description{
@@ -15,8 +13,7 @@ version of the Remez algorithm.
 minimaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list())
 
 \method{print}{minimaxApprox}(x, \dots)
-\method{plot}{minimaxApprox}(x, y, \dots)
-\method{coef}{minimaxApprox}(object, \dots)
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -56,26 +53,35 @@ minimaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list(
   \code{1e-14}. See \strong{Details}.
   }
 }
-  \item{x}{For \code{print} and \code{plot}, a \code{minimaxApprox} object.}
-  \item{y}{
-  Ignored by \code{plot}; in call as required by
-  \href{https://cran.r-project.org/doc/manuals/R-exts.html#Generic-functions-and-methods}{Writing R Extensions:chapter 7}.
-}
-  \item{object}{For \code{coef}, a \code{minimaxApprox} object.}
-  \item{\dots}{
-  Further arguments to be passed to other methods. Specifically to pass
-  \code{ylim} to plot to allow zooming in or out.
-}
+  \item{x}{For \code{print}, a \code{minimaxApprox} object.}
+  \item{\dots}{Further arguments to be passed to other methods.}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+\code{minimaxApprox} returns an object of \link{class} \dQuote{minimaxApprox}
+which inherits from the class \link{list}.
+
+The generic accessor function \code{coef} will extract the numerator and
+denominator vectors.
+
+An object of class \dQuote{minimaxApprox} is a list containing the following
+components:
+
+  \item{a}{The polynomial coefficents or the rational numerator coefficents}
+  \item{b}{The rational denominator coefficents. Missing for polynomial
+  approximation}
+  \item{EE}{The absolute value of the expected error as calculated by the Remez
+  algorithms}
+  \item{OE}{The absolute value of largest observed error between the function
+  and the approximation at the extremal basis points.}
+  \item{iterations}{The number of iterations of the algorithm. This does not
+  include any iterations required to converge the error value in rational
+  approximation.}
+  \item{x}{The basis points at which the minimax error was acheived.}
+  \item{Warning}{A logical flag indicating if any warnings were thrown}
+
 }
 \references{
 Remez, E. I. (1962) \emph{General computational methods of Chebyshev
@@ -95,11 +101,6 @@ equations}, \emph{Numerische Mathematik}, \bold{12}, 242--251,
 Avraham Adler \email{Avraham.Adler@gmail.com}
 }
 \note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-\section{Warning}{
 As of this version, the algorithms are implemented using machine double
 precision, which means that the approximations are at best slightly worse. The
 value of the approximations calculated by this package are for increasing
@@ -118,4 +119,5 @@ RR <- minimaxApprox(exp, 0, 1, c(2, 3))
 RR
 }
 
+\keyword{optimize}
 \keyword{NumericalMathematics}
