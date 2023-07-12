@@ -1,7 +1,7 @@
 Package: minimaxApprox
 Type: Package
 Version: 0.0.1
-Title: Implemention of Remez Algorithm for Polynomial and Rational Function
+Title: Implementation of Remez Algorithm for Polynomial and Rational Function
     Approximation
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))

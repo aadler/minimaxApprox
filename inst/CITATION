@@ -1,0 +1,12 @@
+bibentry(bibtype     = "Manual",
+         textversion = NULL,
+         header      = paste("To cite the", sQuote("minimaxApprox"),
+                             "package in publications, please use:"),
+         author      = person(given = "Avraham", family = "Adler",
+                              role = c("aut", "cph", "cre"),
+                              email = "Avraham.Adler@gmail.com",
+                              comment = c(ORCID = "0000-0002-3039-0703")),
+         title        = "minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational Function Approximation",
+         year         = "2023",
+         note         = "R package version 0.0.1"
+)
