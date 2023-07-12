@@ -41,6 +41,11 @@ r <- remPolyRoots(x, PP$a, fn, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
+## Test error trap with contrived example
+mmA <- minimaxApprox(exp, 1, 2, 4L)
+r <- remPolyRoots(c(1.2, 1.8), A$a, fn, TRUE)
+expect_identical(r, 1.2)
+
 # Test remPolySwitch
 ## Assuming function is correct, replicate a previous result
 control <- c(-1, 0.10264319209405934, 0.33737347892134784, 0.62760323678827878,

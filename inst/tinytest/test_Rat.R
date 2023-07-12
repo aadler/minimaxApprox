@@ -61,6 +61,11 @@ r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
+## Test error trap with contrived example
+mmA <- minimaxApprox(exp, 1, 2, c(2L, 2L))
+r <- remRatRoots(c(1.2, 1.8), A$a, A$b, fn, TRUE)
+expect_identical(r, 1.2)
+
 # Test remRatSwitch
 ## Assuming function is correct, replicate a previous result
 control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
