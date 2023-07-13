@@ -3,8 +3,7 @@
 
 tol <- 1e-7
 
-# Test omponents of minimaxApprox that have not been tested earlier. Primarily
-# messages and the return object.
+# Most tests of warnings and messages will perforce check internals too.
 
 # Test warning flag in good case
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
@@ -50,9 +49,8 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1, 1, 13L), wrnMess)
 ## Rational
-# This isn't triggering the error. Comment out for now
-# fn <- function(x) exp(x) - 1
-# expect_message(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
+fn <- function(x) exp(x) - 1
+expect_warning(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
@@ -64,6 +62,12 @@ wrnMess <- paste(i, "succesive calculated errors were too close to each other",
 expect_warning(minimaxApprox(fn, -1, 1, 12L, opts = opts), wrnMess)
 ## Rational
 expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
+
+# Test function choosing basis x as 0 trap
+errMess <- paste("Algorithm is choosing basis point where functional value is",
+                 "0. Please approximate using absolute, and not relative",
+                 "error.")
+expect_error(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), errType = 'rel'), errMess)
 
 # Test passing incorrect degree (at minimaxApprox level)
 errMess <- paste("Polynomial approximation takes one value for degree and",
@@ -95,6 +99,11 @@ expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
 
 # Test print, plot, and coef methods
 PP <- minimaxApprox(function(x) exp(x), 0, 1, 5L, "abs")
+expect_identical(unlist(coef(PP), use.names = FALSE), PP$a)
+expect_stdout(print(PP))
+expect_stdout(plot(PP))
+
+PP <- minimaxApprox(function(x) exp(x), 0, 1, 5L, "rel")
 expect_identical(unlist(coef(PP), use.names = FALSE), PP$a)
 expect_stdout(print(PP))
 expect_stdout(plot(PP))

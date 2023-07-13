@@ -2,17 +2,47 @@
 minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
                           opts = list()) {
 
+  # Handle configuration options
+  if (!("maxiter" %in% names(opts))) {
+    opts$maxiter <- 100L
+  }
+
+  if (!("miniter" %in% names(opts))) {
+    opts$miniter <- 10L
+  }
+
+  if (!("conviter" %in% names(opts))) {
+    opts$conviter <- 10L
+  } else {
+    # If actually passed then overwrite
+    opts$maxiter <- max(opts$maxiter, opts$conviter)
+  }
+
+  if (!("showProgress" %in% names(opts))) {
+    opts$showProgress <- FALSE
+  }
+
+  if (!("convRatio" %in% names(opts))) {
+    # Using 1 + 1e-9 - See Cody (1968) page 250. Can reasonably expect between
+    # 9 & 12 significant figures.
+    opts$convRatio <- 1.000000001
+  }
+
+  if (!("tol" %in% names(opts))) {
+    opts$tol <- 1e-14
+  }
+
   absErr <- switch(tolower(substring(errType, 1, 3)),
                    abs = TRUE,
                    rel = FALSE,
                    stop("Error type must be either 'abs'olute or 'rel'ative."))
 
-  if (length(degree) == 2L) {        # If rational approximation requested
+  if (length(degree) == 2L) {        # Rational approximation requested
     numerd <- as.integer(degree[1L])
     denomd <- as.integer(degree[2L])
     ratApprox <- TRUE
   } else if (length(degree) == 1L) {
-    ratApprox <- FALSE               #  Polynomial approximation requested
+    ratApprox <- FALSE               # Polynomial approximation requested
     if (!is.null(xi)) {
       warning("Polynomial approximation uses Chebyeshev nodes for initial ",
               "guess. Any passed xi is ignored.")
@@ -24,11 +54,54 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
          "denominator. Any other inputs are invalid.")
   }
 
-  if (ratApprox) {
+  # CaLL Calculation Functions
+  mmA <- if (ratApprox) {
     remRat(fn, lower, upper, numerd, denomd, absErr, xi, opts)
   } else {
     remPoly(fn, lower, upper, as.integer(degree), absErr, opts)
   }
+
+  # Handle all warnings centrally
+  gotWarning <- FALSE
+
+  if (mmA$i >= opts$maxiter && !mmA$converged) {
+    warning("Convergence to requested ratio and tolerance not acheived in ",
+            mmA$i, " iterations.\n", "The ratio is ", fC(mmA$mxae / mmA$expe),
+            " times expected and the difference is ",
+            fC(abs(mmA$mxae - mmA$expe)), " from the expected.")
+    gotWarning <- TRUE
+  }
+
+  if (mmA$unchanged && !mmA$converged) {
+    warning("Convergence to requested ratio and tolerance not acheived in ",
+            mmA$i, " iterations.\n", mmA$unchanging_i, " succesive calculated ",
+            "errors were too close to each other to warrant further ",
+            "iterations.\nThe ratio is ", fC(mmA$mxae / mmA$expe), " times ",
+            "expected and the difference is ", fC(abs(mmA$mxae - mmA$expe)),
+            " from the expected.")
+    gotWarning <- TRUE
+  }
+
+  if (mmA$mxae < 10 * .Machine$double.eps) {
+    warning("All errors very near machine double precision. The solution may ",
+            "not be optimal but should be best given the desired precision ",
+            "and floating point limitations. Try a lower degree if needed.")
+    gotWarning <- TRUE
+  }
+
+  coefficients <- if (ratApprox) list(a = mmA$a, b = mmA$b) else list(a = mmA$a)
+  diagnostics <- list(EE = mmA$expe, OE = mmA$mxae,  iterations = mmA$i,
+                      x = mmA$x, Warning = gotWarning)
+  ret <- c(coefficients, diagnostics)
+  attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
+  attr(ret, "func") <- fn
+  attr(ret, "range") <- c(lower, upper)
+  attr(ret, "absErr") <- absErr
+  attr(ret, "tol") <- opts$tol
+  attr(ret, "convRatio") <- opts$convRatio
+  class(ret) <- c("minimaxApprox", class(ret))
+
+  ret
 }
 
 # Evaluation convenience function
@@ -48,19 +121,19 @@ print.minimaxApprox <- function(x, ...) {
     coefficients <- list(a = x$a, b = x$b)
   }
 
-  diags <- list(x$EE,
-                x$OE,
-                Ratio = round(x$OE / x$EE, 6L),
-                Difference = abs(x$OE - x$EE),
-                Warnings = x$Warning)
+  diagnostics <- list(x$EE,
+                      x$OE,
+                      Ratio = round(x$OE / x$EE, 6L),
+                      Difference = abs(x$OE - x$EE),
+                      Warnings = x$Warning)
 
-  names(diags)[1:2] <- if (attr(x, "absErr")) {
-     c("ExpectedAbsError", "ObservedAbsError")
+  names(diagnostics)[1:2] <- if (attr(x, "absErr")) {
+    c("ExpectedAbsError", "ObservedAbsError")
   } else {
     c("ExpectedRelError", "ObservedRelError")
   }
 
-  print(c(coefficients, diags))
+  print(c(coefficients, diagnostics))
 }
 
 coef.minimaxApprox <- function(object, ...) {
@@ -72,6 +145,7 @@ coef.minimaxApprox <- function(object, ...) {
 
   coef
 }
+
 # Plot method for errors and basis points
 plot.minimaxApprox <- function(x, y, ...) {
   args <- list(...)
@@ -89,7 +163,7 @@ plot.minimaxApprox <- function(x, y, ...) {
   }
 
   ylab <- if (absErr) "Absolute Error" else "Relative Error"
-  ybnd <- max(abs(x$EE), abs(x$OE))
+  ybnd <- max(x$EE, x$OE)
   if ("ylim" %in% names(args)) {
     ylim <- args$ylim
   } else {

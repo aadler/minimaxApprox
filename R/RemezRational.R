@@ -109,49 +109,7 @@ remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
 }
 
 # Main function to calculate and return the minimax rational approximation
-remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
-                   opts = list()) {
-
-  # Handle configuration options
-  if ("maxiter" %in% names(opts)) {
-    maxiter <- opts$maxiter
-  } else {
-    maxiter <- 100L
-  }
-
-  if ("miniter" %in% names(opts)) {
-    miniter <- opts$miniter
-  } else {
-    miniter <- 10L
-  }
-
-  if ("conviter" %in% names(opts)) {
-    conviter <- opts$conviter
-    # If passing conviter then assume maxiter wants at least that much too
-    maxiter <- max(maxiter, conviter)
-  } else {
-    conviter <- 10L
-  }
-
-  if ("showProgress" %in% names(opts)) {
-    showProgress <- opts$showProgress
-  } else {
-    showProgress <- FALSE
-  }
-
-  if ("convRatio" %in% names(opts)) {
-    convRatio <- opts$convRatio
-  } else {
-    # Using 1 + 1e-9 - See Cody (1968) page 250. Can reasonably expect between
-    # 9 & 12 significant figures.
-    convRatio <- 1.000000001
-  }
-
-  if ("tol" %in% names(opts)) {
-    tol <- opts$tol
-  } else {
-    tol <- 1e-14
-  }
+remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
 
   # Initial x's
   if (is.null(xi)) {
@@ -172,9 +130,9 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     E <- 0
     j <- 0L
     repeat {
-      if (j > maxiter) break
+      if (j > opts$maxiter) break
       RR <- remRatCoeffs(x, E, fn, numerd, denomd, absErr)
-      if (abs(RR$E - E) <= tol) break
+      if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
       j <- j + 1
     }
@@ -188,7 +146,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
   unchanging_i <- 0L
   i <- 0L
   repeat {
-    if (i >= maxiter) break
+    if (i >= opts$maxiter) break
     i <- i + 1L
     r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
     x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
@@ -203,23 +161,23 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     mxae <- max(abs(errs))
     expe <- abs(RR$E)
 
-    if (showProgress) {
+    if (opts$showProgress) {
       message("i: ", i, " E: ", fC(expe), " maxErr: ", fC(mxae),
               " Ratio: ", fC(mxae / expe), " Diff:", fC(abs(mxae - expe)))
     }
 
     # Check for convergence
-    if (isConverged(errs, expe, convRatio, tol) && i >= miniter) {
+    if (isConverged(errs, expe, opts$convRatio, opts$tol) && i >= opts$miniter) {
       converged <- TRUE
       break
     }
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will just not help.
-    if (all(errs / errs_last <= convRatio) ||
-        all(abs(errs - errs_last) <= tol)) {
+    if (all(errs / errs_last <= opts$convRatio) ||
+        all(abs(errs - errs_last) <= opts$tol)) {
       unchanging_i <- unchanging_i + 1L
-      if (unchanging_i >= conviter) {
+      if (unchanging_i >= opts$conviter) {
         unchanged <- TRUE
         break
       }
@@ -227,41 +185,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL,
     errs_last <- errs
   }
 
-  gotWarning <- FALSE
-
-  if (i >= maxiter && !converged) {
-    warning("Convergence to requested ratio and tolerance not acheived in ",
-            i, " iterations.\n", "The ratio is ", fC(mxae / expe),
-            " times expected and the difference is ", fC(abs(mxae - expe)),
-            " from the expected.")
-    gotWarning <- TRUE
-  }
-
-  if (unchanged && !converged) {
-    warning("Convergence to requested ratio and tolerance not acheived in ",
-            i, " iterations.\n", unchanging_i, " succesive calculated errors ",
-            "were too close to each other to warrant further iterations.\n",
-            "The ratio is ", fC(mxae / expe), " times expected and the ",
-            "difference is ", fC(abs(mxae - expe)),
-            " from the expected.")
-    gotWarning <- TRUE
-  }
-
-  if (mxae < 10 * .Machine$double.eps) {
-    message("All errors very near machine double precision. The solution may ",
-            "not be optimal but should be best given the desired precision ",
-            "and floating point limitations. Try a lower degree if needed.")
-  }
-
-  ret <- list(a = RR$a, b = RR$b, EE = expe, OE = mxae, iterations = i, x = x,
-              Warning = gotWarning)
-  attr(ret, "type") <- "Rational"
-  attr(ret, "func") <- fn
-  attr(ret, "range") <- c(lower, upper)
-  attr(ret, "absErr") <- absErr
-  attr(ret, "tol") <- tol
-  attr(ret, "convRatio") <- convRatio
-  class(ret) <- c("minimaxApprox", class(ret))
-
-  ret
+  list(a = RR$a, b = RR$b, expe = expe, mxae = mxae, i = i, x = x,
+       converged = converged, unchanged = unchanged,
+       unchanging_i = unchanging_i)
 }

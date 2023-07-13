@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 tol <- 1e-7
-
+opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
+             showProgress = FALSE, convRatio = 1.000000001, tol = 1e-14)
 # Test remRatMat
 x <- c(-0.4, 0.1, 0.3, 0.4)
 E <- 0.5
@@ -45,7 +46,7 @@ c <- (exp(1) - m * log(m)) / 2
 tstFn <- function(x) m * x + c
 x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
-RR <- remRat(fn, 0, 1, 1, 0, TRUE, opts = list(conviter = 50L))
+RR <- remRat(fn, 0, 1, 1, 0, TRUE, NULL, opts)
 expect_equal(remRatErr(x, RR$a, RR$b, fn, TRUE), control, tolerance = 1e-2)
 
 # Test remRatRoots
