@@ -20,23 +20,13 @@ remPolyCoeffs <- function(x, fn, absErr) {
   list(a = PP[-length(PP)], E = PP[length(PP)])
 }
 
-# Function to calculate error between known and calculated values
-remPolyErr <- function(x, a, fn, absErr) {
-  if (absErr) {
-    polyCalc(x, a) - callFun(fn, x)
-  } else {
-    y <- callFun(fn, x)
-    (polyCalc(x, a) - y) / y
-  }
-}
-
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
-remPolyRoots <- function(x, a, fn, absErr) {
+remPolyRoots <- function(x, PP, fn, absErr) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remPolyErr, interval = intv, a = a, fn = fn,
+    root <- tryCatch(uniroot(remErr, interval = intv, R = PP, fn = fn,
                              absErr = absErr),
                      error = function(cond) simpleError(trimws(cond$message)))
     # If there is no root in the interval, take the endpoint closer to 0 (root)
@@ -51,20 +41,20 @@ remPolyRoots <- function(x, a, fn, absErr) {
 
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
-remPolySwitch <- function(r, l, u, a, fn, absErr) {
+remPolySwitch <- function(r, l, u, PP, fn, absErr) {
   bottoms <- c(l, r)
   tops <- c(r, u)
   x <- double(length(bottoms))
-  maximize <- sign(remPolyErr(l, a, fn, absErr)) == 1
+  maximize <- sign(remErr(l, PP, fn, absErr)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
-    extrma <- tryCatch(optimize(remPolyErr, interval = intv, a = a, fn = fn,
+    extrma <- tryCatch(optimize(remErr, interval = intv, R = PP, fn = fn,
                                 absErr = absErr, maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
     # Check if no root in interval and return appropriate endpoint
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remPolyErr(intv, a, fn, absErr)
+      endPtErr <- remErr(intv, PP, fn, absErr)
       if (maximize) {
         x[i] <- intv[which.max(endPtErr)]
       } else {
@@ -76,7 +66,7 @@ remPolySwitch <- function(r, l, u, a, fn, absErr) {
 
     # Test endpoints for max/min
     p <- c(bottoms[i], x[i], tops[i])
-    E <- remPolyErr(p, a, fn, absErr)
+    E <- remErr(p, PP, fn, absErr)
 
     if (maximize) {
       x[i] <- p[which.max(E)]
@@ -98,7 +88,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts) {
 
   # Initial Polynomial Guess
   PP <- remPolyCoeffs(x, fn, absErr)
-  errs_last <- remPolyErr(x, PP$a, fn, absErr)
+  errs_last <- remErr(x, PP, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
   unchanging_i <- 0L
@@ -107,10 +97,10 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts) {
     # Check for maxiter
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- remPolyRoots(x, PP$a, fn, absErr)
-    x <- remPolySwitch(r, lower, upper, PP$a, fn, absErr)
+    r <- remPolyRoots(x, PP, fn, absErr)
+    x <- remPolySwitch(r, lower, upper, PP, fn, absErr)
     PP <- remPolyCoeffs(x, fn, absErr)
-    errs <- remPolyErr(x, PP$a, fn, absErr)
+    errs <- remErr(x, PP, fn, absErr)
     mxae <- max(abs(errs))
     expe <- abs(PP$E)
 

@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 tol <- 1e-7
+opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
+             showProgress = FALSE, convRatio = 1.000000001, tol = 1e-14)
 
 # Test fC
 expect_identical(fC(1.234567, f = "e"), "1.234567e+00")
@@ -60,3 +62,32 @@ control2 <- 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
 expect_equal(polyCalc(x, coeffs), control2, tolerance = tol)
 ## Test vectorized
 expect_equal(polyCalc(c(3, 5), coeffs), c(control, control2), tolerance = tol)
+
+# Test evalFunc
+x <- c(-0.1, 0.2, 2)
+controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
+## Polynomial
+P <- list(a = 1:4)
+expect_equal(evalFunc(x, P), controlN, tolerance = tol)
+## Rational
+R <- list(a = 1:4, b = c(1, 2.2, 4.1))
+controlD <- 1 + 2.2 * x + 4.1 * x ^ 2
+control <- controlN / controlD
+expect_equal(evalFunc(x, R), control, tolerance = tol)
+
+# Test remErr
+# Using fact that exp(1) has analytic answer for degree 1 and pass a zero-degree
+# polynomial in the denominator for the rational test
+fn <- function(x) exp(x)
+m <- exp(1) - 1
+c <- (exp(1) - m * log(m)) / 2
+tstFn <- function(x) m * x + c
+x <- chebNodes(3, 0, 1)
+control <- tstFn(x) - exp(x)
+
+## Polynomial
+PP <- remPoly(fn, 0, 1, 1, TRUE, opts)
+expect_equal(remErr(x, PP, fn, TRUE), control, tolerance = tol)
+## Rational
+RR <- remRat(fn, 0, 1, 1, 0, TRUE, NULL, opts)
+expect_equal(remErr(x, RR, fn, TRUE), control)

@@ -26,26 +26,13 @@ remRatCoeffs <- function(x, E, fn, nD, dD, absErr) {
   RR
 }
 
-# Function to calculate value of minimax rational approximation at x given a & b
-remRatFunc <- function(x, a, b)  polyCalc(x, a) / polyCalc(x, b)
-
-# Function to calculate error between known and calculated values
-remRatErr <- function(x, a, b, fn, absErr) {
-  if (absErr) {
-    remRatFunc(x, a, b) - callFun(fn, x)
-  } else {
-    y <- callFun(fn, x)
-    (remRatFunc(x, a, b) - y) / y
-  }
-}
-
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
-remRatRoots <- function(x, a, b, fn, absErr) {
+remRatRoots <- function(x, RR, fn, absErr) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remRatErr, interval = intv, a = a, b = b, fn = fn,
+    root <- tryCatch(uniroot(remErr, interval = intv, R = RR, fn = fn,
                              absErr = absErr),
                      error = function(cond) simpleError(trimws(cond$message)))
 
@@ -61,20 +48,19 @@ remRatRoots <- function(x, a, b, fn, absErr) {
 
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
-remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
+remRatSwitch <- function(r, l, u, RR, fn, absErr) {
   bottoms <- c(l, r)
   tops <- c(r, u)
   x <- double(length(bottoms))
-  maximize <- sign(remRatErr(l, a, b, fn, absErr)) == 1
+  maximize <- sign(remErr(l, RR, fn, absErr)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
-    extrma <- tryCatch(optimize(remRatErr, interval = intv,
-                                a = a, b = b, fn = fn,
+    extrma <- tryCatch(optimize(remErr, interval = intv, R = RR, fn = fn,
                                 absErr = absErr, maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remRatErr(intv, a, b, fn, absErr)
+      endPtErr <- remErr(intv, RR, fn, absErr)
       if (maximize) {
         x[i] <- intv[which.max(endPtErr)]
       } else {
@@ -86,7 +72,7 @@ remRatSwitch <- function(r, l, u, a, b, fn, absErr) {
 
     # Test endpoints for max/min
     p <- c(bottoms[i], x[i], tops[i])
-    E <- remRatErr(p, a, b, fn, absErr)
+    E <- remErr(p, RR, fn, absErr)
 
     if (maximize) {
       x[i] <- p[which.max(E)]
@@ -140,7 +126,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
   }
 
   RR <- convergeErr(x, absErr)
-  errs_last <- remRatErr(x, RR$a, RR$b, fn, absErr)
+  errs_last <- remErr(x, RR, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
   unchanging_i <- 0L
@@ -148,8 +134,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
   repeat {
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- remRatRoots(x, RR$a, RR$b, fn, absErr)
-    x <- remRatSwitch(r, lower, upper, RR$a, RR$b, fn, absErr)
+    r <- remRatRoots(x, RR, fn, absErr)
+    x <- remRatSwitch(r, lower, upper, RR, fn, absErr)
     RR <- convergeErr(x, absErr)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
@@ -157,7 +143,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
            "at ", fC(dngr), " which makes rational approximation perilous ",
            "over the interval [", fC(lower), ", ", fC(upper), "].")
     }
-    errs <- remRatErr(x, RR$a, RR$b, fn, absErr)
+    errs <- remErr(x, RR, fn, absErr)
     mxae <- max(abs(errs))
     expe <- abs(RR$E)
 

@@ -30,6 +30,25 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 # Calculate the polynomial approximation. Use in numer & denom for rationals
 polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
 
+# Function to calculate value of minimax approximation at x given a & b
+evalFunc <- function(x, R) {
+  ret <- polyCalc(x, R$a)
+  if ("b" %in% names(R)) {
+    ret <- ret / polyCalc(x, R$b)
+  }
+  ret
+}
+
+# Function to calculate error between known and calculated values
+remErr <- function(x, R, fn, absErr) {
+    if (absErr) {
+      evalFunc(x, R) - callFun(fn, x)
+      } else {
+        y <- callFun(fn, x)
+        (evalFunc(x, R) - y) / y
+      }
+}
+
 # Check Remez iterations for convergence
 isConverged <- function(errs, expe, convRatio, tol) {
   aerrs <- abs(errs)

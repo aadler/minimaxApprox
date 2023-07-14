@@ -28,43 +28,22 @@ expect_equal(RR$a, control, tolerance = tol)
 expect_identical(RR$b, 1)
 expect_equal(RR$E, 0, tolerance = tol)
 
-# Test remRatFunc
-a <- 1:4
-b <- c(1, 2.2, 4.1)
-x <- c(-0.1, 0.2, 2)
-controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
-controlD <- 1 + 2.2 * x + 4.1 * x ^ 2
-control <- controlN / controlD
-expect_equal(remRatFunc(x, a, b), control, tolerance = tol)
-
-# Test remRatErr
-# Using fact that exp(1) has analytic answer for degree 1 and pass a zero-degree
-# polynomial in the denominator
-fn <- function(x) exp(x)
-m <- exp(1) - 1
-c <- (exp(1) - m * log(m)) / 2
-tstFn <- function(x) m * x + c
-x <- chebNodes(3, 0, 1)
-control <- tstFn(x) - exp(x)
-RR <- remRat(fn, 0, 1, 1, 0, TRUE, NULL, opts)
-expect_equal(remRatErr(x, RR$a, RR$b, fn, TRUE), control, tolerance = 1e-2)
-
 # Test remRatRoots
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 x <- chebNodes(3, 0, 1)
 fn <- function(x) expm1(x)
 QQ <- remRatCoeffs(x, 0, fn, 1L, 0L, TRUE)
-control <- remRatRoots(x, QQ$a, QQ$b, fn, TRUE)
+control <- remRatRoots(x, QQ, fn, TRUE)
 fn <- function(x) exp(x) - 1
 RR <- remRatCoeffs(x, 0, fn, 1L, 0L, TRUE)
-r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
+r <- remRatRoots(x, RR, fn, TRUE)
 
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1.2e-5)
 
 ## Test error trap with contrived example
 mmA <- minimaxApprox(exp, 1, 2, c(2L, 2L))
-r <- remRatRoots(c(1.2, 1.8), A$a, A$b, fn, TRUE)
+r <- remRatRoots(c(1.2, 1.8), A, fn, TRUE)
 expect_identical(r, 1.2)
 
 # Test remRatSwitch
@@ -74,6 +53,6 @@ control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(5, -1, 1)
 RR <- remRatCoeffs(x, 0, fn, 2L, 1L, TRUE)
-r <- remRatRoots(x, RR$a, RR$b, fn, TRUE)
-x <- remRatSwitch(r, -1, 1, RR$a, RR$b, fn, TRUE)
+r <- remRatRoots(x, RR, fn, TRUE)
+x <- remRatSwitch(r, -1, 1, RR, fn, TRUE)
 expect_equal(x, control, tolerance = 3e-7) #Github macOS complains otherwise

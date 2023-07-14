@@ -104,14 +104,8 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
   ret
 }
 
-# Evaluation convenience function
-minimaxEval <- function(x, mmA) {
-  if (attr(mmA, "type") == "Polynomial") {
-    polyCalc(x, mmA$a)
-  } else {
-    remRatFunc(x, mmA$a, mmA$b)
-  }
-}
+# Evaluation convenience function. Identical to evalFunc. May remove
+minimaxEval <- function(x, mmA) evalFunc(x, mmA)
 
 # Print method (hide i and basis/x but leave in list and not in attribute)
 print.minimaxApprox <- function(x, ...) {
@@ -153,15 +147,8 @@ plot.minimaxApprox <- function(x, y, ...) {
   fn <- attr(x, "func")
   absErr <- attr(x, "absErr")
   z <- seq(rng[1], rng[2], length.out = 1001L)
-
-  if (attr(x, "type") == "Polynomial") {
-    zz <- remPolyErr(z, x$a, fn, absErr)
-    y <- remPolyErr(x$x, x$a, fn, absErr)
-  } else {
-    zz <- remRatErr(z, x$a, x$b, fn, absErr)
-    y <- remRatErr(x$x, x$a, x$b, fn, absErr)
-  }
-
+  zz <- remErr(z, x, fn, absErr)
+  y <- remErr(x$x, x, fn, absErr)
   ylab <- if (absErr) "Absolute Error" else "Relative Error"
   ybnd <- max(x$EE, x$OE)
   if ("ylim" %in% names(args)) {
