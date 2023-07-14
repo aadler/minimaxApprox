@@ -27,7 +27,6 @@ expect_identical(vanderMat(k, 6L), control)
 fn <- function(x) tan(x) - x ^ 3
 control <- tan(-0.4) - (-0.4) ^ 3
 expect_equal(callFun(fn, -0.4), control, tolerance = tol)
-
 ## Test error trapping
 expect_error(callFun("x ^ 2", -0.4), "Unable to parse function.")
 
@@ -36,20 +35,6 @@ control <- c(-2, 1, -3, 4, -1, 6, -7)
 expect_true(isOscil(control))
 control <- c(-2, 1, -3, 4, -1, -6)
 expect_false(isOscil(control))
-
-# Test CheckDenom
-expect_equal(checkDenom(c(-0.5, 1), 0, 1), 0.5)
-expect_null(checkDenom(c(-0.5, 1), 1, 2))
-
-# Check isConverged
-errs <- c(-0.1, 0.1, -0.1)
-E <- 0.1
-expect_true(isConverged(errs, E, 1.05, 1e-12))
-E <- 0.05
-expect_false(isConverged(errs, E, 1.05, 1e-12))
-E <- 0.1
-errs <- c(-0.2, 0.1, -0.1)
-expect_false(isConverged(errs, E, 1.05, 1e-12))
 
 # Test polyCalc
 coeffs <-  c(2, 3.2, 4.6, -9.7, 0.1)
@@ -118,3 +103,38 @@ expect_identical(r, 1.2)
 mmA <- minimaxApprox(exp, 1, 2, c(2L, 2L))
 r <- findRoots(c(1.2, 1.8), A, fn, TRUE)
 expect_identical(r, 1.2)
+
+# Test switchX
+# Assuming function is correct, replicate a previous result.
+## Polynomial
+control <- c(-1, 0.10264319209405934, 0.33737347892134784, 0.62760323678827878,
+             0.88067525674799318, 1)
+fn <- function(x) sin(x) + cos(x)
+x <- chebNodes(6, 0, 1)
+PP <- polyCoeffs(x, fn, TRUE)
+r <- findRoots(x, PP, fn, TRUE)
+x <- switchX(r, -1, 1, PP, fn, TRUE)
+expect_equal(x, control, tolerance = tol)
+## Rational
+control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
+             0.67069355653042717, 1)
+fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
+x <- chebNodes(5, -1, 1)
+RR <- ratCoeffs(x, 0, fn, 2L, 1L, TRUE)
+r <- findRoots(x, RR, fn, TRUE)
+x <- switchX(r, -1, 1, RR, fn, TRUE)
+expect_equal(x, control, tolerance = 3e-7) # Github macOS complains otherwise
+
+# Check isConverged
+errs <- c(-0.1, 0.1, -0.1)
+E <- 0.1
+expect_true(isConverged(errs, E, 1.05, 1e-12))
+E <- 0.05
+expect_false(isConverged(errs, E, 1.05, 1e-12))
+E <- 0.1
+errs <- c(-0.2, 0.1, -0.1)
+expect_false(isConverged(errs, E, 1.05, 1e-12))
+
+# Test CheckDenom
+expect_equal(checkDenom(c(-0.5, 1), 0, 1), 0.5)
+expect_null(checkDenom(c(-0.5, 1), 1, 2))

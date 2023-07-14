@@ -20,47 +20,6 @@ polyCoeffs <- function(x, fn, absErr) {
   list(a = PP[-length(PP)], E = PP[length(PP)])
 }
 
-# Function to identify new x positions. This algorithm uses the multi-switch
-# paradigm, not the single switch.
-remPolySwitch <- function(r, l, u, PP, fn, absErr) {
-  bottoms <- c(l, r)
-  tops <- c(r, u)
-  x <- double(length(bottoms))
-  maximize <- sign(remErr(l, PP, fn, absErr)) == 1
-  for (i in seq_along(x)) {
-    intv <- c(bottoms[i], tops[i])
-    extrma <- tryCatch(optimize(remErr, interval = intv, R = PP, fn = fn,
-                                absErr = absErr, maximum = maximize),
-                       error = function(cond) simpleError(trimws(cond$message)))
-
-    # Check if no root in interval and return appropriate endpoint
-    if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, PP, fn, absErr)
-      if (maximize) {
-        x[i] <- intv[which.max(endPtErr)]
-      } else {
-        x[i] <- intv[which.min(endPtErr)]
-      }
-    } else {
-      x[i] <- extrma[[1L]]
-    }
-
-    # Test endpoints for max/min
-    p <- c(bottoms[i], x[i], tops[i])
-    E <- remErr(p, PP, fn, absErr)
-
-    if (maximize) {
-      x[i] <- p[which.max(E)]
-    } else {
-      x[i] <- p[which.min(E)]
-    }
-
-    # Flip maximize
-    maximize <- !maximize
-  }
-  x
-}
-
 # Main function to calculate and return the minimax polynomial approximation
 remPoly <- function(fn, lower, upper, degree, absErr, opts) {
 
@@ -79,7 +38,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts) {
     if (i >= opts$maxiter) break
     i <- i + 1L
     r <- findRoots(x, PP, fn, absErr)
-    x <- remPolySwitch(r, lower, upper, PP, fn, absErr)
+    x <- switchX(r, lower, upper, PP, fn, absErr)
     PP <- polyCoeffs(x, fn, absErr)
     errs <- remErr(x, PP, fn, absErr)
     mxae <- max(abs(errs))

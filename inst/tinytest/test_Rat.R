@@ -27,14 +27,3 @@ RR <- ratCoeffs(x, 0, fn, 2L, 0L, TRUE)
 expect_equal(RR$a, control, tolerance = tol)
 expect_identical(RR$b, 1)
 expect_equal(RR$E, 0, tolerance = tol)
-
-# Test remRatSwitch
-## Assuming function is correct, replicate a previous result
-control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
-             0.67069355653042717, 1)
-fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-x <- chebNodes(5, -1, 1)
-RR <- ratCoeffs(x, 0, fn, 2L, 1L, TRUE)
-r <- findRoots(x, RR, fn, TRUE)
-x <- remRatSwitch(r, -1, 1, RR, fn, TRUE)
-expect_equal(x, control, tolerance = 3e-7) #Github macOS complains otherwise

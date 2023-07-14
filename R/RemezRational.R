@@ -26,54 +26,6 @@ ratCoeffs <- function(x, E, fn, nD, dD, absErr) {
   RR
 }
 
-# Function to identify new x positions. This algorithm uses the multi-switch
-# paradigm, not the single switch.
-remRatSwitch <- function(r, l, u, RR, fn, absErr) {
-  bottoms <- c(l, r)
-  tops <- c(r, u)
-  x <- double(length(bottoms))
-  maximize <- sign(remErr(l, RR, fn, absErr)) == 1
-  for (i in seq_along(x)) {
-    intv <- c(bottoms[i], tops[i])
-    extrma <- tryCatch(optimize(remErr, interval = intv, R = RR, fn = fn,
-                                absErr = absErr, maximum = maximize),
-                       error = function(cond) simpleError(trimws(cond$message)))
-
-    if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, RR, fn, absErr)
-      if (maximize) {
-        x[i] <- intv[which.max(endPtErr)]
-      } else {
-        x[i] <- intv[which.min(endPtErr)]
-      }
-    } else {
-      x[i] <- extrma[[1L]]
-    }
-
-    # Test endpoints for max/min
-    p <- c(bottoms[i], x[i], tops[i])
-    E <- remErr(p, RR, fn, absErr)
-
-    if (maximize) {
-      x[i] <- p[which.max(E)]
-    } else {
-      x[i] <- p[which.min(E)]
-    }
-
-    # Test for 0 value at function if relative error
-    if (!absErr) {
-      if (callFun(fn, x[i]) == 0) {
-        stop("Algorithm is choosing basis point where functional value is ",
-             "0. Please approximate using absolute, and not relative error.")
-      }
-    }
-
-    # Flip maximize
-    maximize <- !maximize
-  }
-  x
-}
-
 # Main function to calculate and return the minimax rational approximation
 remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
 
@@ -115,7 +67,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
     if (i >= opts$maxiter) break
     i <- i + 1L
     r <- findRoots(x, RR, fn, absErr)
-    x <- remRatSwitch(r, lower, upper, RR, fn, absErr)
+    x <- switchX(r, lower, upper, RR, fn, absErr)
     RR <- convergeErr(x, absErr)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {

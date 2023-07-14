@@ -69,6 +69,54 @@ findRoots <- function(x, R, fn, absErr) {
   r
 }
 
+# Function to identify new x positions. This algorithm uses the multi-switch
+# paradigm, not the single switch.
+switchX <- function(r, l, u, R, fn, absErr) {
+  bottoms <- c(l, r)
+  tops <- c(r, u)
+  x <- double(length(bottoms))
+  maximize <- sign(remErr(l, R, fn, absErr)) == 1
+  for (i in seq_along(x)) {
+    intv <- c(bottoms[i], tops[i])
+    extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
+                                absErr = absErr, maximum = maximize),
+                       error = function(cond) simpleError(trimws(cond$message)))
+
+    if (inherits(extrma, "simpleError")) {
+      endPtErr <- remErr(intv, R, fn, absErr)
+      if (maximize) {
+        x[i] <- intv[which.max(endPtErr)]
+      } else {
+        x[i] <- intv[which.min(endPtErr)]
+      }
+    } else {
+      x[i] <- extrma[[1L]]
+    }
+
+    # Test endpoints for max/min
+    p <- c(bottoms[i], x[i], tops[i])
+    E <- remErr(p, R, fn, absErr)
+
+    if (maximize) {
+      x[i] <- p[which.max(E)]
+    } else {
+      x[i] <- p[which.min(E)]
+    }
+
+    # Test for 0 value at function if relative error
+    if (!absErr) {
+      if (callFun(fn, x[i]) == 0) {
+        stop("Algorithm is choosing basis point where functional value is ",
+             "0. Please approximate using absolute, and not relative error.")
+      }
+    }
+
+    # Flip maximize
+    maximize <- !maximize
+  }
+  x
+}
+
 # Check Remez iterations for convergence
 isConverged <- function(errs, expe, convRatio, tol) {
   aerrs <- abs(errs)
