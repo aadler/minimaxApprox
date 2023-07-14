@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix
-remRatMat <- function(x, E, y, nD, dD, absErr) {
+ratMat <- function(x, E, y, nD, dD, absErr) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x)
@@ -17,9 +17,9 @@ remRatMat <- function(x, E, y, nD, dD, absErr) {
 }
 
 # Function to calculate coefficients given matrix and known values
-remRatCoeffs <- function(x, E, fn, nD, dD, absErr) {
+ratCoeffs <- function(x, E, fn, nD, dD, absErr) {
   y <- callFun(fn, x)
-  P <- solve(remRatMat(x, E, y, nD, dD, absErr), y)
+  P <- solve(ratMat(x, E, y, nD, dD, absErr), y)
   RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
              b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
              E = P[length(P)])
@@ -117,7 +117,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
     j <- 0L
     repeat {
       if (j > opts$maxiter) break
-      RR <- remRatCoeffs(x, E, fn, numerd, denomd, absErr)
+      RR <- ratCoeffs(x, E, fn, numerd, denomd, absErr)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
       j <- j + 1

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix
-remPolyMat <- function(x, y, absErr) {
+polyMat <- function(x, y, absErr) {
   n <- length(x)
   A <- vanderMat(x, n - 2L)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
@@ -14,9 +14,9 @@ remPolyMat <- function(x, y, absErr) {
 }
 
 # Function to calculate coefficients given matrix and known values
-remPolyCoeffs <- function(x, fn, absErr) {
+polyCoeffs <- function(x, fn, absErr) {
   y <- callFun(fn, x)
-  PP <- solve(remPolyMat(x, y, absErr), y)
+  PP <- solve(polyMat(x, y, absErr), y)
   list(a = PP[-length(PP)], E = PP[length(PP)])
 }
 
@@ -87,7 +87,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts) {
   x <- chebNodes(degree + 2L, lower, upper)
 
   # Initial Polynomial Guess
-  PP <- remPolyCoeffs(x, fn, absErr)
+  PP <- polyCoeffs(x, fn, absErr)
   errs_last <- remErr(x, PP, fn, absErr)
   converged <- FALSE
   unchanged <- FALSE
@@ -99,7 +99,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts) {
     i <- i + 1L
     r <- remPolyRoots(x, PP, fn, absErr)
     x <- remPolySwitch(r, lower, upper, PP, fn, absErr)
-    PP <- remPolyCoeffs(x, fn, absErr)
+    PP <- polyCoeffs(x, fn, absErr)
     errs <- remErr(x, PP, fn, absErr)
     mxae <- max(abs(errs))
     expe <- abs(PP$E)
