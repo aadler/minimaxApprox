@@ -5,12 +5,25 @@ tol <- 1e-7
 
 # Most tests of warnings and messages will perforce check internals too.
 
+# Check Accuracy
+## Rational. Based on Cody (1968) pp 250--251. Using weaker tolerance since
+## taking values printed on paper.
+controlA <- c(1.2655835, -0.65058499, 0.19786869)
+controlB <- c(1, -0.064342748, -0.028851456)
+controlX <- c(2, 2.0924, 2.3368, 2.6459, 2.9011, 3)
+controlE <- 2.6934e-5
+RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), errType = "rel", opts = list())
+expect_equal(RR$a, controlA, tolerance = 5e-5)
+expect_equal(RR$b, controlB, tolerance = 5e-5)
+expect_equal(RR$x, controlX, tolerance = 5e-5)
+expect_equal(RR$EE, controlE, tolerance = 5e-5)
+expect_false(RR$Warning)
+
 # Test warning flag in good case
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 ## Polynomial
 expect_false(minimaxApprox(fn, -1, 1, 9L)$Warning)
-## Rational
-expect_false(minimaxApprox(fn, -1, 1, c(2L, 1L))$Warning)
+## Rational tested above
 
 # Test showProgress. Also tests passing miniter
 ## Polynomial
