@@ -84,10 +84,37 @@ c <- (exp(1) - m * log(m)) / 2
 tstFn <- function(x) m * x + c
 x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
-
 ## Polynomial
 PP <- remPoly(fn, 0, 1, 1, TRUE, opts)
 expect_equal(remErr(x, PP, fn, TRUE), control, tolerance = tol)
 ## Rational
 RR <- remRat(fn, 0, 1, 1, 0, TRUE, NULL, opts)
 expect_equal(remErr(x, RR, fn, TRUE), control)
+
+# Test findRoots
+## This one will rely on expm1(x) and exp(x) - 1 being close
+fn <- function(x) exp(x) - 1
+x <- chebNodes(3, 0, 1)
+## Polynomial
+QQ <- polyCoeffs(x, function(x) expm1(x), TRUE)
+control <- findRoots(x, QQ, function(x) expm1(x), TRUE)
+PP <- polyCoeffs(x, fn, TRUE)
+r <- findRoots(x, PP, fn, TRUE)
+## Need weaker tolerance here since functions are not exactly the same
+expect_equal(r, control, tolerance = 1.2e-5)
+## Rational
+QQ <- ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE)
+control <- findRoots(x, QQ, function(x) expm1(x), TRUE)
+RR <- ratCoeffs(x, 0, fn, 1L, 0L, TRUE)
+r <- findRoots(x, RR, fn, TRUE)
+## Need weaker tolerance here since functions are not exactly the same
+expect_equal(r, control, tolerance = 1.2e-5)
+## Test error trap with contrived example
+## Polynomial
+mmA <- minimaxApprox(exp, 1, 2, 4L)
+r <- findRoots(c(1.2, 1.8), A, fn, TRUE)
+expect_identical(r, 1.2)
+## Rational
+mmA <- minimaxApprox(exp, 1, 2, c(2L, 2L))
+r <- findRoots(c(1.2, 1.8), A, fn, TRUE)
+expect_identical(r, 1.2)

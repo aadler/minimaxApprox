@@ -20,25 +20,6 @@ polyCoeffs <- function(x, fn, absErr) {
   list(a = PP[-length(PP)], E = PP[length(PP)])
 }
 
-# Function to identify roots of the error equation for use as bounds in finding
-# the maxima and minima
-remPolyRoots <- function(x, PP, fn, absErr) {
-  r <- double(length(x) - 1L)
-  for (i in seq_along(r)) {
-    intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remErr, interval = intv, R = PP, fn = fn,
-                             absErr = absErr),
-                     error = function(cond) simpleError(trimws(cond$message)))
-    # If there is no root in the interval, take the endpoint closer to 0 (root)
-    if (inherits(root, "simpleError")) {
-      r[i] <- intv[which.min(abs(intv))]
-    } else {
-      r[i] <- root$root
-    }
-  }
-  r
-}
-
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
 remPolySwitch <- function(r, l, u, PP, fn, absErr) {
@@ -97,7 +78,7 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts) {
     # Check for maxiter
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- remPolyRoots(x, PP, fn, absErr)
+    r <- findRoots(x, PP, fn, absErr)
     x <- remPolySwitch(r, lower, upper, PP, fn, absErr)
     PP <- polyCoeffs(x, fn, absErr)
     errs <- remErr(x, PP, fn, absErr)

@@ -28,24 +28,6 @@ expect_equal(RR$a, control, tolerance = tol)
 expect_identical(RR$b, 1)
 expect_equal(RR$E, 0, tolerance = tol)
 
-# Test remRatRoots
-## This one will rely on expm1(x) and exp(x) - 1 being close
-x <- chebNodes(3, 0, 1)
-fn <- function(x) expm1(x)
-QQ <- ratCoeffs(x, 0, fn, 1L, 0L, TRUE)
-control <- remRatRoots(x, QQ, fn, TRUE)
-fn <- function(x) exp(x) - 1
-RR <- ratCoeffs(x, 0, fn, 1L, 0L, TRUE)
-r <- remRatRoots(x, RR, fn, TRUE)
-
-## Need weaker tolerance here since functions are not exactly the same
-expect_equal(r, control, tolerance = 1.2e-5)
-
-## Test error trap with contrived example
-mmA <- minimaxApprox(exp, 1, 2, c(2L, 2L))
-r <- remRatRoots(c(1.2, 1.8), A, fn, TRUE)
-expect_identical(r, 1.2)
-
 # Test remRatSwitch
 ## Assuming function is correct, replicate a previous result
 control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
@@ -53,6 +35,6 @@ control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(5, -1, 1)
 RR <- ratCoeffs(x, 0, fn, 2L, 1L, TRUE)
-r <- remRatRoots(x, RR, fn, TRUE)
+r <- findRoots(x, RR, fn, TRUE)
 x <- remRatSwitch(r, -1, 1, RR, fn, TRUE)
 expect_equal(x, control, tolerance = 3e-7) #Github macOS complains otherwise

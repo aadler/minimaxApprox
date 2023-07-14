@@ -21,30 +21,13 @@ PP <- polyCoeffs(x, fn, TRUE)
 expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$E, 0, tolerance = tol)
 
-# Test remPolyRoots
-## This one will rely on expm1(x) and exp(x) - 1 being close
-x <- chebNodes(3, 0, 1)
-QQ <- polyCoeffs(x, function(x) expm1(x), TRUE)
-control <- remPolyRoots(x, QQ, function(x) expm1(x), TRUE)
-fn <- function(x) exp(x) - 1
-PP <- polyCoeffs(x, fn, TRUE)
-r <- remPolyRoots(x, PP, fn, TRUE)
-## Need weaker tolerance here since functions are not exactly the same
-expect_equal(r, control, tolerance = 1.2e-5)
-
-## Test error trap with contrived example
-mmA <- minimaxApprox(exp, 1, 2, 4L)
-r <- remPolyRoots(c(1.2, 1.8), A, fn, TRUE)
-expect_identical(r, 1.2)
-
 # Test remPolySwitch
 ## Assuming function is correct, replicate a previous result
 control <- c(-1, 0.10264319209405934, 0.33737347892134784, 0.62760323678827878,
              0.88067525674799318, 1)
-
 fn <- function(x) sin(x) + cos(x)
 x <- chebNodes(6, 0, 1)
 PP <- polyCoeffs(x, fn, TRUE)
-r <- remPolyRoots(x, PP, fn, TRUE)
+r <- findRoots(x, PP, fn, TRUE)
 x <- remPolySwitch(r, -1, 1, PP, fn, TRUE)
 expect_equal(x, control, tolerance = tol)

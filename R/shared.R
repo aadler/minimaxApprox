@@ -49,6 +49,26 @@ remErr <- function(x, R, fn, absErr) {
       }
 }
 
+# Function to identify roots of the error equation for use as bounds in finding
+# the maxima and minima
+findRoots <- function(x, R, fn, absErr) {
+  r <- double(length(x) - 1L)
+  for (i in seq_along(r)) {
+    intv <- c(x[i], x[i + 1L])
+    root <- tryCatch(uniroot(remErr, interval = intv, R = R, fn = fn,
+                             absErr = absErr),
+                     error = function(cond) simpleError(trimws(cond$message)))
+
+    # If there is no root in the interval, take the endpoint closest to zero
+    if (inherits(root, "simpleError")) {
+      r[i] <- intv[which.min(abs(intv))]
+    } else {
+      r[i] <- root$root
+    }
+  }
+  r
+}
+
 # Check Remez iterations for convergence
 isConverged <- function(errs, expe, convRatio, tol) {
   aerrs <- abs(errs)

@@ -26,26 +26,6 @@ ratCoeffs <- function(x, E, fn, nD, dD, absErr) {
   RR
 }
 
-# Function to identify roots of the error equation for use as bounds in finding
-# the maxima and minima
-remRatRoots <- function(x, RR, fn, absErr) {
-  r <- double(length(x) - 1L)
-  for (i in seq_along(r)) {
-    intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remErr, interval = intv, R = RR, fn = fn,
-                             absErr = absErr),
-                     error = function(cond) simpleError(trimws(cond$message)))
-
-    # If there is no root in the interval, take the endpoint closest to zero
-    if (inherits(root, "simpleError")) {
-      r[i] <- intv[which.min(abs(intv))]
-    } else {
-      r[i] <- root$root
-    }
-  }
-  r
-}
-
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
 remRatSwitch <- function(r, l, u, RR, fn, absErr) {
@@ -134,7 +114,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
   repeat {
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- remRatRoots(x, RR, fn, absErr)
+    r <- findRoots(x, RR, fn, absErr)
     x <- remRatSwitch(r, lower, upper, RR, fn, absErr)
     RR <- convergeErr(x, absErr)
     dngr <- checkDenom(RR$b, lower, upper)
