@@ -90,7 +90,7 @@ expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
 
 # Test function choosing basis x as 0 trap
 errMess <- paste("Algorithm is choosing basis point where functional value is",
-                 "0. Please approximate using absolute, and not relative",
+                 "0. Please approximate using absolute, and not relative,",
                  "error.")
 expect_error(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), errMess)
 
