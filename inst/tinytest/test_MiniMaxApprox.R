@@ -25,6 +25,11 @@ fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 expect_false(minimaxApprox(fn, -1, 1, 9L)$Warning)
 ## Rational tested above
 
+# Test trap for relErr
+errMess <- paste("Relative Error must be a logical value.",
+                  "Default FALSE returns absolue error")
+expect_error(minimaxApprox(fn, -1, 1, 9L, "abs"), errMess)
+
 # Test showProgress. Also tests passing miniter
 ## Polynomial
 opts <- list(miniter = 1L, showProgress = TRUE)
