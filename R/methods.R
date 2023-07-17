@@ -10,7 +10,7 @@ print.minimaxApprox <- function(x, round = 6L, ...) {
   diagnostics <- list(x$EE,
                       x$OE,
                       Ratio = round(x$OE / x$EE, round),
-                      Difference = round(abs(x$OE - x$EE), round),
+                      Difference = abs(x$OE - x$EE),
                       Warnings = x$Warning)
 
   names(diagnostics)[1:2] <- if (attr(x, "relErr")) {
