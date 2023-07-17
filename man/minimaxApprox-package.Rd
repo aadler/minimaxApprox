@@ -1,6 +1,5 @@
 \name{minimaxApprox-package}
 \alias{minimaxApprox-package}
-\alias{minimaxApprox}
 \docType{package}
 \title{
 \packageTitle{minimaxApprox}
