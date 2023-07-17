@@ -26,4 +26,5 @@ plot(PP)
 }
 
 \keyword{hplot}
+\keyword{methods}
 \keyword{NumericalMathematics}
