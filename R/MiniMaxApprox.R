@@ -14,7 +14,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   if (!("conviter" %in% names(opts))) {
     opts$conviter <- 10L
   } else {
-    # If actually passed then overwrite
+    # If actually passed then overwrite maxiter if conviter > maxiter
     opts$maxiter <- max(opts$maxiter, opts$conviter)
   }
 
@@ -51,10 +51,10 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     # All else is an error
     stop("Polynomial approximation takes one value for degree and rational ",
          "approximation takes a vector of two values for numerator and ",
-         "denominator. Any other inputs are invalid.")
+         "denominator degrees. Any other inputs are invalid.")
   }
 
-  # CaLL Calculation Functions
+  # Call Calculation Functions
   mmA <- if (ratApprox) {
     remRat(fn, lower, upper, numerd, denomd, relErr, xi, opts)
   } else {
@@ -104,7 +104,8 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   ret
 }
 
-# Evaluation convenience function. Identical to evalFunc. May remove
+# Evaluation convenience function. Identical to evalFunc but tests for
+# inheritance from minimmaxApprox.
 minimaxEval <- function(x, mmA) {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")

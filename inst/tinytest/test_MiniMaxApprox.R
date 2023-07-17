@@ -97,7 +97,8 @@ expect_error(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), errMess)
 # Test passing incorrect degree (at minimaxApprox level)
 errMess <- paste("Polynomial approximation takes one value for degree and",
                  "rational approximation takes a vector of two values for",
-                 "numerator and denominator. Any other inputs are invalid.")
+                 "numerator and denominator degrees. Any other inputs are",
+                 "invalid.")
 expect_error(minimaxApprox(fn, -1, 1, 1:3), errMess)
 
 # Test passing xi
