@@ -13,7 +13,7 @@ Evctr <- E * altSign
 yvctr <- y + Evctr
 control <- matrix(c(rep(1, 4L), x, x ^ 2, -(yvctr) * x, -(yvctr) * x ^ 2,
                     -altSign), nrow = length(x))
-expect_identical(ratMat(x, E, y, 2L, 2L, relErr = FALSE), control)
+expect_identical(minimaxApprox:::ratMat(x, E, y, 2L, 2L, FALSE), control)
 
 # Test ratCoeffs
 # If the function is a pure polynomial then coeffs should recover it exactly IF
@@ -23,7 +23,7 @@ expect_identical(ratMat(x, E, y, 2L, 2L, relErr = FALSE), control)
 fn <- function(x) x ^ 2 + 2 * x + 3
 x <- seq(0, 2, length.out = 4)
 control <- c(3, 2, 1)
-RR <- ratCoeffs(x, 0, fn, 2L, 0L, TRUE)
+RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 0L, TRUE)
 expect_equal(RR$a, control, tolerance = tol)
 expect_identical(RR$b, 1)
 expect_equal(RR$E, 0, tolerance = tol)

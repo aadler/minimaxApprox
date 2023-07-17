@@ -101,7 +101,7 @@ expect_warning(minimaxApprox(fn, -1, 1, 10L, xi = 6), wrnMess)
 ## Rational - Check that proper length is passed
 errMess <- paste("Given the requested degrees for numerator and denominator,",
                  "the x-vector needs to have 8 elements.")
-xi <- chebNodes(5L, -1, 1)
+xi <- minimaxApprox:::chebNodes(5L, -1, 1)
 expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
 
 # Test checkDenom error message
