@@ -24,3 +24,8 @@ expect_identical(unlist(coef(RR)$b, use.names = FALSE), RR$b)
 expect_stdout(print(RR))
 expect_stdout(plot(RR))
 expect_stdout(plot(RR, ylim = c(-5e-6, 5e-6)))
+
+# Test ignore y message
+mess <- paste("The y values are taken from the minimaxApprox object.",
+              "Passed y values are ignored.")
+expect_message(plot(RR, y = 1:4), mess)

@@ -35,7 +35,7 @@ coef.minimaxApprox <- function(object, ...) {
 plot.minimaxApprox <- function(x, y = NULL, ...) {
   if (!is.null(y)) {
     message("The y values are taken from the minimaxApprox object. ",
-            "Passed y values are ignored")
+            "Passed y values are ignored.")
   }
   args <- list(...)
   rng <- attr(x, "range")
