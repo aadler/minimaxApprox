@@ -82,6 +82,8 @@ switchX <- function(r, l, u, R, fn, relErr) {
                                 relErr = relErr, maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
+    # If no extremum then the take endpoint with "better" value depending if we
+    # are maximizing or minimizing.
     if (inherits(extrma, "simpleError")) {
       endPtErr <- remErr(intv, R, fn, relErr)
       if (maximize) {
@@ -93,7 +95,7 @@ switchX <- function(r, l, u, R, fn, relErr) {
       x[i] <- extrma[[1L]]
     }
 
-    # Test endpoints for max/min
+    # Test endpoints for max/min even if an extremum was found.
     p <- c(bottoms[i], x[i], tops[i])
     E <- remErr(p, R, fn, relErr)
 
