@@ -76,7 +76,7 @@ PP <- minimaxApprox:::remPoly(fn, 0, 1, 1, FALSE, opts)
 expect_equal(minimaxApprox:::remErr(x, PP, fn, FALSE), control, tolerance = tol)
 ## Rational
 RR <- minimaxApprox:::remRat(fn, 0, 1, 1, 0, FALSE, NULL, opts)
-expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE), control)
+expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE), control, tolerance = tol)
 
 # Test findRoots
 ## This one will rely on expm1(x) and exp(x) - 1 being close

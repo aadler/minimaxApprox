@@ -9,9 +9,9 @@ x <- c(-0.4, 0.1, 0.3, 0.4)
 E <- 0.5
 y <- x ^ 2
 altSign <- (-1) ^ (seq_along(x) - 1)
-Evctr <- E * altSign
-yvctr <- y + Evctr
-control <- matrix(c(rep(1, 4L), x, x ^ 2, -(yvctr) * x, -(yvctr) * x ^ 2,
+errVctr <- E * altSign
+yVctr <- y + errVctr
+control <- matrix(c(rep(1, 4L), x, x ^ 2, -(yVctr) * x, -(yVctr) * x ^ 2,
                     -altSign), nrow = length(x))
 expect_identical(minimaxApprox:::ratMat(x, E, y, 2L, 2L, FALSE), control)
 
