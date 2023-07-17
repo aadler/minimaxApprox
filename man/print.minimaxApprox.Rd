@@ -25,7 +25,7 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 }
 
 \seealso{
-\code{\link{plot.minimaxApprox}}, \code{\link{coeff.minimaxApprox}}
+\code{\link{minimaxApprox}}
 }
 
 \examples{
