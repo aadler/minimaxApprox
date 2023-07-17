@@ -28,7 +28,11 @@ callFun <- function(fn, x) {
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
 # Calculate the polynomial approximation. Use in numer & denom for rationals
-polyCalc <- function(x, a)  drop(vanderMat(x, length(a) - 1) %*% a)
+polyCalc <- function(x, a)  {
+  # drop(vanderMat(x, length(a) - 1) %*% a)
+  .colSums(matrix(rep(x, each = length(a)) ^ (seq_along(a) - 1),
+                  nrow = length(a)) * a, length(a), length(x))
+}
 
 # Function to calculate value of minimax approximation at x given a & b
 evalFunc <- function(x, R) {
