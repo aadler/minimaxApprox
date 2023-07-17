@@ -10,8 +10,8 @@
 
 # minimaxApprox
 **minimaxApprox** is an `R` package which Implements the Remez algorithm for
-polynomial approximation and a form of the Fraser-Hart version
-<doi:10.1007/BF02162506> for rational approximation.
+polynomial function approximation and a form of the Fraser-Hart version
+<doi:10.1007/BF02162506> for rational function approximation.
 
 ## Citation
 If you use the package, please cite it as:
