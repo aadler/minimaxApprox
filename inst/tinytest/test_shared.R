@@ -29,7 +29,8 @@ fn <- function(x) tan(x) - x ^ 3
 control <- tan(-0.4) - (-0.4) ^ 3
 expect_equal(minimaxApprox:::callFun(fn, -0.4), control, tolerance = tol)
 ## Test error trapping
-expect_error(minimaxApprox:::callFun("x ^ 2", -0.4), "Unable to parse function.")
+expect_error(minimaxApprox:::callFun("x ^ 2", -0.4),
+             "Unable to parse function.")
 
 # Test isOscil
 control <- c(-2, 1, -3, 4, -1, 6, -7)
