@@ -33,7 +33,7 @@ A BibTeX entry for LaTeX users is:
 
 ## Acknowledgements
 The author is grateful to [Martin Maechler](https://stat.ethz.ch/~maechler/) for
-suggestions which helped the author with MiniMax approximation
+suggestions which helped the author with MiniMax approximation.
 
 ## Contributions
 Please ensure that all contributions comply with both
