@@ -24,7 +24,7 @@ ratCoeffs <- function(x, E, fn, nD, dD, relErr) {
 }
 
 # Main function to calculate and return the minimax rational approximation
-remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi = NULL, opts) {
+remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 
   # Initial x's
   if (is.null(xi)) {
