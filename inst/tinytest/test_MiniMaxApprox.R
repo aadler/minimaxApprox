@@ -6,16 +6,19 @@ tol <- 1e-7
 # Most tests of warnings and messages will perforce check internals too.
 
 # Check Accuracy and lack of warning flag when converged
-## Polynomial. Based on Fraser & Hart (1962) p. 403 Table 2
-controlA <- c(0, 1.00000001740312228, 0, -0.116461211089858589)
-controlB <- c(1, 0, 0.0502070051571744306)
-controlE <- 6.8e-10
-PP <- minimaxApprox(sin, -0.3, .3, c(3L, 2L), relErr = FALSE)
-expect_equal(PP$a, controlA, tolerance = tol)
-expect_equal(PP$b, controlB, tolerance = tol)
-expect_equal(PP$EE, controlE, tolerance = tol)
-expect_false(PP$Warning)
-## Rational. Based on Cody (1968) pp 250--251. Using weaker tolerance since
+## Ratonal 1: Based on Fraser & Hart (1962) p. 403 Table 2
+controlA <- c(0.99999998510030375, 0.601781180619504719,
+              0.186144903531821877, 0.0687440518995425058)
+controlB <- c(1, 1.17899457599300466, -0.122321311431112167,
+              -0.260995866188425578, 0.0609927504415305534)
+controlE <- 1e-6
+fn <- function(x) gamma(x + 1)
+RR <- minimaxApprox(fn, 0, 1, c(3L, 4L), relErr = FALSE)
+expect_equal(RR$a, controlA, tolerance = tol)
+expect_equal(RR$b, controlB, tolerance = tol)
+expect_true(RR$EE <= controlE)
+expect_false(RR$Warning)
+## Rational 2: Based on Cody (1968) pp 250--251. Using weaker tolerance since
 ## taking values printed on paper.
 controlA <- c(1.2655835, -0.65058499, 0.19786869)
 controlB <- c(1, -0.064342748, -0.028851456)
@@ -35,6 +38,7 @@ expect_error(minimaxApprox(fn, -1, 1, 9L, "abs"), errMess)
 
 # Test showProgress. Also tests passing miniter
 ## Polynomial
+fn <- function(x) exp(x) - 1
 opts <- list(miniter = 1L, showProgress = TRUE)
 expect_message(minimaxApprox(fn, -1, 1, 9L, opts = opts), "i: 1 E: ")
 ## Rational
