@@ -1,15 +1,16 @@
 # Print method (hide i and basis/x but leave in list and not in attribute)
-print.minimaxApprox <- function(x, ...) {
+print.minimaxApprox <- function(x, round = 6L, ...) {
   if (attr(x, "type") == "Polynomial") {
     coefficients <- list(a = x$a)
   } else {
     coefficients <- list(a = x$a, b = x$b)
   }
 
+  round <- as.integer(round)
   diagnostics <- list(x$EE,
                       x$OE,
-                      Ratio = round(x$OE / x$EE, 6L),
-                      Difference = abs(x$OE - x$EE),
+                      Ratio = round(x$OE / x$EE, round),
+                      Difference = round(abs(x$OE - x$EE), round),
                       Warnings = x$Warning)
 
   names(diagnostics)[1:2] <- if (attr(x, "relErr")) {
