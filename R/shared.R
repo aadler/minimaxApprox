@@ -129,10 +129,10 @@ isConverged <- function(errs, expe, convRatio, tol) {
   errDistance <- mxae / expe <= convRatio || abs(mxae - expe) <= tol
 
   # Check observed errors are close enough to each other by ratio or tolerance
-  errMag <- mxae / mnae <= convRatio || mxae - mnae <= tol
+  errMagnitude <- mxae / mnae <= convRatio || mxae - mnae <= tol
 
   # Converged if magnitude and distance are close and error oscillates in sign
-  isOscil(errs) && errDistance && errMag
+  isOscil(errs) && errDistance && errMagnitude
 }
 
 # Check denominator polynomial for zero in the requested range
