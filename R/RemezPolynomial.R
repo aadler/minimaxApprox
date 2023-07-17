@@ -1,7 +1,7 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Function to create augmented Vandermonde matrix
+# Function to create augmented Vandermonde matrix for polynomial approximation
 polyMat <- function(x, y, relErr) {
   n <- length(x)
   A <- vanderMat(x, n - 2L)

@@ -1,7 +1,7 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Function to create augmented Vandermonde matrix
+# Function to create augmented Vandermonde matrix for rational approximation
 ratMat <- function(x, E, y, nD, dD, relErr) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
@@ -45,7 +45,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi = NULL, opts) {
     E <- 0
     j <- 0L
     repeat {
-      if (j > opts$maxiter) break
+      if (j >= opts$maxiter) break
       RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
