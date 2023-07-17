@@ -2,33 +2,31 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix
-polyMat <- function(x, y, absErr) {
+polyMat <- function(x, y, relErr) {
   n <- length(x)
   A <- vanderMat(x, n - 2L)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x)
-  if (!absErr) {
-    altSgn <- altSgn * y
-  }
+  if (relErr) altSgn <- altSgn * y
   cbind(A, altSgn, deparse.level = 0L)
 }
 
 # Function to calculate coefficients given matrix and known values
-polyCoeffs <- function(x, fn, absErr) {
+polyCoeffs <- function(x, fn, relErr) {
   y <- callFun(fn, x)
-  PP <- solve(polyMat(x, y, absErr), y)
+  PP <- solve(polyMat(x, y, relErr), y)
   list(a = PP[-length(PP)], E = PP[length(PP)])
 }
 
 # Main function to calculate and return the minimax polynomial approximation
-remPoly <- function(fn, lower, upper, degree, absErr, opts) {
+remPoly <- function(fn, lower, upper, degree, relErr, opts) {
 
   # Initial x's
   x <- chebNodes(degree + 2L, lower, upper)
 
   # Initial Polynomial Guess
-  PP <- polyCoeffs(x, fn, absErr)
-  errs_last <- remErr(x, PP, fn, absErr)
+  PP <- polyCoeffs(x, fn, relErr)
+  errs_last <- remErr(x, PP, fn, relErr)
   converged <- FALSE
   unchanged <- FALSE
   unchanging_i <- 0L
@@ -37,10 +35,10 @@ remPoly <- function(fn, lower, upper, degree, absErr, opts) {
     # Check for maxiter
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- findRoots(x, PP, fn, absErr)
-    x <- switchX(r, lower, upper, PP, fn, absErr)
-    PP <- polyCoeffs(x, fn, absErr)
-    errs <- remErr(x, PP, fn, absErr)
+    r <- findRoots(x, PP, fn, relErr)
+    x <- switchX(r, lower, upper, PP, fn, relErr)
+    PP <- polyCoeffs(x, fn, relErr)
+    errs <- remErr(x, PP, fn, relErr)
     mxae <- max(abs(errs))
     expe <- abs(PP$E)
 

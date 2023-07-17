@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Printing convenience function
-fC <- function(x, d = 6L, f = "g", w = -1) {
+fC <- function(x, d = 6L, f = "g", w = -1L) {
   formatC(x, digits = d, format = f, width = w)
 }
 
@@ -40,23 +40,23 @@ evalFunc <- function(x, R) {
 }
 
 # Function to calculate error between known and calculated values
-remErr <- function(x, R, fn, absErr) {
-    if (absErr) {
+remErr <- function(x, R, fn, relErr) {
+    if (relErr) {
+      y <- callFun(fn, x)
+      (evalFunc(x, R) - y) / y
+    } else {
       evalFunc(x, R) - callFun(fn, x)
-      } else {
-        y <- callFun(fn, x)
-        (evalFunc(x, R) - y) / y
-      }
+    }
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima
-findRoots <- function(x, R, fn, absErr) {
+findRoots <- function(x, R, fn, relErr) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
     root <- tryCatch(uniroot(remErr, interval = intv, R = R, fn = fn,
-                             absErr = absErr),
+                             relErr = relErr),
                      error = function(cond) simpleError(trimws(cond$message)))
 
     # If there is no root in the interval, take the endpoint closest to zero
@@ -71,19 +71,19 @@ findRoots <- function(x, R, fn, absErr) {
 
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
-switchX <- function(r, l, u, R, fn, absErr) {
+switchX <- function(r, l, u, R, fn, relErr) {
   bottoms <- c(l, r)
   tops <- c(r, u)
   x <- double(length(bottoms))
-  maximize <- sign(remErr(l, R, fn, absErr)) == 1
+  maximize <- sign(remErr(l, R, fn, relErr)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
     extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
-                                absErr = absErr, maximum = maximize),
+                                relErr = relErr, maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, R, fn, absErr)
+      endPtErr <- remErr(intv, R, fn, relErr)
       if (maximize) {
         x[i] <- intv[which.max(endPtErr)]
       } else {
@@ -95,7 +95,7 @@ switchX <- function(r, l, u, R, fn, absErr) {
 
     # Test endpoints for max/min
     p <- c(bottoms[i], x[i], tops[i])
-    E <- remErr(p, R, fn, absErr)
+    E <- remErr(p, R, fn, relErr)
 
     if (maximize) {
       x[i] <- p[which.max(E)]
@@ -104,7 +104,7 @@ switchX <- function(r, l, u, R, fn, absErr) {
     }
 
     # Test for 0 value at function if relative error
-    if (!absErr) {
+    if (relErr) {
       if (callFun(fn, x[i]) == 0) {
         stop("Algorithm is choosing basis point where functional value is ",
              "0. Please approximate using absolute, and not relative error.")

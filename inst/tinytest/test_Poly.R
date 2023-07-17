@@ -8,7 +8,7 @@ opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
 # Test polyMat
 x <- c(-0.4, 0.1, 0.3, 0.4)
 control <- matrix(c(rep(1, 4L), x, x ^ 2, 1, -1, 1, -1), nrow = 4)
-expect_identical(polyMat(x, NULL, TRUE), control)
+expect_identical(polyMat(x, y = NULL, relErr = FALSE), control)
 
 # Test polyCoeffs
 # If the function is a pure polynomial then coeffs should recover it exactly.

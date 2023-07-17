@@ -70,11 +70,11 @@ tstFn <- function(x) m * x + c
 x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
 ## Polynomial
-PP <- remPoly(fn, 0, 1, 1, TRUE, opts)
-expect_equal(remErr(x, PP, fn, TRUE), control, tolerance = tol)
+PP <- remPoly(fn, 0, 1, 1, FALSE, opts)
+expect_equal(remErr(x, PP, fn, FALSE), control, tolerance = tol)
 ## Rational
-RR <- remRat(fn, 0, 1, 1, 0, TRUE, NULL, opts)
-expect_equal(remErr(x, RR, fn, TRUE), control)
+RR <- remRat(fn, 0, 1, 1, 0, FALSE, NULL, opts)
+expect_equal(remErr(x, RR, fn, FALSE), control)
 
 # Test findRoots
 ## This one will rely on expm1(x) and exp(x) - 1 being close
@@ -111,18 +111,18 @@ control <- c(-1, 0.10264319209405934, 0.33737347892134784, 0.62760323678827878,
              0.88067525674799318, 1)
 fn <- function(x) sin(x) + cos(x)
 x <- chebNodes(6, 0, 1)
-PP <- polyCoeffs(x, fn, TRUE)
-r <- findRoots(x, PP, fn, TRUE)
-x <- switchX(r, -1, 1, PP, fn, TRUE)
+PP <- polyCoeffs(x, fn, FALSE)
+r <- findRoots(x, PP, fn, FALSE)
+x <- switchX(r, -1, 1, PP, fn, FALSE)
 expect_equal(x, control, tolerance = tol)
 ## Rational
 control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
              0.67069355653042717, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- chebNodes(5, -1, 1)
-RR <- ratCoeffs(x, 0, fn, 2L, 1L, TRUE)
-r <- findRoots(x, RR, fn, TRUE)
-x <- switchX(r, -1, 1, RR, fn, TRUE)
+RR <- ratCoeffs(x, 0, fn, 2L, 1L, FALSE)
+r <- findRoots(x, RR, fn, FALSE)
+x <- switchX(r, -1, 1, RR, fn, FALSE)
 expect_equal(x, control, tolerance = 3e-7) # Github macOS complains otherwise
 
 # Check isConverged

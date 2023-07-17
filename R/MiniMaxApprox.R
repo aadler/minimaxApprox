@@ -1,5 +1,5 @@
 # Master user-exposed function
-minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
+minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                           opts = list()) {
 
   # Handle configuration options
@@ -32,10 +32,10 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
     opts$tol <- 1e-14
   }
 
-  absErr <- switch(tolower(substring(errType, 1, 3)),
-                   abs = TRUE,
-                   rel = FALSE,
-                   stop("Error type must be either 'abs'olute or 'rel'ative."))
+  if (!is.logical(relErr)) {
+    stop("Relative Error must be a logical value. ",
+         "Default FALSE returns absolue error")
+  }
 
   if (length(degree) == 2L) {        # Rational approximation requested
     numerd <- as.integer(degree[1L])
@@ -56,9 +56,9 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
 
   # CaLL Calculation Functions
   mmA <- if (ratApprox) {
-    remRat(fn, lower, upper, numerd, denomd, absErr, xi, opts)
+    remRat(fn, lower, upper, numerd, denomd, relErr, xi, opts)
   } else {
-    remPoly(fn, lower, upper, as.integer(degree), absErr, opts)
+    remPoly(fn, lower, upper, as.integer(degree), relErr, opts)
   }
 
   # Handle all warnings centrally
@@ -96,7 +96,7 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
-  attr(ret, "absErr") <- absErr
+  attr(ret, "relErr") <- relErr
   attr(ret, "tol") <- opts$tol
   attr(ret, "convRatio") <- opts$convRatio
   class(ret) <- c("minimaxApprox", class(ret))
@@ -106,63 +106,3 @@ minimaxApprox <- function(fn, lower, upper, degree, errType = "abs", xi = NULL,
 
 # Evaluation convenience function. Identical to evalFunc. May remove
 minimaxEval <- function(x, mmA) evalFunc(x, mmA)
-
-# Print method (hide i and basis/x but leave in list and not in attribute)
-print.minimaxApprox <- function(x, ...) {
-  if (attr(x, "type") == "Polynomial") {
-    coefficients <- list(a = x$a)
-  } else {
-    coefficients <- list(a = x$a, b = x$b)
-  }
-
-  diagnostics <- list(x$EE,
-                      x$OE,
-                      Ratio = round(x$OE / x$EE, 6L),
-                      Difference = abs(x$OE - x$EE),
-                      Warnings = x$Warning)
-
-  names(diagnostics)[1:2] <- if (attr(x, "absErr")) {
-    c("ExpectedAbsError", "ObservedAbsError")
-  } else {
-    c("ExpectedRelError", "ObservedRelError")
-  }
-
-  print(c(coefficients, diagnostics))
-}
-
-coef.minimaxApprox <- function(object, ...) {
-  if (attr(object, "type") == "Polynomial") {
-    coef <- list(a = object$a)
-  } else {
-    coef <- list(a = object$a, b = object$b)
-  }
-
-  coef
-}
-
-# Plot method for errors and basis points
-plot.minimaxApprox <- function(x, y, ...) {
-  args <- list(...)
-  rng <- attr(x, "range")
-  fn <- attr(x, "func")
-  absErr <- attr(x, "absErr")
-  z <- seq(rng[1], rng[2], length.out = 1001L)
-  zz <- remErr(z, x, fn, absErr)
-  y <- remErr(x$x, x, fn, absErr)
-  ylab <- if (absErr) "Absolute Error" else "Relative Error"
-  ybnd <- max(x$EE, x$OE)
-  if ("ylim" %in% names(args)) {
-    ylim <- args$ylim
-  } else {
-    ylim <- c(-ybnd, ybnd)
-  }
-
-  plot(z, zz, type = "l", xlab = "x", ylab = ylab, ...)
-  abline(h = 0)
-  points(x$x, y, col = "red", pch = 16L)
-  abline(h = c(-x$OE, x$OE), lty = 2L, col = "blue")
-  abline(h = c(-x$EE, x$EE), lty = 3L, col = "red")
-  legend(x = "bottomleft", inset = c(0.35, 1), col = c("red", "red", "blue"),
-         lty = c(NA, 3L, 2L), legend = c("Basis", "Exp Err", "Obs Err"),
-         pch = c(16L, NA, NA), bg = "transparent", xpd = TRUE)
-}

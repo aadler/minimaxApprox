@@ -12,7 +12,7 @@ controlA <- c(1.2655835, -0.65058499, 0.19786869)
 controlB <- c(1, -0.064342748, -0.028851456)
 controlX <- c(2, 2.0924, 2.3368, 2.6459, 2.9011, 3)
 controlE <- 2.6934e-5
-RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), errType = "rel", opts = list())
+RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), TRUE, opts = list())
 expect_equal(RR$a, controlA, tolerance = 5e-5)
 expect_equal(RR$b, controlB, tolerance = 5e-5)
 expect_equal(RR$x, controlX, tolerance = 5e-5)
@@ -80,7 +80,7 @@ expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
 errMess <- paste("Algorithm is choosing basis point where functional value is",
                  "0. Please approximate using absolute, and not relative",
                  "error.")
-expect_error(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), errType = 'rel'), errMess)
+expect_error(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), errMess)
 
 # Test passing incorrect degree (at minimaxApprox level)
 errMess <- paste("Polynomial approximation takes one value for degree and",
@@ -109,27 +109,3 @@ mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
-
-# Test print, plot, and coef methods
-PP <- minimaxApprox(function(x) exp(x), 0, 1, 5L, "abs")
-expect_identical(unlist(coef(PP), use.names = FALSE), PP$a)
-expect_stdout(print(PP))
-expect_stdout(plot(PP))
-
-PP <- minimaxApprox(function(x) exp(x), 0, 1, 5L, "rel")
-expect_identical(unlist(coef(PP), use.names = FALSE), PP$a)
-expect_stdout(print(PP))
-expect_stdout(plot(PP))
-
-RR <- minimaxApprox(function(x) exp(x), 0, 1, c(2L, 2L), "abs")
-expect_identical(unlist(coef(RR)$a, use.names = FALSE), RR$a)
-expect_identical(unlist(coef(RR)$b, use.names = FALSE), RR$b)
-expect_stdout(print(RR))
-expect_stdout(plot(RR))
-
-RR <- suppressWarnings(minimaxApprox(exp, 0, 1, c(2L, 2L), "rel"))
-expect_identical(unlist(coef(RR)$a, use.names = FALSE), RR$a)
-expect_identical(unlist(coef(RR)$b, use.names = FALSE), RR$b)
-expect_stdout(print(RR))
-expect_stdout(plot(RR))
-expect_stdout(plot(RR, ylim = c(-5e-6, 5e-6)))

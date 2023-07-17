@@ -2,13 +2,11 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix
-ratMat <- function(x, E, y, nD, dD, absErr) {
+ratMat <- function(x, E, y, nD, dD, relErr) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x)
-  if (!absErr) {
-    altSgn <- altSgn * y
-  }
+  if (relErr)  altSgn <- altSgn * y
   altE <- altSgn * E
   yvctr <- -(y + altE)
   aMat <- vanderMat(x, nD)
@@ -17,24 +15,23 @@ ratMat <- function(x, E, y, nD, dD, absErr) {
 }
 
 # Function to calculate coefficients given matrix and known values
-ratCoeffs <- function(x, E, fn, nD, dD, absErr) {
+ratCoeffs <- function(x, E, fn, nD, dD, relErr) {
   y <- callFun(fn, x)
-  P <- solve(ratMat(x, E, y, nD, dD, absErr), y)
-  RR <- list(a = P[seq_len(nD + 1)],            # Works even if nD = 0
-             b = c(1, P[seq_len(dD) + nD + 1]), # Works even if dD = 0
-             E = P[length(P)])
-  RR
+  P <- solve(ratMat(x, E, y, nD, dD, relErr), y)
+  list(a = P[seq_len(nD + 1L)],            # Works even if nD = 0
+       b = c(1, P[seq_len(dD) + nD + 1L]), # Works even if dD = 0
+       E = P[length(P)])
 }
 
 # Main function to calculate and return the minimax rational approximation
-remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
+remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi = NULL, opts) {
 
   # Initial x's
   if (is.null(xi)) {
-    x <- chebNodes(numerd + denomd + 2, lower, upper)
+    x <- chebNodes(numerd + denomd + 2L, lower, upper)
   } else {
     x <- xi
-    if (length(xi) != numerd + denomd + 2) {
+    if (length(xi) != numerd + denomd + 2L) {
       stop("Given the requested degrees for numerator and denominator, ",
            "the x-vector needs to have ", numerd + denomd + 2, " elements.")
     }
@@ -44,12 +41,12 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
   # equations until E converges. Function may remain inside of remRat.
   # Everything but "x" is previously defined and constant inside the main remRat
   # function and thus does not need to be passed.
-  convergeErr <- function(x, absErr) {
+  convergeErr <- function(x, relErr) {
     E <- 0
     j <- 0L
     repeat {
       if (j > opts$maxiter) break
-      RR <- ratCoeffs(x, E, fn, numerd, denomd, absErr)
+      RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
       j <- j + 1
@@ -57,8 +54,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
     RR
   }
 
-  RR <- convergeErr(x, absErr)
-  errs_last <- remErr(x, RR, fn, absErr)
+  RR <- convergeErr(x, relErr)
+  errs_last <- remErr(x, RR, fn, relErr)
   converged <- FALSE
   unchanged <- FALSE
   unchanging_i <- 0L
@@ -66,16 +63,16 @@ remRat <- function(fn, lower, upper, numerd, denomd, absErr, xi = NULL, opts) {
   repeat {
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- findRoots(x, RR, fn, absErr)
-    x <- switchX(r, lower, upper, RR, fn, absErr)
-    RR <- convergeErr(x, absErr)
+    r <- findRoots(x, RR, fn, relErr)
+    x <- switchX(r, lower, upper, RR, fn, relErr)
+    RR <- convergeErr(x, relErr)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fC(dngr), " which makes rational approximation perilous ",
            "over the interval [", fC(lower), ", ", fC(upper), "].")
     }
-    errs <- remErr(x, RR, fn, absErr)
+    errs <- remErr(x, RR, fn, relErr)
     mxae <- max(abs(errs))
     expe <- abs(RR$E)
 
