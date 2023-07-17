@@ -105,4 +105,9 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 }
 
 # Evaluation convenience function. Identical to evalFunc. May remove
-minimaxEval <- function(x, mmA) evalFunc(x, mmA)
+minimaxEval <- function(x, mmA) {
+  if (!inherits(mmA, "minimaxApprox")) {
+    stop("This function only works with 'minimaxApprox' objects.")
+  }
+  evalFunc(x, mmA)
+}

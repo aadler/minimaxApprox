@@ -109,3 +109,6 @@ mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
+## Check error trap
+errMess <- "This function only works with 'minimaxApprox' objects."
+expect_error(minimaxEval(x, sin), errMess)
