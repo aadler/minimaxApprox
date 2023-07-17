@@ -8,7 +8,7 @@ Provides a more human-readable output of a \dQuote{minimaxApprox} object.
 }
 
 \usage{
-\method{print}{minimaxApprox}(x, \dots)
+\method{print}{minimaxApprox}(x, round = 6L, \dots)
 }
 
 \arguments{
