@@ -1,21 +1,22 @@
 \name{coef.minimaxApprox}
 \alias{coef.minimaxApprox}
 \title{Extract coefficiencts from a \dQuote{minimaxApprox} object}
+
 \description{
 Extracts the numerator and denominator vectors from a \dQuote{minimaxApprox}
 object.
 }
+
 \usage{
 \method{coef}{minimaxApprox}(object, \dots)
 }
+
 \arguments{
   \item{object}{An object inheriting from \link{class} \dQuote{minimaxApprox}.
 }
   \item{\dots}{Other arguments.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{Coefficients extracted from the \dQuote{minimaxApprox} object. A
 \link{list} containing:
 
@@ -23,12 +24,15 @@ object.
   \item{b}{The rational denominator coefficents. Missing for polynomial
   approximation}
 }
+
 \author{
 Avraham Adler \email{Avraham.Adler@gmail.com}
 }
+
 \seealso{
 \code{\link{minimaxApprox}}
 }
+
 \examples{
 PP <- minimaxApprox(exp, 0, 1, 5)
 coef(PP)
