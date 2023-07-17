@@ -11,7 +11,7 @@ version of the Remez algorithm.
 }
 
 \usage{
-minimaxApprox(fn, lower, upper, degree, errType = "abs", xi = NULL, opts = list())
+minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL, opts = list())
 }
 
 \arguments{
