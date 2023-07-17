@@ -8,7 +8,7 @@ the basis points and error bounds.
 \usage{\method{plot}{minimaxApprox}(x, y, \dots)}
 \arguments{
   \item{x}{An object inheriting from \link{class} \dQuote{minimaxApprox}}
-  \item{y}{Ignored. In call as required by
+  \item{y}{Ignored. In call as required by \R in
   \href{https://cran.r-project.org/doc/manuals/R-exts.html#Generic-functions-and-methods}{Writing R Extensions:chapter 7}}
   \item{\dots}{Further arguments to plot. Specifically to pass \code{ylim} to
   allow zooming in or out.}
