@@ -44,10 +44,10 @@ expect_message(minimaxApprox(fn, -1, 1, 9L, opts = opts), "i: 1 E: ")
 ## Rational
 expect_message(minimaxApprox(fn, -1, 1, c(2L, 1L), opts = opts), "i: 1 E: ")
 
-# Test passing some maxiter, convRatio, tol, and conviter. Also checks conviter
+# Test passing some maxiter, convrat, tol, and conviter. Also checks conviter
 # overwrite.
 fn <- function(x) exp(x) - 1
-opts <- list(maxiter = 25L, convRatio = 1.01, tol = 1e-12, conviter = 50L)
+opts <- list(maxiter = 25L, convrat = 1.01, tol = 1e-12, conviter = 50L)
 ## Polynomial
 expect_silent(minimaxApprox(fn, -0.15, 0.15, 4L, opts = opts))
 ## Rational

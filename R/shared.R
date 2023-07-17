@@ -120,16 +120,16 @@ switchX <- function(r, l, u, R, fn, relErr) {
 }
 
 # Check Remez iterations for convergence
-isConverged <- function(errs, expe, convRatio, tol) {
+isConverged <- function(errs, expe, convrat, tol) {
   aerrs <- abs(errs)
   mxae <- max(aerrs)
   mnae <- min(aerrs)
 
   # Check observed errors are close enough to expected by ratio or tolerance
-  errDistance <- mxae / expe <= convRatio || abs(mxae - expe) <= tol
+  errDistance <- mxae / expe <= convrat || abs(mxae - expe) <= tol
 
   # Check observed errors are close enough to each other by ratio or tolerance
-  errMagnitude <- mxae / mnae <= convRatio || mxae - mnae <= tol
+  errMagnitude <- mxae / mnae <= convrat || mxae - mnae <= tol
 
   # Converged if magnitude and distance are close and error oscillates in sign
   isOscil(errs) && errDistance && errMagnitude

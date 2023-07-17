@@ -47,7 +47,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
     }
 
     # Check for convergence
-    if (isConverged(errs, expe, opts$convRatio, opts$tol) &&
+    if (isConverged(errs, expe, opts$convrat, opts$tol) &&
         i >= opts$miniter) {
       converged <- TRUE
       break
@@ -55,7 +55,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will just not help.
-    if (all(errs / errs_last <= opts$convRatio) ||
+    if (all(errs / errs_last <= opts$convrat) ||
         all(abs(errs - errs_last) <= opts$tol)) {
       unchanging_i <- unchanging_i + 1L
       if (unchanging_i >= opts$conviter) {

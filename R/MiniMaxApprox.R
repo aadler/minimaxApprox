@@ -22,10 +22,10 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     opts$showProgress <- FALSE
   }
 
-  if (!("convRatio" %in% names(opts))) {
+  if (!("convrat" %in% names(opts))) {
     # Using 1 + 1e-9 - See Cody (1968) page 250. Can reasonably expect between
     # 9 & 12 significant figures.
-    opts$convRatio <- 1.000000001
+    opts$convrat <- 1.000000001
   }
 
   if (!("tol" %in% names(opts))) {
@@ -98,7 +98,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   attr(ret, "range") <- c(lower, upper)
   attr(ret, "relErr") <- relErr
   attr(ret, "tol") <- opts$tol
-  attr(ret, "convRatio") <- opts$convRatio
+  attr(ret, "convrat") <- opts$convrat
   class(ret) <- c("minimaxApprox", class(ret))
 
   ret
