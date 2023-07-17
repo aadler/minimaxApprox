@@ -1,0 +1,38 @@
+# -----------------------------------------------------------
+# CITATION file created with {cffr} R package, v0.5.0
+# See also: https://docs.ropensci.org/cffr/
+# -----------------------------------------------------------
+ 
+cff-version: 1.2.0
+message: 'To cite package "minimaxApprox" in publications use:'
+type: software
+license: MPL-2.0
+title: 'minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational
+  Function Approximation'
+version: 0.0.1
+abstract: Implements the basic Remez algorithm for polynomial approximation and a
+  form of the Fraser-Hart version <doi:10.1145/368273.368578> for rational approximation.
+authors:
+- family-names: Adler
+  given-names: Avraham
+  email: Avraham.Adler@gmail.com
+  orcid: https://orcid.org/0000-0002-3039-0703
+preferred-citation:
+  type: manual
+  title: 'minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational
+    Function Approximation'
+  authors:
+  - family-names: Adler
+    given-names: Avraham
+    email: Avraham.Adler@gmail.com
+    orcid: https://orcid.org/0000-0002-3039-0703
+  year: '2023'
+  notes: R package version 0.0.1
+repository-code: https://github.com/aadler/MiniMaxApprox
+url: https://github.com/aadler/MiniMaxApprox
+date-released: '2023-07-10'
+contact:
+- family-names: Adler
+  given-names: Avraham
+  email: Avraham.Adler@gmail.com
+  orcid: https://orcid.org/0000-0002-3039-0703
