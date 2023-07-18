@@ -1,6 +1,6 @@
 bibentry(bibtype     = "Manual",
          textversion = NULL,
-         header      = paste("To cite the", sQuote("minimaxApprox"),
+         header      = paste("To cite the", sQuote(minimaxApprox),
                              "package in publications, please use:"),
          author      = person(given = "Avraham", family = "Adler",
                               role = c("aut", "cph", "cre"),
