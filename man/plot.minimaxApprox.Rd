@@ -1,3 +1,6 @@
+% Copyright Avraham Adler (c) 2023
+% SPDX-License-Identifier: MPL-2.0+
+
 \name{plot.minimaxApprox}
 \alias{plot.minimaxApprox}
 \encoding{UTF-8}

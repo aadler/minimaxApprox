@@ -1,3 +1,6 @@
+% Copyright Avraham Adler (c) 2023
+% SPDX-License-Identifier: MPL-2.0+
+
 \name{NEWS}
 \alias{NEWS}
 
