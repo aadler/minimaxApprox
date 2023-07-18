@@ -3,7 +3,7 @@
 
 \title{NEWS file for the minimaxApprox package}
 
-\section{Version 0.0.1 (2023-07-20)}{
+\section{Version 0.0.1 (2023-07-18)}{
   \subsection{Added}{
     \itemize{
       \item Initial release.
