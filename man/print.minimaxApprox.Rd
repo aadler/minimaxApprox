@@ -1,10 +1,11 @@
 \name{print.minimaxApprox}
 \alias{print.minimaxApprox}
+\encoding{UTF-8}
 
-\title{Print method for a \dQuote{minimaxApprox} object}
+\title{Print method for a \code{"minimaxApprox object"}}
 
 \description{
-Provides a more human-readable output of a \dQuote{minimaxApprox} object.
+Provides a more human-readable output of a \code{"minimaxApprox"} object.
 }
 
 \usage{
@@ -12,13 +13,14 @@ Provides a more human-readable output of a \dQuote{minimaxApprox} object.
 }
 
 \arguments{
-  \item{x}{An object inheriting from \link{class} \dQuote{minimaxApprox}}
-  \item{round}{integer; Number of digits to which to round ratio and difference}
-  \item{\dots}{Further arguments to \code{print}}
+    \item{x}{An object inheriting from \link{class} \code{"minimaxApprox"}.}
+    \item{round}{integer; Number of digits to which to round ratio and
+    difference.}
+    \item{\dots}{Further arguments to \code{print}.}
 }
 
 \details{
-To print the raw \dQuote{minimaxApprox} object use \code{print.default}.
+To print the raw \code{"minimaxApprox"} object use \code{print.default}.
 }
 
 \author{

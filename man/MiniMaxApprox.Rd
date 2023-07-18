@@ -1,6 +1,6 @@
 \name{minimaxApprox}
-\encoding{UTF-8}
 \alias{minimaxApprox}
+\encoding{UTF-8}
 
 \title{Minimax Approximation of Functions}
 
@@ -11,68 +11,68 @@ version of the Remez algorithm.
 }
 
 \usage{
-minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL, opts = list())
+minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
+              opts = list())
 }
 
 \arguments{
-  \item{fn}{function; A univariate vectorized function having \strong{x} as its
-  first value.
-  }
-  \item{lower}{numeric; The lower bound of the approximation interval.}
-  \item{upper}{numeric; The upper bound of the approximation interval.}
-  \item{degree}{integer; Either a single value representing the requested degree
-  for polynomial approximation or a vector of length 2 representing the
-  requested degrees of the numerator and denominator for rational approximation.
-}
-  \item{relErr}{logical; If \code{TRUE}, calculate the minimax approximation
-  using \emph{relative} error. The default is \code{FALSE} which uses
-  \emph{absolute} error.
-}
-  \item{xi}{numeric; For rational approximation, a vector of initial points of
-  the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
-  missing, approximation will use the appropriate Chebyeshev nodes. Polynomial
-  approximation \strong{always} uses Chebyeshev nodes and will ignore \code{xi}
-  with a message.
-}
-  \item{opts}{\link{list}; Configuration options including:
-  \itemize{
-  \item \code{maxiter}: integer; The maximum number of iterations to attempt
-  convergence. Defaults to 100.
-  \item \code{miniter}:  integer; The minimum number of iterations before
-  allowing convergence. Defaults to 10.
-  \item \code{conviter}: integer; For rational approximation only, the number of
-  successive iteration with the same results allowed before assuming no further
-  convergence is possible. Defaults to 10L. Will overwrite \code{maxiter} if
-  passed and larger.
-  \item \code{showProgress}: logical; If \code{TRUE} will print error values at
-  each iteration.
-  \item \code{convRatio}: numeric; The convergence ratio tolerance. Defaults to
-  \code{1+1e-9}. See \strong{Details}.
-  \item \code{tol}: numeric; The absolute difference tolerance. Defaults to
-  \code{1e-14}. See \strong{Details}.
-  }
-}
+    \item{fn}{function; A vectorized univariate function having \strong{x} as
+    its first value.}
+    \item{lower}{numeric; The lower bound of the approximation interval.}
+    \item{upper}{numeric; The upper bound of the approximation interval.}
+    \item{degree}{integer; Either a single value representing the requested
+    degree for polynomial approximation or a vector of length 2 representing the
+    requested degrees of the numerator and denominator for rational
+    approximation.}
+    \item{relErr}{logical; If \code{TRUE}, calculate the minimax approximation
+    using \emph{relative} error. The default is \code{FALSE} which uses
+    \emph{absolute} error.}
+    \item{xi}{numeric; For rational approximation, a vector of initial points of
+    the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
+    missing, approximation will use the appropriate Chebyshev nodes. Polynomial
+    approximation \strong{always} uses Chebyshev nodes and will ignore \code{xi}
+    with a message.}
+    \item{opts}{\link{list}; Configuration options including:
+        \itemize{
+            \item \code{maxiter}: integer; The maximum number of iterations to
+            attempt convergence. Defaults to 100.
+            \item \code{miniter}:  integer; The minimum number of iterations
+            before allowing convergence. Defaults to 10.
+            \item \code{conviter}: integer; For rational approximation only, the
+            number of successive iteration with the same results allowed before
+            assuming no further convergence is possible. Defaults to 10L. Will
+            overwrite \code{maxiter} if \code{conviter} is explicitly passed and
+            is larger than \code{maxiter}.
+            \item \code{showProgress}: logical; If \code{TRUE} will print error
+            values at each iteration.
+             \item \code{convRatio}: numeric; The convergence ratio tolerance.
+             Defaults to \code{1+1e-9}. See \strong{Details}.
+             \item \code{tol}: numeric; The absolute difference tolerance.
+             Defaults to \code{1e-14}. See \strong{Details}.
+        }
+    }
 }
 
 \details{
-The function implements the Remez algorithm using linear approximation, cheifly
-as described by Cody (1968). Convergence is considered acheived when all three
+The function implements the Remez algorithm using linear approximation, chiefly
+as described by Cody (1968). Convergence is considered achieved when all three
 of the following criteria are met:
-\enumerate{
-  \item The observed error magnitudes are within tolerance of the expected
-  error (Distance Test)
-  \item The observed error magnitudes are within tolerance of each other
-  (Magnitude Test)
-  \item The observed error signs oscillate (Oscillating Test)
-}
-\dQuote{Within tolerance} can be bet in one of two ways:
-\enumerate{
-  \item The difference between the absolute magnitudes is less than or equal to
-  \code{tol}
-  \item The ratio between the larger and smaller is less less than or equal to
-  \code{convRatio}
-}
-For efficency, the Distance Test is taken between the absolute value of the
+    \enumerate{
+        \item The observed error magnitudes are within tolerance of the expected
+         error (Distance Test).
+        \item The observed error magnitudes are within tolerance of each other
+        (Magnitude Test).
+        \item The observed error signs oscillate (Oscillating Test).
+    }
+\dQuote{Within tolerance} can be met in one of two ways:
+    \enumerate{
+        \item The difference between the absolute magnitudes is less than or
+        equal to \code{tol}.
+        \item The ratio between the larger and smaller is less than or equal to
+        \code{convRatio}.
+    }
+
+For efficiency, the Distance Test is taken between the absolute value of the
 largest observed error and the absolute value of the expected error. Similarly,
 the Magnitude test is taken between the absolute value of the largest observed
 error and the absolute value of the smallest observed error. Both the Magnitude
@@ -81,28 +81,29 @@ Test and the Distance Test can be passed by \strong{either} being within
 }
 
 \value{
-\code{minimaxApprox} returns an object of \link{class} \dQuote{minimaxApprox}
+\code{minimaxApprox} returns an object of \link{class} \code{"minimaxApprox"}
 which inherits from the class \link{list}.
 
 The generic accessor function \code{coef} will extract the numerator and
 denominator vectors. There are also default \code{print} and \code{plot}
 methods.
 
-An object of class \dQuote{minimaxApprox} is a list containing the following
+An object of class \code{"minimaxApprox"} is a list containing the following
 components:
 
-  \item{a}{The polynomial coefficents or the rational numerator coefficents}
-  \item{b}{The rational denominator coefficents. Missing for polynomial
-  approximation}
-  \item{EE}{The absolute value of the expected error as calculated by the Remez
-  algorithms}
-  \item{OE}{The absolute value of largest observed error between the function
-  and the approximation at the extremal basis points.}
-  \item{iterations}{The number of iterations of the algorithm. This does not
-  include any iterations required to converge the error value in rational
-  approximation.}
-  \item{x}{The basis points at which the minimax error was acheived.}
-  \item{Warning}{A logical flag indicating if any warnings were thrown}
+    \item{a}{The polynomial coefficients or the rational numerator
+    coefficients.}
+    \item{b}{The rational denominator coefficients. Missing for polynomial
+    approximation.}
+    \item{EE}{The absolute value of the expected error as calculated by the
+    Remez algorithms.}
+    \item{OE}{The absolute value of largest observed error between the function
+    and the approximation at the extremal basis points.}
+    \item{iterations}{The number of iterations of the algorithm. This does not
+    include any iterations required to converge the error value in rational
+    approximation.}
+    \item{x}{The basis points at which the minimax error was achieved.}
+    \item{Warning}{A logical flag indicating if any warnings were thrown.}
 }
 
 \references{
@@ -131,7 +132,7 @@ coding and not---as of yet---for highly precise estimates.
 }
 
 \seealso{
-\code{\link{minimaxEval}} for a conveniece function to calculate approximation
+\code{\link{minimaxEval}} for a convenience function to calculate approximation
 values and \code{\link[Pade:Pade]{Pade}} for a function to calculate
 \enc{Padé}{Pade} coefficients given suitable Taylor series coefficients.
 }

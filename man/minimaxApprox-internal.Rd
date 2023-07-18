@@ -1,4 +1,5 @@
 \name{minimaxApprox-internal}
+\encoding{UTF-8}
 
 %% Internal-only functions need to be listed here wrapped in \alias{}
 

@@ -1,9 +1,11 @@
 \name{coef.minimaxApprox}
 \alias{coef.minimaxApprox}
-\title{Extract coefficiencts from a \dQuote{minimaxApprox} object}
+\encoding{UTF-8}
+
+\title{Extract coefficients from a \code{"minimaxApprox"} object}
 
 \description{
-Extracts the numerator and denominator vectors from a \dQuote{minimaxApprox}
+Extracts the numerator and denominator vectors from a \code{"minimaxApprox"}
 object.
 }
 
@@ -12,17 +14,18 @@ object.
 }
 
 \arguments{
-  \item{object}{An object inheriting from \link{class} \dQuote{minimaxApprox}.
+    \item{object}{An object inheriting from \link{class} \code{"minimaxApprox"}.
 }
-  \item{\dots}{Other arguments.}
+    \item{\dots}{Other arguments.}
 }
 
-\value{Coefficients extracted from the \dQuote{minimaxApprox} object. A
+\value{Coefficients extracted from the \code{"minimaxApprox"} object. A
 \link{list} containing:
 
-  \item{a}{The polynomial coefficents or the rational numerator coefficents}
-  \item{b}{The rational denominator coefficents. Missing for polynomial
-  approximation}
+    \item{a}{The polynomial coefficients or the rational numerator
+    coefficients.}
+    \item{b}{The rational denominator coefficients. Missing for polynomial
+    approximation.}
 }
 
 \author{

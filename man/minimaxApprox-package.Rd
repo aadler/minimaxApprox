@@ -1,5 +1,6 @@
 \name{minimaxApprox-package}
 \alias{minimaxApprox-package}
+\encoding{UTF-8}
 \docType{package}
 \title{
 \packageTitle{minimaxApprox}

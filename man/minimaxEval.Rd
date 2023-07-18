@@ -1,5 +1,7 @@
 \name{minimaxEval}
 \alias{minimaxEval}
+\encoding{UTF-8}
+
 \title{Evaluate Minimax Approximation}
 \description{
 The function evaluates the rational or polynomial approximation at x.
@@ -9,7 +11,7 @@ minimaxEval(x, mmA)
 }
 \arguments{
   \item{x}{a numeric vector}
-  \item{mmA}{a minimaxApprox return object}
+  \item{mmA}{a \code{"minimaxApprox"} return object}
 }
 \details{
 This is a convenience function to evalute the approximation at supplied \code{x}.
