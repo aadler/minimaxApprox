@@ -126,7 +126,7 @@ x <- minimaxApprox:::chebNodes(5, -1, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE)
 r <- minimaxApprox:::findRoots(x, RR, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE)
-expect_equal(x, control, tolerance = 3e-7) # Github macOS complains otherwise
+expect_equal(x, control, tolerance = 3e-7) # GitHub macOS complains otherwise
 
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)
@@ -138,6 +138,6 @@ E <- 0.1
 errs <- c(-0.2, 0.1, -0.1)
 expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
 
-# Test CheckDenom
+# Test checkDenom
 expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1), 0.5)
 expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2))

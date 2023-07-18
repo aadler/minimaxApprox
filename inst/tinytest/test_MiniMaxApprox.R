@@ -6,7 +6,7 @@ tol <- 1e-7
 # Most tests of warnings and messages will perforce check internals too.
 
 # Check Accuracy and lack of warning flag when converged
-## Ratonal 1: Based on Fraser & Hart (1962) p. 403 Table 2
+## Rational 1: Based on Fraser & Hart (1962) p. 403 Table 2
 controlA <- c(0.99999998510030375, 0.601781180619504719,
               0.186144903531821877, 0.0687440518995425058)
 controlB <- c(1, 1.17899457599300466, -0.122321311431112167,
@@ -33,7 +33,7 @@ expect_false(RR$Warning)
 
 # Test trap for relErr
 errMess <- paste("Relative Error must be a logical value.",
-                  "Default FALSE returns absolue error")
+                  "Default FALSE returns absolute error")
 expect_error(minimaxApprox(fn, -1, 1, 9L, "abs"), errMess)
 
 # Test showProgress. Also tests passing miniter
@@ -55,7 +55,7 @@ expect_silent(minimaxApprox(fn, -0.15, 0.15, c(2L, 2L), opts = opts))
 
 # Test maxiter warning and warning flag
 opts <- list(maxiter = 2L)
-wrnMess <- paste("Convergence to requested ratio and tolerance not acheived in",
+wrnMess <- paste("Convergence to requested ratio and tolerance not achieved in",
                  "2 iterations.\nThe ratio is ")
 ## Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 9L, opts = opts), wrnMess)
@@ -81,7 +81,7 @@ expect_warning(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
 fn <- function(x) exp(x) - 1
 i <- 5L
 opts <- list(conviter = i)
-wrnMess <- paste(i, "succesive calculated errors were too close to each other",
+wrnMess <- paste(i, "successive calculated errors were too close to each other",
                  "to warrant further iterations.\n")
 ## Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 12L, opts = opts), wrnMess)
@@ -103,7 +103,7 @@ expect_error(minimaxApprox(fn, -1, 1, 1:3), errMess)
 
 # Test passing xi
 ## Polynomial - Check that it is ignored
-wrnMess <- paste("Polynomial approximation uses Chebyeshev nodes for initial",
+wrnMess <- paste("Polynomial approximation uses Chebyshev nodes for initial",
                  "guess. Any passed xi is ignored.")
 expect_warning(minimaxApprox(fn, -1, 1, 10L, xi = 6), wrnMess)
 ## Rational - Check that proper length is passed

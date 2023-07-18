@@ -6,7 +6,7 @@ fC <- function(x, d = 6L, f = "g", w = -1L) {
   formatC(x, digits = d, format = f, width = w)
 }
 
-# Default Chebyeshev nodes
+# Default Chebyshev nodes
 chebNodes <- function(n, a, b) {
   n <- as.integer(n)
   sort(0.5 * (a + b + (b - a) * cos((2 * seq_len(n) - 1) * pi / (2 * n))))

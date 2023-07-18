@@ -34,7 +34,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
   if (!is.logical(relErr)) {
     stop("Relative Error must be a logical value. ",
-         "Default FALSE returns absolue error")
+         "Default FALSE returns absolute error.")
   }
 
   if (length(degree) == 2L) {        # Rational approximation requested
@@ -44,7 +44,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   } else if (length(degree) == 1L) {
     ratApprox <- FALSE               # Polynomial approximation requested
     if (!is.null(xi)) {
-      warning("Polynomial approximation uses Chebyeshev nodes for initial ",
+      warning("Polynomial approximation uses Chebyshev nodes for initial ",
               "guess. Any passed xi is ignored.")
     }
   } else {
@@ -65,7 +65,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   gotWarning <- FALSE
 
   if (mmA$i >= opts$maxiter && !mmA$converged) {
-    warning("Convergence to requested ratio and tolerance not acheived in ",
+    warning("Convergence to requested ratio and tolerance not achieved in ",
             mmA$i, " iterations.\n", "The ratio is ", fC(mmA$mxae / mmA$expe),
             " times expected and the difference is ",
             fC(abs(mmA$mxae - mmA$expe)), " from the expected.")
@@ -73,8 +73,8 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   }
 
   if (mmA$unchanged && !mmA$converged) {
-    warning("Convergence to requested ratio and tolerance not acheived in ",
-            mmA$i, " iterations.\n", mmA$unchanging_i, " succesive calculated ",
+    warning("Convergence to requested ratio and tolerance not achieved in ",
+            mmA$i, " iterations.\n", mmA$unchanging_i, " successive calculated ",
             "errors were too close to each other to warrant further ",
             "iterations.\nThe ratio is ", fC(mmA$mxae / mmA$expe), " times ",
             "expected and the difference is ", fC(abs(mmA$mxae - mmA$expe)),
@@ -105,7 +105,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 }
 
 # Evaluation convenience function. Identical to evalFunc but tests for
-# inheritance from minimmaxApprox.
+# inheritance from minimaxApprox.
 minimaxEval <- function(x, mmA) {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")
