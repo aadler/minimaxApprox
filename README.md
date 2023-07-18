@@ -2,11 +2,11 @@
 <!-- Comment out for now
 [![](https://www.r-pkg.org/badges/version-last-release/Delaporte)](https://cran.r-project.org/package=Delaporte)
 [![](http://cranlogs.r-pkg.org/badges/last-month/Delaporte)](https://cran.r-project.org/package=Delaporte)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5880051.svg)](https://doi.org/10.5281/zenodo.5880051)
 -->
  [![R-CMD-check](https://github.com/aadler/minimaxApprox/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aadler/minimaxApprox/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/aadler/minimaxApprox/branch/master/graph/badge.svg)](https://app.codecov.io/gh/aadler/minimaxApprox?branch=master)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7580/badge)](https://bestpractices.coreinfrastructure.org/projects/7580)
+[![DOI](https://zenodo.org/badge/660219797.svg)](https://zenodo.org/badge/latestdoi/660219797)
 <!-- badges: end -->
 
 # minimaxApprox
@@ -17,10 +17,10 @@ polynomial function approximation and a form of the Fraser-Hart version
 ## Citation
 If you use the package, please cite it as:
 
-  Avraham Adler (2023). minimaxApprox: Implementation of Remez Algorithm for
-                        Polynomial and Rational Function Approximation.
-  R package version 0.0.1.
-  https://CRAN.R-project.org/package=minimaxApprox
+  Adler A (2023). minimaxApprox: Implementation of Remez Algorithm for
+  Polynomial and Rational Function Approximation.
+  [doi: 10.5281/zenodo.8158855](https://doi.org/10.5281/zenodo.8158855),
+  R package version 0.0.1, https://CRAN.R-project.org/package=minimaxApprox
 
 A BibTeX entry for LaTeX users is:
 
@@ -29,7 +29,8 @@ A BibTeX entry for LaTeX users is:
     author = {Avraham Adler},
     title = {minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational Function Approximation},
     year = {2023},
-    url  = "https://CRAN.R-project.org/package=minimaxApprox",
+    url = {https://CRAN.R-project.org/package=minimaxApprox},
+    doi = {10.5281/zenodo.8158855},
     note = {R package version 0.0.1},
   }
 ```
