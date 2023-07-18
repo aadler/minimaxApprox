@@ -6,5 +6,9 @@ pV <- packageVersion("minimaxApprox")
 # Test CITATION has most recent package version
 expect_true(any(grepl(pV, toBibtex(citation("minimaxApprox")), fixed = TRUE)))
 
-# Test NEWS has most recent pacakge version
+# Test NEWS has most recent package version
 expect_true(any(grepl(pV, news(package = "minimaxApprox"), fixed = TRUE)))
+
+# Test that NEWS has an entry with DESCRIPTION's Date
+pD <- packageDate("minimaxApprox")
+expect_true(any(grepl(pD, news(package = "minimaxApprox"), fixed = TRUE)))
