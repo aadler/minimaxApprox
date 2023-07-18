@@ -20,6 +20,7 @@ If you use the package, please cite it as:
   Avraham Adler (2023). minimaxApprox: Implementation of Remez Algorithm for
                         Polynomial and Rational Function Approximation.
   R package version 0.0.1.
+  https://CRAN.R-project.org/package=minimaxApprox
 
 A BibTeX entry for LaTeX users is:
 
@@ -28,6 +29,7 @@ A BibTeX entry for LaTeX users is:
     author = {Avraham Adler},
     title = {minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational Function Approximation},
     year = {2023},
+    url  = "https://CRAN.R-project.org/package=minimaxApprox",
     note = {R package version 0.0.1},
   }
 ```
