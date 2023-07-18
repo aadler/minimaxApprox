@@ -37,7 +37,7 @@ A BibTeX entry for LaTeX users is:
 
 ## Acknowledgements
 The author is grateful to [Martin Maechler](https://stat.ethz.ch/~maechler/) for
-suggestions which helped the author with MiniMax approximation.
+suggestions which helped the author with minimax approximation.
 
 ## Contributions
 Please ensure that all contributions comply with both
@@ -48,7 +48,7 @@ This project attempts to follow [Semantic Versioning](https://semver.org/).
 
 ### Changelog
 This project attempts to follow the changelog system at
-[Keep a CHANGELOG](https://keepachangelog.com/).
+[keep a changelog](https://keepachangelog.com/).
 
 ### Dependencies
 This project intends to have as few dependencies as possible. Please consider
@@ -85,16 +85,16 @@ the lead maintainer.
 ### Major
 
  * Consider moving some calculations into a compiled language (C, Fortran, C++)
- for efficiency
+ for efficiency.
  * Research
  [barycentric representations](https://www.chebfun.org/publications/remez.pdf)
- to consider if possible to implement in R
- * Alternatively, research if possible to use [Rmpfr](https://CRAN.R-project.org/package=Rmpfr ) package for increased
- precision
+ to consider if possible to implement in R.
+ * Alternatively, research if possible to use [Rmpfr](https://CRAN.R-project.org/package=Rmpfr) package for increased
+ precision.
 
 ### Minor
 
- * Write a vignette
+ * Write a vignette.
 
 ## Security
 ### Expectations
