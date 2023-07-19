@@ -26,6 +26,8 @@ Provides a more human-readable output of a \code{"minimaxApprox"} object.
 To print the raw \code{"minimaxApprox"} object use \code{print.default}.
 }
 
+\value{No return value; called for side effects.}
+
 \author{
 Avraham Adler \email{Avraham.Adler@gmail.com}
 }

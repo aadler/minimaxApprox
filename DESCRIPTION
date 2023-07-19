@@ -6,8 +6,8 @@ Version: 0.0.1
 Date: 2023-07-18
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))
-Description: Implements the basic Remez algorithm for polynomial approximation
-    and a form of the Fraser-Hart version <doi:10.1145/368273.368578> for
+Description: Implements the algorithm of Remez (1962) for polynomial
+    approximation and of Cody et al. (1968) <doi:10.1007/BF02162506> for
     rational approximation.
 License: MPL-2.0
 URL: https://github.com/aadler/MiniMaxApprox

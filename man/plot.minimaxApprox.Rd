@@ -6,10 +6,12 @@
 \encoding{UTF-8}
 
 \title{Plot errors from a \code{"minimaxApprox"} object}
+
 \description{
 Produces a plot of the error of the \code{"minimaxApprox"} object, highlighting
 the basis points and error bounds.
 }
+
 \usage{\method{plot}{minimaxApprox}(x, y, \dots)}
 \arguments{
     \item{x}{An object inheriting from \link{class} \code{"minimaxApprox"}.}
@@ -18,13 +20,17 @@ the basis points and error bounds.
     \item{\dots}{Further arguments to plot. Specifically to pass \code{ylim} to
     allow zooming in or out.}
 }
-\value{A plot of the approximation error.}
+
+\value{No return value; called for side effects.}
+
 \author{
 Avraham Adler \email{Avraham.Adler@gmail.com}
 }
+
 \seealso{
 \code{\link{minimaxApprox}}
 }
+
 \examples{
 PP <- minimaxApprox(exp, 0, 1, 5)
 plot(PP)
