@@ -118,9 +118,8 @@ Fraser W. and Hart J. F. (1962) \dQuote{On the computation of rational
 approximations to continuous functions}, \emph{Communications of the ACM},
 \bold{5}(7), 401--403, \doi{10.1145/368273.368578}
 
-Cody, W. J. (1968) \dQuote{Rational Chebyshev approximation using linear
-equations}, \emph{Numerische Mathematik}, \bold{12}, 242--251,
-\doi{10.1007/BF02162506}
+Cody, W. J. and Fraser W. and Hart J. F. (1968) \dQuote{Rational Chebyshev approximation using linear equations}, \emph{Numerische Mathematik}, \bold{12},
+242--251, \doi{10.1007/BF02162506}
 }
 
 \author{
