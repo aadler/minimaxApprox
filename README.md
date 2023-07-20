@@ -18,7 +18,7 @@ If you use the package, please cite it as:
   Adler A (2023). minimaxApprox: Implementation of Remez Algorithm for
   Polynomial and Rational Function Approximation.
   [doi: 10.5281/zenodo.8158855](https://doi.org/10.5281/zenodo.8158855),
-  R package version 0.0.2, https://CRAN.R-project.org/package=minimaxApprox
+  R package version 0.0.3, https://CRAN.R-project.org/package=minimaxApprox
 
 A BibTeX entry for LaTeX users is:
 
@@ -29,7 +29,7 @@ A BibTeX entry for LaTeX users is:
     year = {2023},
     url = {https://CRAN.R-project.org/package=minimaxApprox},
     doi = {10.5281/zenodo.8158855},
-    note = {R package version 0.0.2},
+    note = {R package version 0.0.3},
   }
 ```
 
