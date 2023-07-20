@@ -1,3 +1,4 @@
+# nocov start
 .onAttach <- function(libname, pkgname) {
   # Warn Mac M1 users
   # See https://stackoverflow.com/questions/69913603/skip-test-on-m1mac-in-r
@@ -13,3 +14,4 @@
                           "differently.")
   }
 }
+# nocov end
