@@ -41,11 +41,11 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             attempt convergence. Defaults to 100.
             \item \code{miniter}:  integer; The minimum number of iterations
             before allowing convergence. Defaults to 10.
-            \item \code{conviter}: integer; For rational approximation only, the
-            number of successive iteration with the same results allowed before
-            assuming no further convergence is possible. Defaults to 10L. Will
-            overwrite \code{maxiter} if \code{conviter} is explicitly passed and
-            is larger than \code{maxiter}.
+            \item \code{conviter}: integer; The number of successive iterations
+            with the same results allowed before assuming no further convergence
+            is possible. Defaults to 10. Will overwrite \code{maxiter} if
+            \code{conviter} is explicitly passed and is larger than
+            \code{maxiter}.
             \item \code{showProgress}: logical; If \code{TRUE} will print error
             values at each iteration.
              \item \code{convRatio}: numeric; The convergence ratio tolerance.
