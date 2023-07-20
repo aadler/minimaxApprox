@@ -20,7 +20,8 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
 \arguments{
     \item{fn}{function; A vectorized univariate function having \code{x} as its
-    first parameter.}
+    first argument. This could be a built-in \R function, a predefined function,
+    or an anonymous function defined in the call; see \strong{Examples}.}
     \item{lower}{numeric; The lower bound of the approximation interval.}
     \item{upper}{numeric; The upper bound of the approximation interval.}
     \item{degree}{integer; Either a single value representing the requested
@@ -140,10 +141,12 @@ values and \code{\link[Pade:Pade]{Pade}} for a function to calculate
 }
 
 \examples{
-PP <- minimaxApprox(exp, 0, 1, 5)
-PP
-RR <- minimaxApprox(exp, 0, 1, c(2, 3))
-RR
+minimaxApprox(exp, 0, 1, 5)                              # Built-in & polynomial
+
+fn <- function(x) sin(x) ^ 2 + cosh(x)                   # Pre-defined
+minimaxApprox(exp, 0, 1, c(2, 3))                        # Rational
+
+minimaxApprox(function(x) x ^ 3 / sin(x), 0.7, 1.6, 6L)  # Anonymous
 }
 
 \keyword{optimize}
