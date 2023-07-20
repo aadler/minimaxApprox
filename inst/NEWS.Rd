@@ -6,6 +6,14 @@
 
 \title{NEWS file for the minimaxApprox package}
 
+\section{Version 0.0.2-9000 (2023-08-08)}{
+  \subsection{Changed}{
+    \itemize{
+      \item Correct the \code{minimaxApprox} example
+    }
+  }
+}
+
 \section{Version 0.0.2 (2023-07-20)}{
   \subsection{Changed}{
     \itemize{
