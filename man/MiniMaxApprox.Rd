@@ -9,8 +9,8 @@
 
 \description{
 Calculates minimax approximations to functions. Polynomial approximation uses
-the Remez algorithm. Rational approximation uses a form of the Fraser-Hart
-version of the Remez algorithm.
+the Remez (1962) algorithm. Rational approximation uses the Cody-Fraser-Hart
+(Cody et al., 1968) version of the algorithm.
 }
 
 \usage{
