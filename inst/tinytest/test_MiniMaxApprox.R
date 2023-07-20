@@ -105,7 +105,7 @@ expect_error(minimaxApprox(fn, -1, 1, 1:3), errMess)
 ## Polynomial - Check that it is ignored
 wrnMess <- paste("Polynomial approximation uses Chebyshev nodes for initial",
                  "guess. Any passed xi is ignored.")
-expect_warning(minimaxApprox(fn, -1, 1, 10L, xi = 6), wrnMess)
+expect_message(minimaxApprox(fn, -1, 1, 10L, xi = 6), wrnMess)
 ## Rational - Check that proper length is passed
 errMess <- paste("Given the requested degrees for numerator and denominator,",
                  "the x-vector needs to have 8 elements.")
