@@ -11,7 +11,7 @@
     \itemize{
       \item Trap one test which fails on M1 Mac due to it returning a singular
       matrix where Linux and Windows do not. Per \R
-      \href{https://bit.ly/44SkzmV}{Installation and Administration}, the native
+      \href{https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-R-under-macOS}{Installation and Administration}, the native
       Apple build \dQuote{...may give different numerical results from the
       more common ‘x86_64’ platforms...as ARM hardware lacks extended-precision
       floating-point operations.}
