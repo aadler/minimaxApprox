@@ -9,10 +9,10 @@ type: software
 license: MPL-2.0
 title: 'minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational
   Function Approximation'
-version: 0.0.1
+version: 0.0.2
 doi: 10.5281/zenodo.8158855
-abstract: Implements the basic Remez algorithm for polynomial approximation and a
-  form of the Fraser-Hart version <doi:10.1145/368273.368578> for rational approximation.
+abstract: Implements the algorithm of Remez (1962) for polynomial minimax approximation
+  and of Cody et al. (1968) <doi:10.1007/BF02162506> for rational minimax approximation.
 authors:
 - family-names: Adler
   given-names: Avraham
@@ -31,9 +31,10 @@ preferred-citation:
   url: https://CRAN.R-project.org/package=minimaxApprox
   doi: 10.5281/zenodo.8158855
   notes: R package version 0.0.1
+repository: https://CRAN.R-project.org/package=minimaxApprox
 repository-code: https://github.com/aadler/MiniMaxApprox
 url: https://github.com/aadler/MiniMaxApprox
-date-released: '2023-07-18'
+date-released: '2023-07-20'
 contact:
 - family-names: Adler
   given-names: Avraham
