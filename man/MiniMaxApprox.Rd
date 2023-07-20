@@ -144,7 +144,7 @@ values and \code{\link[Pade:Pade]{Pade}} for a function to calculate
 minimaxApprox(exp, 0, 1, 5)                              # Built-in & polynomial
 
 fn <- function(x) sin(x) ^ 2 + cosh(x)                   # Pre-defined
-minimaxApprox(exp, 0, 1, c(2, 3))                        # Rational
+minimaxApprox(fn, 0, 1, c(2, 3))                         # Rational
 
 minimaxApprox(function(x) x ^ 3 / sin(x), 0.7, 1.6, 6L)  # Anonymous
 }
