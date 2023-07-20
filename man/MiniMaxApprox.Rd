@@ -19,8 +19,8 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 }
 
 \arguments{
-    \item{fn}{function; A vectorized univariate function having \strong{x} as
-    its first value.}
+    \item{fn}{function; A vectorized univariate function having \code{x} as its
+    first parameter.}
     \item{lower}{numeric; The lower bound of the approximation interval.}
     \item{upper}{numeric; The upper bound of the approximation interval.}
     \item{degree}{integer; Either a single value representing the requested
