@@ -9,7 +9,7 @@ type: software
 license: MPL-2.0
 title: 'minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational
   Function Approximation'
-version: 0.0.2
+version: 0.0.2-9000
 doi: 10.5281/zenodo.8158855
 abstract: Implements the algorithm of Remez (1962) for polynomial minimax approximation
   and of Cody et al. (1968) <doi:10.1007/BF02162506> for rational minimax approximation.
@@ -30,7 +30,7 @@ preferred-citation:
   year: '2023'
   url: https://CRAN.R-project.org/package=minimaxApprox
   doi: 10.5281/zenodo.8158855
-  notes: R package version 0.0.1
+  notes: R package version 0.0.2-9000
 repository: https://CRAN.R-project.org/package=minimaxApprox
 repository-code: https://github.com/aadler/MiniMaxApprox
 url: https://github.com/aadler/MiniMaxApprox
@@ -40,3 +40,49 @@ contact:
   given-names: Avraham
   email: Avraham.Adler@gmail.com
   orcid: https://orcid.org/0000-0002-3039-0703
+references:
+- type: software
+  title: stats
+  abstract: 'R: A Language and Environment for Statistical Computing'
+  notes: Imports
+  authors:
+  - name: R Core Team
+  location:
+    name: Vienna, Austria
+  year: '2023'
+  institution:
+    name: R Foundation for Statistical Computing
+- type: software
+  title: graphics
+  abstract: 'R: A Language and Environment for Statistical Computing'
+  notes: Imports
+  authors:
+  - name: R Core Team
+  location:
+    name: Vienna, Austria
+  year: '2023'
+  institution:
+    name: R Foundation for Statistical Computing
+- type: software
+  title: tinytest
+  abstract: 'tinytest: Lightweight and Feature Complete Unit Testing Framework'
+  notes: Suggests
+  url: https://github.com/markvanderloo/tinytest
+  repository: https://CRAN.R-project.org/package=tinytest
+  authors:
+  - family-names: van der Loo
+    given-names: Mark
+    email: mark.vanderloo@gmail.com
+    orcid: https://orcid.org/0000-0002-9807-4686
+  year: '2023'
+- type: software
+  title: covr
+  abstract: 'covr: Test Coverage for Packages'
+  notes: Suggests
+  url: https://covr.r-lib.org
+  repository: https://CRAN.R-project.org/package=covr
+  authors:
+  - family-names: Hester
+    given-names: Jim
+    email: james.f.hester@gmail.com
+  year: '2023'
