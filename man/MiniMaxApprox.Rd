@@ -59,8 +59,8 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
 \details{
 The function implements the Remez algorithm using linear approximation, chiefly
-as described by Cody (1968). Convergence is considered achieved when all three
-of the following criteria are met:
+as described by Cody et al. (1968). Convergence is considered achieved when all
+three of the following criteria are met:
     \enumerate{
         \item The observed error magnitudes are within tolerance of the expected
          error (Distance Test).
@@ -78,7 +78,7 @@ of the following criteria are met:
 
 For efficiency, the Distance Test is taken between the absolute value of the
 largest observed error and the absolute value of the expected error. Similarly,
-the Magnitude test is taken between the absolute value of the largest observed
+the Magnitude Test is taken between the absolute value of the largest observed
 error and the absolute value of the smallest observed error. Both the Magnitude
 Test and the Distance Test can be passed by \strong{either} being within
 \code{tol} or \code{convRatio} as described above.
