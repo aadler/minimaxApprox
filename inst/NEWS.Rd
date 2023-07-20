@@ -15,7 +15,10 @@
       Apple build \dQuote{...may give different numerical results from the
       more common ‘x86_64’ platforms...as ARM hardware lacks extended-precision
       floating-point operations.}
-      \item Add a startup message to that effect for the M1 Mac.
+      \item Fails on PowerPC as well per
+      \href{https://github.com/aadler/minimaxApprox/issues/1}{Issue 1}; thanks
+      to \href{https://github.com/barracuda156}{Sergey Fedorov}.
+      \item Add a startup message to that effect for the M1 Mac and PowerPC.
     }
   }
 }

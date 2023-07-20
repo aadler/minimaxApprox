@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 tol <- 1e-7
+problemSystems <- c("aarch64", "aarch32", "ppc", "ppc64")
 
 # Most tests of warnings and messages will perforce check internals too.
 
@@ -81,7 +82,7 @@ expect_warning(minimaxApprox(fn, -1, 1, 13L), wrnMess)
 
 fn <- function(x) exp(x) - 1
 if (!(tolower(Sys.info()[["sysname"]]) == "darwin" &&
-       R.version[["arch"]] == "aarch64")) {
+      R.version[["arch"]] %in% problemSystems)) {
   expect_warning(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
 }
 
