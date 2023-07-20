@@ -1,0 +1,12 @@
+.onAttach <- function(libname, pkgname) {
+  # Warn Mac M1 users
+  # See https://stackoverflow.com/questions/69913603/skip-test-on-m1mac-in-r
+  if ((tolower(Sys.info()[["sysname"]]) == "darwin" &&
+       R.version[["arch"]] == "aarch64")) {
+    packageStartupMessage("As per R Installation and Administration, the ",
+                          "native build for Apple Silicon may give different ",
+                          "numerical results from other systems, or even fail ",
+                          "where they succeed, since ARM hardware lacks ",
+                          "extended-precision floating-point operations.")
+  }
+}
