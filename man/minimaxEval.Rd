@@ -17,7 +17,8 @@ minimaxEval(x, mmA)
   \item{mmA}{a \code{"minimaxApprox"} return object}
 }
 \details{
-This is a convenience function to evalute the approximation at supplied \code{x}.
+This is a convenience function to evaluate the approximation at supplied
+\code{x}.
 }
 \value{
 A vector of the same length as \code{x} containing the approximation values.
