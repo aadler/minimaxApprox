@@ -74,8 +74,16 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1, 1, 13L), wrnMess)
 ## Rational
+## Going to skip test on M1 Mac because it returns a BLAS error. Doesn't make
+## sense to test for "expect_error" because the BLAS may be fixed one day.
+## Trap code taken from https://stackoverflow.com/a/70016061/2726543
+## AA: 2023-07-20
+
 fn <- function(x) exp(x) - 1
-expect_warning(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
+if (!(tolower(Sys.info()[["sysname"]]) == "darwin" &&
+       R.version[["arch"]] == "aarch64")) {
+  expect_warning(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
+}
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
