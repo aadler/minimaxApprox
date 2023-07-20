@@ -17,8 +17,7 @@ Provides a more human-readable output of a \code{"minimaxApprox"} object.
 
 \arguments{
     \item{x}{An object inheriting from \link{class} \code{"minimaxApprox"}.}
-    \item{round}{integer; Number of digits to which to round ratio and
-    difference.}
+    \item{round}{integer; Number of digits to which to round the ratio.}
     \item{\dots}{Further arguments to \code{print}.}
 }
 
