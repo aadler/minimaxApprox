@@ -44,7 +44,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   } else if (length(degree) == 1L) {
     ratApprox <- FALSE               # Polynomial approximation requested
     if (!is.null(xi)) {
-      warning("Polynomial approximation uses Chebyshev nodes for initial ",
+      message("Polynomial approximation uses Chebyshev nodes for initial ",
               "guess. Any passed xi is ignored.")
     }
   } else {
