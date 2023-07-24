@@ -9,7 +9,7 @@ Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
 Description: Implements the algorithm of Remez (1962) for polynomial minimax
     approximation and of Cody et al. (1968) <doi:10.1007/BF02162506> for
     rational minimax approximation.
-License: MPL-2.0
+License: MPL-2.0 | file LICENSE
 URL: https://github.com/aadler/MiniMaxApprox
 BugReports: https://github.com/aadler/MiniMaxApprox/issues
 Imports: stats, graphics
