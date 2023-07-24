@@ -77,11 +77,11 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
   if (mmA$unchanged && !mmA$converged) {
     warning("Convergence to requested ratio and tolerance not achieved in ",
-            mmA$i, " iterations.\n", mmA$unchanging_i, " successive calculated ",
-            "errors were too close to each other to warrant further ",
-            "iterations.\nThe ratio is ", fC(mmA$mxae / mmA$expe), " times ",
-            "expected and the difference is ", fC(abs(mmA$mxae - mmA$expe)),
-            " from the expected.")
+            mmA$i, " iterations.\n", mmA$unchanging_i, " successive ",
+            "calculated errors were too close to each other to warrant ",
+            "further iterations.\nThe ratio is ", fC(mmA$mxae / mmA$expe),
+            " times expected and the difference is ",
+            fC(abs(mmA$mxae - mmA$expe)), " from the expected.")
     gotWarning <- TRUE
   }
 
