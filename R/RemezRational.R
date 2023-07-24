@@ -91,7 +91,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will just not help.
     if (all(errs / errs_last <= opts$convrat) ||
-        all(abs(errs - errs_last) <= opts$tol)) {
+          all(abs(errs - errs_last) <= opts$tol)) {
       unchanging_i <- unchanging_i + 1L
       if (unchanging_i >= opts$conviter) {
         unchanged <- TRUE

@@ -43,12 +43,12 @@ evalFunc <- function(x, R) {
 
 # Function to calculate error between known and calculated values
 remErr <- function(x, R, fn, relErr) {
-    if (relErr) {
-      y <- callFun(fn, x)
-      (evalFunc(x, R) - y) / y
-    } else {
-      evalFunc(x, R) - callFun(fn, x)
-    }
+  if (relErr) {
+    y <- callFun(fn, x)
+    (evalFunc(x, R) - y) / y
+  } else {
+    evalFunc(x, R) - callFun(fn, x)
+  }
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
@@ -108,11 +108,9 @@ switchX <- function(r, l, u, R, fn, relErr) {
     }
 
     # Test for 0 value at function if relative error
-    if (relErr) {
-      if (callFun(fn, x[i]) == 0) {
-        stop("Algorithm is choosing basis point where functional value is ",
-             "0. Please approximate using absolute, and not relative, error.")
-      }
+    if (relErr && callFun(fn, x[i]) == 0) {
+      stop("Algorithm is choosing basis point where functional value is ",
+           "0. Please approximate using absolute, and not relative, error.")
     }
 
     # Flip maximize

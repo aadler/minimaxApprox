@@ -32,8 +32,8 @@ expect_equal(RR$EE, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
 # Test trap for relErr
-errMess <- paste("Relative Error must be a logical value.",
-                  "Default FALSE returns absolute error")
+errMess <- paste("Relative Error must be a logical value. Default FALSE",
+                 "returns absolute error.")
 expect_error(minimaxApprox(fn, -1, 1, 9L, "abs"), errMess)
 
 # Test showProgress. Also tests passing miniter
