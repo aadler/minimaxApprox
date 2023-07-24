@@ -10,5 +10,5 @@ expect_true(any(grepl(pV, toBibtex(citation("minimaxApprox")), fixed = TRUE)))
 expect_true(any(grepl(pV, news(package = "minimaxApprox"), fixed = TRUE)))
 
 # Test that NEWS has an entry with DESCRIPTION's Date
-pD <- packageDate("minimaxApprox")
-expect_true(any(grepl(pD, news(package = "minimaxApprox"), fixed = TRUE)))
+expect_true(any(grepl(packageDate("minimaxApprox"),
+                      news(package = "minimaxApprox"), fixed = TRUE)))
