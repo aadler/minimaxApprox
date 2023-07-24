@@ -1,3 +1,6 @@
+# Copyright Avraham Adler (c) 2023
+# SPDX-License-Identifier: MPL-2.0+
+
 # Master user-exposed function
 minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                           opts = list()) {

@@ -1,3 +1,6 @@
+# Copyright Avraham Adler (c) 2023
+# SPDX-License-Identifier: MPL-2.0+
+
 # Print method (hide i and basis/x but leave in list and not in attribute)
 print.minimaxApprox <- function(x, round = 6L, ...) {
   if (attr(x, "type") == "Polynomial") {
