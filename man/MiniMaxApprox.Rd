@@ -82,6 +82,9 @@ the Magnitude Test is taken between the absolute value of the largest observed
 error and the absolute value of the smallest observed error. Both the Magnitude
 Test and the Distance Test can be passed by \strong{either} being within
 \code{tol} or \code{convRatio} as described above.
+
+When too high of a degree is requested for the tolerance of the algorithm, it
+often fails with a singular matrix error.
 }
 
 \value{
