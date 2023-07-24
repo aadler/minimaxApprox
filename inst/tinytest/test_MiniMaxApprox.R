@@ -67,21 +67,11 @@ expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
 
 # Test "very near machine double" warning message
 wrnMess <- paste("All errors very near machine double precision. The solution",
-                 "may not be optimal but should be best given the desired",
-                 "precision and floating point limitations. Try a lower degree",
-                 "if needed.")
+                 "may not be optimal given floating point limitations.")
 ## Polynomial
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1, 1, 13L), wrnMess)
-## Rational
-## Only test on x86_64 due to issues with extended floating point on other
-## platforms. See  https://stackoverflow.com/a/70016061/2726543
-## AA: 2023-07-20
-
-if (tolower(R.version[["arch"]]) == "x86_64") {
-  fn <- function(x) exp(x) - 1
-  expect_warning(minimaxApprox(fn, -0.15, 0.15, c(3L, 4L)), wrnMess)
-}
+## Rational removed per CRAN suggestion 2023-07-20
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1

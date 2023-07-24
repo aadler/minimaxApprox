@@ -84,8 +84,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
   if (mmA$mxae < 10 * .Machine$double.eps) {
     warning("All errors very near machine double precision. The solution may ",
-            "not be optimal but should be best given the desired precision ",
-            "and floating point limitations. Try a lower degree if needed.")
+            "not be optimal given floating point limitations.")
     gotWarning <- TRUE
   }
 
