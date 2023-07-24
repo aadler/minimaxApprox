@@ -70,10 +70,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     if (!is.null(dngr)) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fC(dngr), " which makes rational approximation perilous ",
-           "over the interval [", fC(lower), ", ", fC(upper), "]. First try ",
-           "increasing the denominator degree by 1. Often that allows the ",
-           "denominator to converge. Otherwise try a polynomial approximation ",
-           "with degree similar to the sum of numerator and denominator.")
+           "over the interval [", fC(lower), ", ", fC(upper), "]. Increasing ",
+           "the denominator degree by 1 sometimes allows convergence.")
     }
     errs <- remErr(x, RR, fn, relErr)
     mxae <- max(abs(errs))
