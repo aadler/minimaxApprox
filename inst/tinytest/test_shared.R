@@ -40,16 +40,20 @@ expect_false(minimaxApprox:::isOscil(control))
 
 # Test polyCalc
 coeffs <-  c(2, 3.2, 4.6, -9.7, 0.1)
+controlF <- function(x) {
+  2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
+}
 ## Test scalar
 x <- 3
-control <- 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
-expect_equal(minimaxApprox:::polyCalc(x, coeffs), control, tolerance = tol)
+expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
 x <- 5
 control2 <- 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
-expect_equal(minimaxApprox:::polyCalc(x, coeffs), control2, tolerance = tol)
+expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
+x <- 1e-14
+expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
 ## Test vectorized
-expect_equal(minimaxApprox:::polyCalc(c(3, 5), coeffs),
-             c(control, control2), tolerance = tol)
+expect_equal(minimaxApprox:::polyCalc(c(3, 5, 1e-14), coeffs),
+             c(controlF(3), controlF(5), controlF(1e-14)), tolerance = tol)
 
 # Test evalFunc
 x <- c(-0.1, 0.2, 2)

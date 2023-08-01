@@ -31,7 +31,7 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 # Use Horner's method. This version is fastest of few tried (recursion, Reduce,
 # etc.)
 polyCalc <- function(x, a) {
-  ret <- 0
+  ret <- double(length(x))
   for (i in length(a):1L) {
     ret <- (ret * x) + a[i]
   }
