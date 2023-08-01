@@ -23,8 +23,10 @@
       missing.
     }
   }
-  \subsection{Changes}{
+  \subsection{Changed}{
     \itemize{
+      \item Internal function \code{polyCalc} now uses Horner's method for
+      efficiency and stability.
       \item Clarified some error messages.
     }
   }
