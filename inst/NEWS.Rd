@@ -21,6 +21,8 @@
       \item Added file LICENSE with text of MPL-2.0.
       \item Added copyright and license notices to source code where it was
       missing.
+      \item Added unit tests endpoint errors in \code{switchX} bringing unit
+      test coverage to 100\%.
     }
   }
   \subsection{Changed}{
