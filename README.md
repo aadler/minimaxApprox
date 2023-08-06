@@ -7,7 +7,6 @@
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7580/badge)](https://bestpractices.coreinfrastructure.org/projects/7580)
 [![DOI](https://zenodo.org/badge/660219797.svg)](https://zenodo.org/badge/latestdoi/660219797)
 <!-- badges: end -->
-
 # minimaxApprox
 **minimaxApprox** is an `R` package which implements the algorithm of Remez
 (1962) for polynomial minimax approximation and of Cody et al. (1968)
