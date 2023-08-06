@@ -6,7 +6,7 @@
 
 \title{NEWS file for the minimaxApprox package}
 
-\section{Version 0.0.3 (2023-07-24)}{
+\section{Version 0.0.3 (2023-08-07)}{
   \subsection{Removed}{
     \itemize{
       \item Remove one test which fails on M1 Mac (thanks to Professor Brian
