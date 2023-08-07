@@ -7,6 +7,13 @@
 \title{NEWS file for the minimaxApprox package}
 
 \section{Version 0.0.3 (2023-08-07)}{
+  \subsection{Changed}{
+    \itemize{
+      \item Internal function \code{polyCalc} now uses Compensated Horner Scheme
+      of Langlois et al. (2006) for increased precision and stability.
+      \item Clarified some error messages.
+    }
+  }
   \subsection{Removed}{
     \itemize{
       \item Remove one test which fails on M1 Mac (thanks to Professor Brian
@@ -23,13 +30,6 @@
       missing.
       \item Added unit tests endpoint errors in \code{switchX} bringing unit
       test coverage to 100\%.
-    }
-  }
-  \subsection{Changed}{
-    \itemize{
-      \item Internal function \code{polyCalc} now uses Horner's method for
-      efficiency and stability.
-      \item Clarified some error messages.
     }
   }
 }
