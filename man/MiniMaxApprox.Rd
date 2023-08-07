@@ -10,7 +10,8 @@
 \description{
 Calculates minimax approximations to functions. Polynomial approximation uses
 the Remez (1962) algorithm. Rational approximation uses the Cody-Fraser-Hart
-(Cody et al., 1968) version of the algorithm.
+(Cody et al., 1968) version of the algorithm. Polynomial evaluation uses the
+Compensated Horner Scheme of Langlois et al. (2006).
 }
 
 \usage{
@@ -85,6 +86,9 @@ Test and the Distance Test can be passed by \strong{either} being within
 
 When too high of a degree is requested for the tolerance of the algorithm, it
 often fails with a singular matrix error.
+
+The polynomials are evaluated using the Compensated Horner Scheme of Langlois et
+al. (2006) to enhance both stability and precision at the expense of some speed.
 }
 
 \value{
@@ -122,8 +126,14 @@ Fraser W. and Hart J. F. (1962) \dQuote{On the computation of rational
 approximations to continuous functions}, \emph{Communications of the ACM},
 \bold{5}(7), 401--403, \doi{10.1145/368273.368578}
 
-Cody, W. J. and Fraser W. and Hart J. F. (1968) \dQuote{Rational Chebyshev approximation using linear equations}, \emph{Numerische Mathematik}, \bold{12},
+Cody, W. J. and Fraser W. and Hart J. F. (1968) \dQuote{Rational Chebyshev
+approximation using linear equations}, \emph{Numerische Mathematik}, \bold{12},
 242--251, \doi{10.1007/BF02162506}
+
+Langlois, P. and Graillat, S. and Louvet, N. (2006) \dQuote{Compensated Horner
+Scheme}, in \emph{Algebraic and Numerical Algorithms and Computer-assisted
+Proofs.} Dagstuhl Seminar Proceedings, \bold{5391},
+\doi{10.4230/DagSemProc.05391.3}
 }
 
 \author{
@@ -132,9 +142,17 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 
 \note{
 At present, the algorithms are implemented using machine double precision, which
-means that the approximations are at best slightly worse. The value of the
-approximations calculated by this package are for increasing efficiency in
-coding and not---as of yet---for highly precise estimates.
+means that the approximations are at best slightly worse. Research proceeds on
+more precise, stable, and efficient implementations. So long as the package
+remains in an experimental state---noted by a 0 major version---the API may
+change at any time.
+
+\subsection{Future Development Ideas}{
+Future developments may include moving the evaluation into a compiled language
+to take advantage of the speed and precision gains of using fused-multiply-add
+(\acronym{FMA}) instructions, possible use of arbitrary-precision math, or
+using barycentric representations instead of monomials.
+}
 }
 
 \seealso{
@@ -150,6 +168,10 @@ fn <- function(x) sin(x) ^ 2 + cosh(x)                   # Pre-defined
 minimaxApprox(fn, 0, 1, c(2, 3))                         # Rational
 
 minimaxApprox(function(x) x ^ 3 / sin(x), 0.7, 1.6, 6L)  # Anonymous
+
+fn <- function(x) besselJ(x, nu = 0)                     # More than one input
+b0 <- 0.893576966279167522                               # Zero of besselY
+minimaxApprox(fn, 0, b0, c(3L, 3L))                      # Cf. DLMF 3.11.19
 }
 
 \keyword{optimize}

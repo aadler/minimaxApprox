@@ -16,6 +16,13 @@
 \alias{callFun}
 \alias{isOscil}
 \alias{polyCalc}
+\alias{Horner}
+\alias{TwoSum}
+\alias{Split}
+\alias{TwoProduct}
+\alias{EFTHorner}
+\alias{HornerSum}
+\alias{CompensatedHorner}
 \alias{evalFunc}
 \alias{remErr}
 \alias{findRoots}
