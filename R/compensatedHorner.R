@@ -4,27 +4,27 @@
 # Based on Langlois et al.(2006)
 # https://drops.dagstuhl.de/opus/volltexte/2006/442/
 
-# Vectorized standard Horner method (old polyCalc)
-Horner <- function(x, a) {
+# Vectorized standard horner method (old polyCalc)
+horner <- function(x, a) {
   ret <- double(length(x))
   # Using fastest sequence constructor despite it not checking for empty vector
   # as that should not be possible.
-  for (i in length(a):1L) {
+  for (i in length(a):1L) { # nolint (see comment above)
     ret <- (ret * x) + a[i]
   }
   ret
 }
 
-# Vectorized TwoSum
-TwoSum <- function(a, b) {
+# Vectorized twoSum
+twoSum <- function(a, b) {
   x <- a + b
   z <- x - a
   y <- (a - (x - z)) + (b - z)
   list(x = x, y = y)
 }
 
-# Vectorized Split
-Split <- function(a) {
+# Vectorized splitA
+splitA <- function(a) {
   # For doubles, q = 53 so r = 27 so magic number 2 ^ r + 1 is 134217729
   z <- a * 134217729
   x <- z - (z - a)
@@ -32,17 +32,17 @@ Split <- function(a) {
   list(h = x, l = y)
 }
 
-# Vectorized TwoProduct
-TwoProduct <- function(a, b) {
+# Vectorized twoProd
+twoProd <- function(a, b) {
   x <- a * b
-  A <- Split(a)
-  B <- Split(b)
+  A <- splitA(a)
+  B <- splitA(b)
   y <- A$l * B$l - (((x - A$h * B$h) - A$l * B$h) - A$h * B$l)
   list(x = x, y = y)
 }
 
-# Vectorized EFTHorner
-EFTHorner <- function(x, a) {
+# Vectorized eftHorner
+eftHorner <- function(x, a) {
   n <- length(a)
   m <- length(x)
   s <- matrix(0, nrow = n, ncol = m)
@@ -50,9 +50,9 @@ EFTHorner <- function(x, a) {
   if (n > 0) s[n, ] <- a[n]
   if (n > 1L) {
     for (i in (n - 1L):1) {
-      A <- TwoProduct(s[i + 1L, ], x)
+      A <- twoProd(s[i + 1L, ], x)
       piM[i, ] <- A$y
-      B <- TwoSum(A$x, a[i])
+      B <- twoSum(A$x, a[i])
       s[i, ] <- B$x
       sigM[i, ] <- B$y
     }
@@ -60,8 +60,8 @@ EFTHorner <- function(x, a) {
   list(val = s[1L, ], pi = piM, sig = sigM)
 }
 
-# Vectorized HornerSum
-HornerSum <- function(x, p, q) {
+# Vectorized hornerSum
+hornerSum <- function(x, p, q) {
   n <- NROW(p)
   if (n <= 0L) {
     return(rep(0, length(x)))
@@ -79,9 +79,9 @@ HornerSum <- function(x, p, q) {
   r[1L, ]
 }
 
-# Vectorized CompensatedHorner
-CompensatedHorner <- function(x, a) {
-  EFTH <- EFTHorner(x, a)
-  cc <- HornerSum(x, EFTH$pi, EFTH$sig)
+# Vectorized compensatedHorner
+compensatedHorner <- function(x, a) {
+  EFTH <- eftHorner(x, a)
+  cc <- hornerSum(x, EFTH$pi, EFTH$sig)
   EFTH$val + cc
 }

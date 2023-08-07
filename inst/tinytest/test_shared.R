@@ -135,9 +135,11 @@ expect_equal(x, control, tolerance = 3e-7) # GitHub macOS complains otherwise
 ## Contrive no extremum examples for maximization and minimization
 R <- list(a = 0, b = 1)
 fn <- function(x) 3
-expect_equal(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0))
+expect_equal(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
+             tolerance = tol)
 fn <- function(x) -3
-expect_equal(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0))
+expect_equal(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
+             tolerance = tol)
 
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)

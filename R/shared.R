@@ -40,7 +40,8 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 #   ret
 # }
 
-polyCalc <- function(x, a) CompensatedHorner(x, a)
+# Using Compensated Horner Scheme of Langlois et al. (2006)
+polyCalc <- function(x, a) compensatedHorner(x, a)
 
 # Function to calculate value of minimax approximation at x given a & b
 evalFunc <- function(x, R) {
