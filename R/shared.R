@@ -30,15 +30,17 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 # Calculate the polynomial approximation. Use in numer & denom for rationals
 # Use Horner's method. This version is fastest of few tried (recursion, Reduce,
 # etc.)
-polyCalc <- function(x, a) {
-  ret <- double(length(x))
-  # Using fastest sequence constructor despite it not checking for empty vector
-  # as that should not be possible.
-  for (i in length(a):1L) {
-    ret <- (ret * x) + a[i]
-  }
-  ret
-}
+# polyCalc <- function(x, a) {
+#   ret <- double(length(x))
+#   # Using fastest sequence constructor despite it not checking for empty vector
+#   # as that should not be possible.
+#   for (i in length(a):1L) {
+#     ret <- (ret * x) + a[i]
+#   }
+#   ret
+# }
+
+polyCalc <- function(x, a) CompensatedHorner(x, a)
 
 # Function to calculate value of minimax approximation at x given a & b
 evalFunc <- function(x, R) {
