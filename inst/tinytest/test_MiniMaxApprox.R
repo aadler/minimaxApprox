@@ -31,6 +31,18 @@ expect_equal(RR$x, controlX, tolerance = 5e-5)
 expect_equal(RR$EE, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
+## Rational 3: Based on DLMF 3.11.19 https://dlmf.nist.gov/3.11#iii
+# Differnce on Windows machine is 8.15e-6
+controlA <- c(0.99999998917854, -0.34038938209347, -0.18915483763222,
+              0.06658319420166)
+controlB <- c(1, -0.34039052338838, 0.06086501629812, -0.01864476809090)
+fn <- function(x) besselJ(x, nu = 0)
+b0 <- 0.893576966279167522
+RR <- minimaxApprox(fn, 0, b0, c(3L, 3L))
+expect_equal(RR$a, controlA, tolerance = 1e-5)
+expect_equal(RR$b, controlB, tolerance = 1e-5)
+expect_false(RR$Warning)
+
 # Test trap for relErr
 errMess <- paste("Relative Error must be a logical value. Default FALSE",
                  "returns absolute error.")
