@@ -9,7 +9,7 @@
 \section{Version 0.1.0 (2023-08-07)}{
   \subsection{Changed}{
     \itemize{
-      \item Internal function \code{polyCalc} now uses Compensated Horner Scheme
+      \item Internal polynomial evaluations now uses Compensated Horner Scheme
       of Langlois et al. (2006) for increased precision and stability.
       \item Clarified some error messages.
     }
