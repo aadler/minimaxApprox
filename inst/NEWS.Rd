@@ -6,7 +6,7 @@
 
 \title{NEWS file for the minimaxApprox package}
 
-\section{Version 0.0.3 (2023-08-07)}{
+\section{Version 0.1.0 (2023-08-07)}{
   \subsection{Changed}{
     \itemize{
       \item Internal function \code{polyCalc} now uses Compensated Horner Scheme
