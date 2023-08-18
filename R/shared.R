@@ -32,8 +32,8 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 # etc.)
 # polyCalc <- function(x, a) {
 #   ret <- double(length(x))
-#   # Using fastest sequence constructor despite it not checking for empty vector
-#   # as that should not be possible.
+#   # Using fastest sequence constructor despite it not checking for empty
+#   # vector as that should not be possible.
 #   for (i in length(a):1L) {
 #     ret <- (ret * x) + a[i]
 #   }
