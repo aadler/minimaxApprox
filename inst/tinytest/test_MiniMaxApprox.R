@@ -136,6 +136,7 @@ expect_error(minimaxEval(x, sin), errMess)
 
 # Test HW Borchers request of returning n degree if n fails but n + 1 works with
 # uppermost effectively 0 with Runge function between -1 and 1 and degree 10.
+## Test successful restart
 mess <- paste("The algorithm failed while looking for a polynomial of degree",
               "10 but successfully completed when looking for a polynomial of",
               "degree 11 with the largest coefficient's contribution to the",
@@ -151,3 +152,16 @@ PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
 expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$EE, controlE, tolerance = tol)
 expect_equal(PP$OE, controlE, tolerance = tol)
+
+## Test unsuccessful restart due to two failures
+errMess <- paste("The algorithm neither converged when looking for a",
+                 "polynomial of length 13 nor when looking for a polynomial of",
+                 "degree 14.")
+fn <- function(x) exp(x) - 1
+expect_error(minimaxApprox(fn, -0.15, 0.15, 13L), errMess)
+
+## Test unsuccessful restart due to one failures and n + 1 not 0.
+errMess <- paste("The algorithm did not converge when looking for a polynomial",
+                 "of length 12 and when looking for a polynomial of degree 13",
+                 "the uppermost coefficient is not effectively zero.")
+expect_error(minimaxApprox(abs, -0.25, 0.25, 12L), errMess)
