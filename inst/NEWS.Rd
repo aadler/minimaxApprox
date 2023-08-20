@@ -27,6 +27,10 @@
       ill-conditioned matrices for \dQuote{longer}, i.e. higher degree
       polynomials.
       \item Updated unit tests.
+      \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
+      \file{DESCRIPTION} as suggested on
+      \href{https://stat.ethz.ch/pipermail/r-package-devel/2023q3/009417.html
+      }{R-pkg-devel}.
     }
   }
 }
