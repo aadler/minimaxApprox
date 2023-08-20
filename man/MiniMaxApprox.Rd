@@ -54,11 +54,16 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
              Defaults to \code{1+1e-9}. See \strong{Details}.
              \item \code{tol}: numeric; The absolute difference tolerance.
              Defaults to \code{1e-14}. See \strong{Details}.
+             \item \code{tailtol}: numeric; The tolerance of the coefficent of
+             the largest power of \code{x} to be ignored when performing the
+             polynomial approximation a second time. Defaults to \code{1e-10}.
+             See \strong{Details}.
         }
     }
 }
 
 \details{
+\subsection{Convergece}
 The function implements the Remez algorithm using linear approximation, chiefly
 as described by Cody et al. (1968). Convergence is considered achieved when all
 three of the following criteria are met:
@@ -84,11 +89,22 @@ error and the absolute value of the smallest observed error. Both the Magnitude
 Test and the Distance Test can be passed by \strong{either} being within
 \code{tol} or \code{convRatio} as described above.
 
-When too high of a degree is requested for the tolerance of the algorithm, it
-often fails with a singular matrix error.
-
+\subsection{Polynomial Evaluation}
 The polynomials are evaluated using the Compensated Horner Scheme of Langlois et
 al. (2006) to enhance both stability and precision at the expense of some speed.
+
+\subsection{Polynomial Algorithm Singular Error Response}
+When too high of a degree is requested for the tolerance of the algorithm, it
+often fails with a singular matrix error. In this case, for the polynomial
+version, the algorithm will try looking for an approximation of degree
+\code{n + 1}. If it finds one, \strong{and} the contribution of that coefficient
+to the approximation is \eqn{\le}\code{tailtol}, it will ignore that coefficient
+and return the resulting degree \code{n} polynomial, as the largest coefficient
+is effectively 0. The contribution is measured by multiplying that coefficient
+by the endpoint with the larger absolute magnitude raised to the \code{n + 1}
+power. This is done to prevent errors in cases where a very small coefficient is
+found on a range with very large absolute values and the resulting contribution
+to the approximation is \strong{not} \emph{de minimis}.
 }
 
 \value{
