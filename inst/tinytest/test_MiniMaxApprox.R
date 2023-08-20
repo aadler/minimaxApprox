@@ -32,7 +32,7 @@ expect_equal(RR$EE, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
 ## Rational 3: Based on DLMF 3.11.19 https://dlmf.nist.gov/3.11#iii
-# Differnce on Windows machine is 8.15e-6
+# Difference on Windows machine is 8.15e-6
 controlA <- c(0.99999998917854, -0.34038938209347, -0.18915483763222,
               0.06658319420166)
 controlB <- c(1, -0.34039052338838, 0.06086501629812, -0.01864476809090)
@@ -133,3 +133,21 @@ expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
 ## Check error trap
 errMess <- "This function only works with 'minimaxApprox' objects."
 expect_error(minimaxEval(x, sin), errMess)
+
+# Test HW Borchers request of returning n degree if n fails but n + 1 works with
+# uppermost effectively 0 with Runge function between -1 and 1 and degree 10.
+mess <- paste("The algorithm failed while looking for a polynomial of degree",
+              "10 but successfully completed when looking for a polynomial of",
+              "degree 11 with the largest coefficient's contribution to the",
+              "approximation <= 1e-10: the tailtol option. The result is a",
+              "polynomial of length 10 as the uppermost coefficient is",
+              "effectively 0.")
+fn <- function(x) 1 / (1 + (5 * x) ^ 2)
+control <- c(0.934077073, 0.0, -11.553015692, 0.0, 59.171892231,
+             0.0, -134.155250367, 0.0, 135.795965068, 0.0, -50.221129702)
+controlE <- 0.06592293
+expect_message(minimaxApprox(fn, -1, 1, 10L), mess)
+PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
+expect_equal(PP$a, control, tolerance = tol)
+expect_equal(PP$EE, controlE, tolerance = tol)
+expect_equal(PP$OE, controlE, tolerance = tol)
