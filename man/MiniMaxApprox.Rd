@@ -54,7 +54,7 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
              Defaults to \code{1+1e-9}. See \strong{Details}.
              \item \code{tol}: numeric; The absolute difference tolerance.
              Defaults to \code{1e-14}. See \strong{Details}.
-             \item \code{tailtol}: numeric; The tolerance of the coefficent of
+             \item \code{tailtol}: numeric; The tolerance of the coefficient of
              the largest power of \code{x} to be ignored when performing the
              polynomial approximation a second time. Defaults to \code{1e-10}.
              See \strong{Details}.
@@ -63,7 +63,7 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 }
 
 \details{
-\subsection{Convergece}
+\subsection{Convergence}{
 The function implements the Remez algorithm using linear approximation, chiefly
 as described by Cody et al. (1968). Convergence is considered achieved when all
 three of the following criteria are met:
@@ -88,12 +88,12 @@ the Magnitude Test is taken between the absolute value of the largest observed
 error and the absolute value of the smallest observed error. Both the Magnitude
 Test and the Distance Test can be passed by \strong{either} being within
 \code{tol} or \code{convRatio} as described above.
-
-\subsection{Polynomial Evaluation}
+}
+\subsection{Polynomial Evaluation}{
 The polynomials are evaluated using the Compensated Horner Scheme of Langlois et
 al. (2006) to enhance both stability and precision at the expense of some speed.
-
-\subsection{Polynomial Algorithm Singular Error Response}
+}
+\subsection{Polynomial Algorithm Singular Error Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
 often fails with a singular matrix error. In this case, for the polynomial
 version, the algorithm will try looking for an approximation of degree
@@ -106,7 +106,7 @@ power. This is done to prevent errors in cases where a very small coefficient is
 found on a range with very large absolute values and the resulting contribution
 to the approximation is \strong{not} \emph{de minimis}.
 }
-
+}
 \value{
 \code{minimaxApprox} returns an object of \link{class} \code{"minimaxApprox"}
 which inherits from the class \link{list}.
