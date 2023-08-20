@@ -14,7 +14,7 @@ polyMat <- function(x, y, relErr) {
 # Function to calculate coefficients given matrix and known values
 polyCoeffs <- function(x, fn, relErr) {
   y <- callFun(fn, x)
-  PP <- qr.solve(polyMat(x, y, relErr), y)
+  PP <- qr.solve(polyMat(x, y, relErr), y, tol = 1e-12)
   list(a = PP[-length(PP)], E = PP[length(PP)])
 }
 
