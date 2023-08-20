@@ -103,7 +103,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                "effectively zero.")
         }
       } else {
-        stop("The algorithm neither convergef when looking for a polynomial ",
+        stop("The algorithm neither converged when looking for a polynomial ",
              "of length ", degree, " nor when looking for a polynomial of ",
              "degree ", degree + 1L, ".")
       }
