@@ -6,6 +6,21 @@
 
 \title{NEWS file for the minimaxApprox package}
 
+\section{Version 0.1.0.9999 (2023-08-20)}{
+  \subsection{Added}{
+    \itemize{
+      \item When the polynomial algorithm fails with a singular matrix error
+      for degree \code{n}, it will now look for a polynomial of degree
+      \code{n + 1}. If found, \strong{and} the contribution of that coefficient
+      is less than the new option \code{tailtol} (default \code{1e-10}), it will
+      return the found polynomial without the uppermost coefficient---which is
+      effectively 0. It will message the user to that effect (see
+      [Issue 2](https://github.com/hwborchers) with thanks to
+      [Hans W. Borchers](https://github.com/hwborchers).)
+    }
+  }
+}
+
 \section{Version 0.1.0 (2023-08-07)}{
   \subsection{Changed}{
     \itemize{
