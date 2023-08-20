@@ -26,8 +26,9 @@ extern SEXP horner_c(SEXP x, SEXP a) {
 
 extern SEXP twoSum_c(SEXP a, SEXP b) {
   const int n = LENGTH(a);
-  SEXP x = PROTECT(allocVector(REALSXP, n));
-  SEXP y = PROTECT(allocVector(REALSXP, n));
+  const int m = LENGTH(b);
+  volatile SEXP x = PROTECT(allocVector(REALSXP, n));
+  volatile SEXP y = PROTECT(allocVector(REALSXP, n));
   SEXP ret = PROTECT(allocVector(VECSXP, 2));
   SEXP names = PROTECT(allocVector(STRSXP, 2));
   SET_STRING_ELT(names, 0, mkChar("x"));
@@ -36,12 +37,14 @@ extern SEXP twoSum_c(SEXP a, SEXP b) {
   double *pb = REAL(b);
   double *px = REAL(x);
   double *py = REAL(y);
-  double z;
+  volatile double z[n];
 
   for (int i = 0; i < n; ++i) {
-    px[i] = pa[i] + pb[i];
-    z = px[i] - pa[i];
-    py[i] = (pa[i] - (px[i] - z)) + (pb[i] - z);
+    // In eftHorner, the second term is a singleton. So run this check.
+    int j = m == 1 ? 0 : i;
+    px[i] = pa[i] + pb[j];
+    z[i] = px[i] - pa[i];
+    py[i] = (pa[i] - (px[i] - z[i])) + (pb[j] - z[i]);
   }
 
   SET_VECTOR_ELT(ret, 0, x);
@@ -107,11 +110,12 @@ extern SEXP twoProd_c(SEXP a, SEXP b) {
 
   for (int i = 0; i < n; ++i) {
     px[i]= pa[i] * pb[i];
-    Ah = splithigh(pa[i]);
-    Al = splitlow(pa[i]);
-    Bh = splithigh(pb[i]);
-    Bl = splitlow(pb[i]);
-    py[i] = Al * Bl - (((px[i] - Ah * Bh) - Al * Bh) - Ah * Bl);
+    // Ah = splithigh(pa[i]);
+    // Al = splitlow(pa[i]);
+    // Bh = splithigh(pb[i]);
+    // Bl = splitlow(pb[i]);
+    // py[i] = Al * Bl - (((px[i] - Ah * Bh) - Al * Bh) - Ah * Bl);
+    py[i] = fma(pa[i], pb[i], -px[i]);
   }
 
   SET_VECTOR_ELT(ret, 0, x);
