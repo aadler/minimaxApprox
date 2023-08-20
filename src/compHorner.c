@@ -106,7 +106,7 @@ extern SEXP twoProd_c(SEXP a, SEXP b) {
   double *pb = REAL(b);
   double *px = REAL(x);
   double *py = REAL(y);
-  double Ah, Al, Bh, Bl;
+  // double Ah, Al, Bh, Bl;
 
   for (int i = 0; i < n; ++i) {
     px[i]= pa[i] * pb[i];
