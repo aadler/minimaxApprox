@@ -1,3 +1,5 @@
+useDynLib(minimaxApprox, .registration = TRUE)
+
 export(minimaxApprox, minimaxEval, print.minimaxApprox, plot.minimaxApprox,
        coef.minimaxApprox)
 

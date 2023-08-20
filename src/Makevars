@@ -1,0 +1,9 @@
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+C_OBJS = compHorner.o
+
+all:
+	@$(MAKE) $(SHLIB)
+	@rm -f *.mod *.o
+
+$(SHLIB): $(C_OBJS)

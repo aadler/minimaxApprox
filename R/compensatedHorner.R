@@ -15,12 +15,20 @@ horner <- function(x, a) {
   ret
 }
 
+hornerC <- function(x, a) {
+  .Call(horner_c, as.double(x), as.double(a))
+}
+
 # Vectorized twoSum
 twoSum <- function(a, b) {
   x <- a + b
   z <- x - a
   y <- (a - (x - z)) + (b - z)
   list(x = x, y = y)
+}
+
+twoSumC <- function(a, b) {
+  .Call(twoSum_c, as.double(a), as.double(b))
 }
 
 # Vectorized splitA
@@ -32,6 +40,10 @@ splitA <- function(a) {
   list(h = x, l = y)
 }
 
+splitAC <- function(a) {
+  .Call(splitA_c, as.double(a))
+}
+
 # Vectorized twoProd
 twoProd <- function(a, b) {
   x <- a * b
@@ -39,6 +51,10 @@ twoProd <- function(a, b) {
   B <- splitA(b)
   y <- A$l * B$l - (((x - A$h * B$h) - A$l * B$h) - A$h * B$l)
   list(x = x, y = y)
+}
+
+twoProdC <- function(a, b) {
+  .Call(twoProd_c, as.double(a), as.double(b))
 }
 
 # Vectorized eftHorner
