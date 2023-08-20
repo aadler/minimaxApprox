@@ -82,8 +82,7 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
                  "may not be optimal given floating point limitations.")
 ## Polynomial
 fn <- function(x) sin(x) + cos(x)
-expect_warning(minimaxApprox(fn, -1, 1, 13L), wrnMess)
-## Rational removed per CRAN suggestion 2023-07-20
+expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
