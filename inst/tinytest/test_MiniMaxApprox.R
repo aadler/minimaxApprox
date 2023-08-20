@@ -155,18 +155,17 @@ expect_equal(PP$OE, controlE, tolerance = tol)
 
 ## Test unsuccessful restart due to two failures
 errMess <- paste("The algorithm neither converged when looking for a",
-                 "polynomial of length 18 nor when looking for a polynomial of",
-                 "degree 19.")
-fn <- function(x) exp(x) - 1
-expect_error(minimaxApprox(fn, -0.15, 0.15, 18L), errMess)
+                 "polynomial of length 22 nor when looking for a polynomial of",
+                 "degree 23.")
+expect_error(minimaxApprox(sin, 0, pi/2, 22L), errMess)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
 ## sensitive to precision as it fails on some of github's test platforms, so
 ## only test on my machine and sacrifice the 100% coverage.
 if (Sys.info()["nodename"] == "HOME") {
   errMess <- paste("The algorithm did not converge when looking for a",
-                   "polynomial of length 12 and when looking for a polynomial",
-                   "of degree 13 the uppermost coefficient is not effectively",
+                   "polynomial of length 18 and when looking for a polynomial",
+                   "of degree 19 the uppermost coefficient is not effectively",
                    "zero.")
-  expect_error(minimaxApprox(abs, -0.25, 0.25, 12L), errMess)
+  expect_error(minimaxApprox(abs, -0.15, 0.15, 18L), errMess)
 }
