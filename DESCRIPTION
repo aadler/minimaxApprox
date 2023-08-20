@@ -15,5 +15,5 @@ BugReports: https://github.com/aadler/MiniMaxApprox/issues
 Imports: stats, graphics
 Suggests: tinytest, covr
 ByteCompile: yes
-NeedsCompilation: no
+NeedsCompilation: yes
 Encoding: UTF-8
