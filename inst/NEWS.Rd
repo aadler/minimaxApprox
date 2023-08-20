@@ -19,6 +19,16 @@
       [Hans W. Borchers](https://github.com/hwborchers).)
     }
   }
+  \subsection{Changed}{
+    \itemize{
+      \item Changed linear solution algorithm from default \code{solve}---which
+      uses \acronym{LAPACK}'s \acronym{DGESV}---to \code{qr.solve} which uses a
+      \acronym{QR} decomposition. This seems more capable of handling
+      ill-conditioned matrices for \dQuote{longer}, i.e. higher degree
+      polynomials.
+      \item Updated unit tests.
+    }
+  }
 }
 
 \section{Version 0.1.0 (2023-08-07)}{
