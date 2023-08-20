@@ -121,8 +121,8 @@ xi <- minimaxApprox:::chebNodes(5L, -1, 1)
 expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
 
 # Test checkDenom error message
-expect_error(minimaxApprox(tan, 1, 2, c(2L, 3L)),
-             "The 3 degree polynomial in the denominator has a zero at 1.57")
+expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
+             "The 3 degree polynomial in the denominator has a zero at 2.80961")
 
 # Test evaluation function
 x <- seq(0.1, 0.4, 0.025)
