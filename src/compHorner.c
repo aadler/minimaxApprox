@@ -269,8 +269,8 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
   double *pr0 = REAL(r0);
   memset(pr0, 0, m * sizeof(double));
 
-  // prows can be 0 if asking for constant. Ignoring size issues in this case, which
-  // may be a mistake. Only asking/continuing if prows > 0.
+  // prows can be 0 if asking for constant. Ignoring size issues in this case,
+  // which may be a mistake. Only asking/continuing if prows > 0.
   if (prows > 0) {
     if (lp != LENGTH(q)) {
       error("Error polynomials must be of same dimension.");
@@ -296,8 +296,7 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
     // See above for why this addressing schema is needed.
     // Now build "upwards".
     if (prows > 1) {
-      int nm1 = prows - 1;
-      for (int j = nm1; j-- > 0; ) {
+      for (int j = prows - 1; j-- > 0; ) {
         for (int i = 0; i < m; ++i) {
           r1[i] = pr0[i] * px[i] + (pp[prows * i + j] + pq[prows * i + j]);
         }
