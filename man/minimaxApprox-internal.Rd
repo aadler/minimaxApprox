@@ -22,6 +22,11 @@
 \alias{twoProd}
 \alias{eftHorner}
 \alias{hornerSum}
+\alias{twoSumC}
+\alias{splitAC}
+\alias{twoProdC}
+\alias{eftHornerC}
+\alias{hornerSumC}
 \alias{compensatedHorner}
 \alias{evalFunc}
 \alias{remErr}
