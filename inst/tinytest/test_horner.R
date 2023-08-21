@@ -5,13 +5,23 @@ tol <- 1e-7
 x <- 1:3
 a <- c(1, 1e-6, 1e-12)
 aa <- matrix(rep(a, 2), ncol = 3)
+
+## compensatedHorner
+# Differences should be much less than tol - at the edges of machine precision
+# or beyond.
 expect_equal(minimaxApprox:::hornerC(x, a),
              minimaxApprox:::compensatedHorner(x, a),
              tolerance = tol)
 
+## hornerSum
+# Proper function
+expect_silent(minimaxApprox:::hornerSumC(x, aa, aa))
+
+# Test 0 trap
+expect_identical(minimaxApprox:::hornerSumC(x, double(0), double(0)),
+                 rep(0, length(x)))
+# Test error traps
 expect_error(minimaxApprox:::hornerSumC(x, a, c(a, 1)),
              "Error polynomials must be of same dimension.")
-
-expect_silent(minimaxApprox:::hornerSumC(x, aa, aa))
 expect_error(minimaxApprox:::hornerSumC(x[-1], aa, aa),
              "Polynomials must have same length as x.")
