@@ -17,10 +17,13 @@ ratMat <- function(x, E, y, nD, dD, relErr) {
 # Function to calculate coefficients given matrix and known values
 ratCoeffs <- function(x, E, fn, nD, dD, relErr) {
   y <- callFun(fn, x)
-  P <- qr.solve(ratMat(x, E, y, nD, dD, relErr), y, tol = 1e-12)
-  list(a = P[seq_len(nD + 1L)],            # Works even if nD = 0
-       b = c(1, P[seq_len(dD) + nD + 1L]), # Works even if dD = 0
-       E = P[length(P)])
+  P <- ratMat(x, E, y, nD, dD, relErr)
+  PP <- tryCatch(solve(P, y),
+                 error = function(cond) simpleError(trimws(cond$message)))
+  if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-12)
+  list(a = PP[seq_len(nD + 1L)],            # Works even if nD = 0
+       b = c(1, PP[seq_len(dD) + nD + 1L]), # Works even if dD = 0
+       E = PP[length(PP)])
 }
 
 # Main function to calculate and return the minimax rational approximation
