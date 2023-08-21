@@ -2,7 +2,9 @@
 title: "Using the minimaxApprox package"
 author: "Avraham Adler"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Using the minimaxApprox package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -25,13 +27,31 @@ the limitations of floating-point representation
 Therefore, it is common to use polynomial approximations to such functions,
 especially near poles or singularities.
 
-## Styles
+There are various kinds of polynomial approximation, including Maclaurin and
+Taylor series. 
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+ * Chebyshev
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
+ * Minimax
+
+ * Rational
+ 
+ * Rational Minimax
+ 
+## Description of Process
+
+ * step through with some graphs
+ 
+## Usage Examples
+
+## Failure modes
+
+## Future Research
+
+## References
+
+
+
 
 ## Figures
 
@@ -41,14 +61,6 @@ The figure sizes have been customised so that you can easily put two images side
 plot(1:10)
 plot(10:1)
 ```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
 
 ## More Examples
 
@@ -62,5 +74,3 @@ Also a quote using `>`:
 
 > "He who gives up [code] safety for [code] speed deserves neither."
 ([via](https://twitter.com/hadleywickham/status/504368538874703872))
-
-
