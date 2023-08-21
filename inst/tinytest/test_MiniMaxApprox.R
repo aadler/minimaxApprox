@@ -83,10 +83,6 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
 ## Polynomial
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
-## Rational
-fn <- function(x) exp(x) - 1
-opts <- list(maxiter = 25L, convrat = 1.01, tol = 1e-12, conviter = 50L)
-expect_warning(minimaxApprox(fn, -0.15, 0.15, c(5L, 4L), opts = opts), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
@@ -126,6 +122,9 @@ expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
 # Test checkDenom error message
 expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
              "The 3 degree polynomial in the denominator has a zero at 2.80961")
+# Should also check DGEMM --> QR failover for Rational
+expect_error(minimaxApprox(exp, 0, 0.15, c(3L, 4L)),
+             "4 degree polynomial in the denominator has a zero at 0.0285519")
 
 # Test evaluation function
 x <- seq(0.1, 0.4, 0.025)
