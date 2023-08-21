@@ -175,7 +175,7 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   double *pval = REAL(val);
   double *ppiM = REAL(piM);
   double *psigM = REAL(sigM);
-  volatile double Ax, Ay, Bx, By;
+  volatile double Ax;
 
   memset(ps0, 0, m * sizeof(double));
   memset(ps1, 0, m * sizeof(double));
