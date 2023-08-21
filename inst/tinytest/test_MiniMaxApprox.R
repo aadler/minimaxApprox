@@ -156,7 +156,7 @@ expect_equal(PP$OE, controlE, tolerance = tol)
 errMess <- paste("The algorithm neither converged when looking for a",
                  "polynomial of length 22 nor when looking for a polynomial of",
                  "degree 23.")
-expect_error(minimaxApprox(sin, 0, pi/2, 22L), errMess)
+expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMess)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
 ## sensitive to precision as it fails on some of github's test platforms, so

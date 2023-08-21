@@ -78,7 +78,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   # and return the resulting degree n and message appropriately.
 
   if (inherits(mmA, "simpleError") &&
-      grepl("singular", mmA$message, fixed = TRUE)) {
+        grepl("singular", mmA$message, fixed = TRUE)) {
     mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
                             relErr, opts),
                     error = function(cond) simpleError(trimws(cond$message)))
@@ -90,7 +90,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                       "degree", degree, "but successfully completed when",
                       "looking for a polynomial of degree", degree + 1L,
                       "with the largest coefficient's contribution to the",
-                        "approximation <=", paste0(opts$tailtol, ":"), "the",
+                      "approximation <=", paste0(opts$tailtol, ":"), "the",
                       "tailtol option. The result is a polynomial of length",
                       degree, "as the uppermost coefficient is effectively 0.")
         mmA$a <- mmA$a[-length(mmA$a)]
