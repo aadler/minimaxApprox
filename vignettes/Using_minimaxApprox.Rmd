@@ -16,15 +16,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
-
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+The [Weirstrass Approximation Theorem](https://mathworld.wolfram.com/WeierstrassApproximationTheorem.html)
+lets us approximate any function by polynomials mathematically to any desired
+degree of accuracy. This is important in the computer age as there are many
+functions which are difficult to properly represent in code, especially given
+the limitations of floating-point representation
+([Goldberg 1991](https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html)).
+Therefore, it is common to use polynomial approximations to such functions,
+especially near poles or singularities.
 
 ## Styles
 
@@ -63,3 +62,5 @@ Also a quote using `>`:
 
 > "He who gives up [code] safety for [code] speed deserves neither."
 ([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+
