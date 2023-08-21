@@ -83,6 +83,10 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
 ## Polynomial
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
+## Rational
+fn <- function(x) exp(x) - 1
+opts <- list(maxiter = 25L, convrat = 1.01, tol = 1e-12, conviter = 50L)
+expect_warning(minimaxApprox(fn, -0.15, 0.15, c(5L, 4L), opts = opts), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
