@@ -4,6 +4,15 @@
 # Based on Langlois et al.(2006)
 # https://drops.dagstuhl.de/opus/volltexte/2006/442/
 
+# Calculation ported to C. Most of the _c functions were used while developing
+# the C code. In actuality, they should never be called from R as it is faster
+# to use C as much as possible. Since there is no good way to pass list results
+# to C functions, the core functionality has been rewritten as non-SEXP C and
+# only the "outermost" calls will be exposed. The code will be commented/nocoved
+# out, but left in the files for pedagogic, debugging, and reminder reasons.
+# (AA: 2023-08-21)
+
+# nocov start
 # Vectorized standard horner method (old polyCalc)
 horner <- function(x, a) {
   ret <- double(length(x))
@@ -15,20 +24,12 @@ horner <- function(x, a) {
   ret
 }
 
-hornerC <- function(x, a) {
-  .Call(horner_c, as.double(x), as.double(a))
-}
-
 # Vectorized twoSum
 twoSum <- function(a, b) {
   x <- a + b
   z <- x - a
   y <- (a - (x - z)) + (b - z)
   list(x = x, y = y)
-}
-
-twoSumC <- function(a, b) {
-  .Call(twoSum_c, as.double(a), as.double(b))
 }
 
 # Vectorized splitA
@@ -40,10 +41,6 @@ splitA <- function(a) {
   list(h = x, l = y)
 }
 
-splitAC <- function(a) {
-  .Call(splitA_c, as.double(a))
-}
-
 # Vectorized twoProd
 twoProd <- function(a, b) {
   x <- a * b
@@ -51,10 +48,6 @@ twoProd <- function(a, b) {
   B <- splitA(b)
   y <- A$l * B$l - (((x - A$h * B$h) - A$l * B$h) - A$h * B$l)
   list(x = x, y = y)
-}
-
-twoProdC <- function(a, b) {
-  .Call(twoProd_c, as.double(a), as.double(b))
 }
 
 # Vectorized eftHorner
@@ -95,9 +88,39 @@ hornerSum <- function(x, p, q) {
   r[1L, ]
 }
 
+# The following C calls are unused in actuality (see .src file) and are also
+# kept for debugging etc.
+# (AA: 2023-08-20)
+
+twoSumC <- function(a, b) {
+  .Call(twoSum_c, as.double(a), as.double(b))
+}
+
+splitAC <- function(a) {
+  .Call(splitA_c, as.double(a))
+}
+
+twoProdC <- function(a, b) {
+  .Call(twoProd_c, as.double(a), as.double(b))
+}
+
+# nocov end
+
+hornerC <- function(x, a) {
+  .Call(horner_c, as.double(x), as.double(a))
+}
+
+hornerSumC <- function(x, p, q) {
+  .Call(hornerSum_c, as.double(x), as.double(p), NROW(p), as.double(q), NROW(q))
+}
+
+eftHornerC <- function(x, a) {
+  .Call(eftHorner_c, as.double(x), as.double(a))
+}
+
 # Vectorized compensatedHorner
 compensatedHorner <- function(x, a) {
-  EFTH <- eftHorner(x, a)
-  cc <- hornerSum(x, EFTH$pi, EFTH$sig)
+  EFTH <- eftHornerC(x, a)
+  cc <- hornerSumC(x, EFTH$pi, EFTH$sig)
   EFTH$val + cc
 }
