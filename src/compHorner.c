@@ -189,6 +189,21 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
     }
   }
   if (n > 1) {
+  // Key here is to remember R stores matrices as contiguous vectors in
+  // COLUMN-MAJOR order. So to get to cell [i, j]---assuming C convention that
+  // everything starts at 0---you start by iterating over COLUMNS first and then
+  // actually want (numrows * rowIndex + colIndex). See the R code for how it
+  // works in R, but it's vectorized, so operations are done for all columns in
+  // one row at a time.
+  //
+  // Also, looking at how twoProd and twoSum work, only need to store A$x
+  // equivalent in variable as everything else is a result and not an input too.
+  //
+  // Lastly, looking at the algorithm, one doesn't need the entire matrix---just
+  // the "last" value. When the inner (column) loop finishes, simply store the
+  // new results as the old results and then decrement the row counter.
+  //
+  // (AA: 2023-08-20)
     for (int j = nm1; j-- > 0; ) {
       for (int i = 0; i < m; ++i) {
         Ax = ps0[i] * px[i];
@@ -196,6 +211,7 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
         ps1[i] = Ax + pa[j];
         psigM[nm1 * i + j] = twoSumy(Ax, pa[j]);
       }
+  // Storing the new as old.
       for (int i = 0; i < m; ++i) {
         ps0[i] = ps1[i];
       }
@@ -243,10 +259,12 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q, SEXP nq) {
   double *pr0 = REAL(r0);
   double *pr1 = REAL(r1);
 
+  // See above for why this addressing schema is needed.
   for (int i = 0; i < m; ++i) {
     pr0[i] = pp[prows[0] * (i + 1) - 1] +  pq[prows[0] * (i + 1) - 1];
   }
 
+  // See above for why this addressing schema is needed.
   if (prows[0] > 1) {
     int nm1 = prows[0] - 1;
     for (int j = nm1; j-- > 0; ) {
