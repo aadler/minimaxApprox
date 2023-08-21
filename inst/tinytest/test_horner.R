@@ -10,7 +10,7 @@ expect_equal(minimaxApprox:::hornerC(x, a),
              tolerance = tol)
 
 expect_error(minimaxApprox:::hornerSumC(x, a, c(a, 1)),
-             "Error polynomials must be of same length.")
+             "Error polynomials must be of same dimension.")
 
 expect_silent(minimaxApprox:::hornerSumC(x, aa, aa))
 expect_error(minimaxApprox:::hornerSumC(x[-1], aa, aa),
