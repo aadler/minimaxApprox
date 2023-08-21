@@ -302,7 +302,6 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
     // See above for why this addressing schema is needed.
     // Now build "upwards".
     if (prows > 1) {
-      int vecidx;
       for (int j = prows - 1; j-- > 0; ) {
         for (int i = 0; i < m; ++i) {
           // Proper position of value given flattened column-major matrix.
