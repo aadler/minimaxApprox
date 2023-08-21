@@ -24,7 +24,8 @@
       \item Changed linear solution algorithm to use \code{qr.solve} when the
       default \code{solve} fails with a singular matrix issue. This allows
       higher degree polynomials in certain cases.
-      \item Ported  Compensated Horner Scheme algorithms to C for speed.
+      \item Ported Compensated Horner Scheme algorithms to C for speed. The
+      algorithms are roughly 10x as fast.
       \item Updated unit tests.
       \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
       \file{DESCRIPTION} as suggested on
