@@ -59,9 +59,9 @@ eftHorner <- function(x, a) {
   if (n > 0) s[n, ] <- a[n]
   if (n > 1L) {
     for (i in (n - 1L):1) {
-      A <- twoProdC(s[i + 1L, ], x)
+      A <- twoProd(s[i + 1L, ], x)
       piM[i, ] <- A$y
-      B <- twoSumC(A$x, a[i])
+      B <- twoSum(A$x, a[i])
       s[i, ] <- B$x
       sigM[i, ] <- B$y
     }
