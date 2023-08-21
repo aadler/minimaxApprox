@@ -111,7 +111,7 @@ hornerC <- function(x, a) {
 }
 
 hornerSumC <- function(x, p, q) {
-  .Call(hornerSum_c, as.double(x), as.double(p), NROW(p), as.double(q), NROW(q))
+  .Call(hornerSum_c, as.double(x), as.double(p), NROW(p), as.double(q))
 }
 
 eftHornerC <- function(x, a) {

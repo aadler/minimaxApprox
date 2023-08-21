@@ -258,10 +258,9 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   return(ret);
 }
 
-extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q, SEXP nq) {
+extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
   const int m = LENGTH(x);
   const int prows = INTEGER(np)[0];
-  const int qrows = INTEGER(nq)[0];
   // Length of the "flattened" matrix. Will be used for error checking.
   const int lp = LENGTH(p);
 
@@ -319,7 +318,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"splitA_c",      (DL_FUNC) &splitA_c,    1},
   {"twoProd_c",     (DL_FUNC) &twoProd_c,   2},
   {"eftHorner_c",   (DL_FUNC) &eftHorner_c, 2},
-  {"hornerSum_c",   (DL_FUNC) &hornerSum_c, 5},
+  {"hornerSum_c",   (DL_FUNC) &hornerSum_c, 4},
   {NULL,            NULL,                   0}
 };
 
