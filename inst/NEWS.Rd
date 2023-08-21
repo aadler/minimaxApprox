@@ -15,22 +15,20 @@
       is less than the new option \code{tailtol} (default \code{1e-10}), it will
       return the found polynomial without the uppermost coefficient---which is
       effectively 0. It will message the user to that effect (see
-      [Issue 2](https://github.com/hwborchers) with thanks to
-      [Hans W. Borchers](https://github.com/hwborchers).)
+      \href{https://github.com/aadler/minimaxApprox/issues/2}{Issue 2} with
+      thanks to \href{https://github.com/hwborchers}{Hans W. Borchers}).
     }
   }
   \subsection{Changed}{
     \itemize{
-      \item Changed linear solution algorithm from default \code{solve}---which
-      uses \acronym{LAPACK}'s \acronym{DGESV}---to \code{qr.solve} which uses a
-      \acronym{QR} decomposition. This seems more capable of handling
-      ill-conditioned matrices for \dQuote{longer}, i.e. higher degree
-      polynomials.
+      \item Changed linear solution algorithm to use \code{qr.solve} when the
+      default \code{solve} fails with a singular matrix issue. This allows
+      higher degree polynomials in certain cases.
+      \item Ported  Compensated Horner Scheme algorithms to C for speed.
       \item Updated unit tests.
       \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
       \file{DESCRIPTION} as suggested on
-      \href{https://stat.ethz.ch/pipermail/r-package-devel/2023q3/009417.html
-      }{R-pkg-devel}.
+      \href{https://stat.ethz.ch/pipermail/r-package-devel/2023q3/009417.html}{R-pkg-devel}.
     }
   }
 }
