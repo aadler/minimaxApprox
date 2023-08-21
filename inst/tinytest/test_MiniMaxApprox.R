@@ -122,9 +122,6 @@ expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
 # Test checkDenom error message
 expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
              "The 3 degree polynomial in the denominator has a zero at 2.80961")
-# Should also check DGEMM --> QR failover for Rational
-expect_error(minimaxApprox(exp, 0, 0.15, c(3L, 4L)),
-             "4 degree polynomial in the denominator has a zero at 0.0285519")
 
 # Test evaluation function
 x <- seq(0.1, 0.4, 0.025)

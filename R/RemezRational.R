@@ -74,7 +74,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fC(dngr), " which makes rational approximation perilous ",
            "over the interval [", fC(lower), ", ", fC(upper), "]. Increasing ",
-           "the denominator degree by 1 sometimes allows convergence.")
+           "the numerator or denominator degree by 1 sometimes allows ",
+           "convergence.")
     }
     errs <- remErr(x, RR, fn, relErr)
     mxae <- max(abs(errs))
