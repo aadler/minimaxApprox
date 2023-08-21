@@ -18,7 +18,7 @@ If you use the package, please cite it as:
   Adler A (2023). minimaxApprox: Implementation of Remez Algorithm for
   Polynomial and Rational Function Approximation.
   [doi: 10.5281/zenodo.8158855](https://doi.org/10.5281/zenodo.8158855),
-  R package version 0.1.0, https://CRAN.R-project.org/package=minimaxApprox
+  R package version 0.1.0.9999, https://CRAN.R-project.org/package=minimaxApprox
 
 A BibTeX entry for LaTeX users is:
 
@@ -29,7 +29,7 @@ A BibTeX entry for LaTeX users is:
     year = {2023},
     url = {https://CRAN.R-project.org/package=minimaxApprox},
     doi = {10.5281/zenodo.8158855},
-    note = {R package version 0.1.0},
+    note = {R package version 0.1.0.9999},
   }
 ```
 
@@ -82,8 +82,8 @@ the lead maintainer.
 ## Roadmap
 ### Major
 
- * Consider moving some calculations into a compiled language (C, Fortran, C++)
- for efficiency.
+ * Consider if the "n + 1" check implemented for polynomial approximation
+ should also be applied to numerator and denominator of rational approximation.
  * Research
  [barycentric representations](https://www.chebfun.org/publications/remez.pdf)
  to consider if possible to implement in R.
@@ -93,6 +93,8 @@ the lead maintainer.
 ### Minor
 
  * Write a vignette.
+ * Consider switching nested loop order in C to better reflect R's column-major
+ order which may allow for better compiler optimization.
 
 ## Security
 ### Expectations
