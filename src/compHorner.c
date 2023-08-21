@@ -220,9 +220,9 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   // The key here is to remember R stores matrices as contiguous vectors in
   // COLUMN-MAJOR order. So to get to cell [i, j]---assuming C convention that
   // everything starts at 0---you start by iterating over COLUMNS first and then
-  // actually want (numrows * rowIndex + colIndex). See the R code for how it
-  // works in R, but it's vectorized, so operations are done for all columns in
-  // one row at a time.
+  // actually want vectorindex = (numrows * rowIndex + colIndex). See the R code
+  // for how it works in R, but it's vectorized, so operations are done for all
+  // columns in one row at a time.
   //
   // Also, looking at how twoProd and twoSum work, only need to store A$x
   // equivalent in variable as everything else is a result and not an input too.
@@ -232,16 +232,19 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   // new results as the old results and then decrement the row counter.
   //
   // (AA: 2023-08-20)
+  int vecidx;
     for (int j = nm1; j-- > 0; ) {
       for (int i = 0; i < m; ++i) {
+        // Proper position of value given flattened column-major matrix.
+        vecidx = nm1 * i + j;
         // First element of twoProd
         Ax = ps0[i] * px[i];
         // Second element of twoProd
-        ppiM[nm1 * i + j] = twoPrody(ps0[i], px[i]);
+        ppiM[vecidx] = twoPrody(ps0[i], px[i]);
         // First element of twoSum
         s1[i] = Ax + pa[j];
         // Second element of twoSum
-        psigM[nm1 * i + j] = twoSumy(Ax, pa[j]);
+        psigM[vecidx] = twoSumy(Ax, pa[j]);
       }
   // Storing the new as old.
       for (int i = 0; i < m; ++i) {
@@ -269,8 +272,8 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
   double *pr0 = REAL(r0);
   memset(pr0, 0, m * sizeof(double));
 
-  // prows can be 0 if asking for constant. Ignoring size issues in this case, which
-  // may be a mistake. Only asking/continuing if prows > 0.
+  // prows can be 0 if asking for constant. Ignoring size issues in this case,
+  // which may be a mistake. Only asking/continuing if prows > 0.
   if (prows > 0) {
     if (lp != LENGTH(q)) {
       error("Error polynomials must be of same dimension.");
@@ -289,17 +292,22 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
 
     // See above for why this addressing schema is needed.
     // Replace the 0's with the sum of the LAST rows of p and q (pi and Sigma).
+    int vecidx;
     for (int i = 0; i < m; ++i) {
-      pr0[i] = pp[prows * (i + 1) - 1] +  pq[prows * (i + 1) - 1];
+      // Proper position of value given flattened column-major matrix.
+      vecidx = prows * (i + 1) - 1;
+      pr0[i] = pp[vecidx] +  pq[vecidx];
     }
 
     // See above for why this addressing schema is needed.
     // Now build "upwards".
     if (prows > 1) {
-      int nm1 = prows - 1;
-      for (int j = nm1; j-- > 0; ) {
+      int vecidx;
+      for (int j = prows - 1; j-- > 0; ) {
         for (int i = 0; i < m; ++i) {
-          r1[i] = pr0[i] * px[i] + (pp[prows * i + j] + pq[prows * i + j]);
+          // Proper position of value given flattened column-major matrix.
+          vecidx = prows * i + j;
+          r1[i] = pr0[i] * px[i] + (pp[vecidx] + pq[vecidx]);
         }
         for (int i = 0; i < m; ++i) {
           pr0[i] = r1[i];
