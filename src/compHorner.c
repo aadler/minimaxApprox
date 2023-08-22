@@ -207,6 +207,7 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   memset(psigM, 0, m * nm1 * sizeof(double));
 
   // If n is at least 1, initialize s0 with the last value of a.
+  // Cannot use memset. See https://stackoverflow.com/a/17288891/2726543
   if (n > 0) {
     for (int i = 0; i < m; ++i) {
       ps0[i] = pa[nm1];
@@ -246,10 +247,8 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
         // Second element of twoSum
         psigM[vecidx] = twoSumy(Ax, pa[j]);
       }
-  // Storing the new as old.
-      for (int i = 0; i < m; ++i) {
-        ps0[i] = s1[i];
-      }
+      // Once "row" is finished, copy "new" into "old".
+      memcpy(ps0, s1, m * sizeof(double));
     }
   }
 
@@ -308,9 +307,8 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
           vecidx = prows * i + j;
           r1[i] = pr0[i] * px[i] + (pp[vecidx] + pq[vecidx]);
         }
-        for (int i = 0; i < m; ++i) {
-          pr0[i] = r1[i];
-        }
+        // Once "row" is finished, copy "new" into "old".
+        memcpy(pr0, r1, m * sizeof(double));
       }
     }
   }
