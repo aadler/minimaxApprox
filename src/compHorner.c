@@ -7,149 +7,16 @@
 #include <Rmath.h>
 #include <R_ext/Rdynload.h>
 
-// Based on Langlois et al.(2006)
+// Based on Langlois et al. (2006)
 // https://drops.dagstuhl.de/opus/volltexte/2006/442/
-
-// Most of the _c functions were used while developing the C code. In actuality,
-// they should never be called from R as it is faster to use C as much as
-// possible. Since there is no good way to pass list results to C functions, the
-// core functionality has been rewritten as non-SEXP C and only the "outermost"
-// calls will be exposed. The code will be commented/nocoved out, but left in
-// the files for pedagogic, debugging, and reminder reasons. This is why the
-// eftHorner_c and hornerSum_c may have optimzations/efficiencies not found in
-// the "component" functions.
 //
-// Also, many of the variables need to be initialized as "volatile" as we
-// specifically DO NOT WANT the compiler to optimize them out. The entire point
-// of EFT algorithms is to capture the floating-point error as best possible!
+// Many of the variables need to be initialized as "volatile" as we specifically
+// DO NOT WANT the compiler to optimize them out. The entire point of EFT
+// algorithms is to capture the floating-point error as best possible!
 //
-// (AA: 2023-08-21)
+// (AA: 2023-08-22)
 
-// # nocov start
-extern SEXP horner_c(SEXP x, SEXP a) {
-  const int m = LENGTH(x);
-  const int n = LENGTH(a);
-  SEXP ret = PROTECT(allocVector(REALSXP, m));
-  double *px = REAL(x);
-  double *pa = REAL(a);
-  double *pret = REAL(ret);
-  for (int i = 0; i < m; ++i) {
-    pret[i] = 0;
-    for (int j = n; j-- > 0; ) {
-      pret[i] = fma(pret[i], px[i], pa[j]);
-    }
-  }
-  UNPROTECT(1);
-  return(ret);
-}
-
-extern SEXP twoSum_c(SEXP a, SEXP b) {
-  const int n = LENGTH(a);
-  const int m = LENGTH(b);
-  volatile SEXP x = PROTECT(allocVector(REALSXP, n));
-  volatile SEXP y = PROTECT(allocVector(REALSXP, n));
-  SEXP ret = PROTECT(allocVector(VECSXP, 2));
-  SEXP names = PROTECT(allocVector(STRSXP, 2));
-  SET_STRING_ELT(names, 0, mkChar("x"));
-  SET_STRING_ELT(names, 1, mkChar("y"));
-  double *pa = REAL(a);
-  double *pb = REAL(b);
-  double *px = REAL(x);
-  double *py = REAL(y);
-  volatile double z[n];
-
-  for (int i = 0; i < n; ++i) {
-    // In eftHorner, the second term is a singleton. So run this check.
-    int j = m == 1 ? 0 : i;
-    px[i] = pa[i] + pb[j];
-    z[i] = px[i] - pa[i];
-    py[i] = (pa[i] - (px[i] - z[i])) + (pb[j] - z[i]);
-  }
-
-  SET_VECTOR_ELT(ret, 0, x);
-  SET_VECTOR_ELT(ret, 1, y);
-  setAttrib(ret, R_NamesSymbol, names);
-  UNPROTECT(4);
-  return(ret);
-}
-
-extern SEXP splitA_c(SEXP a) {
-// For doubles, q = 53 so r = 27 so magic number 2 ^ r + 1 is 134217729
-  const int n = LENGTH(a);
-  volatile SEXP x = PROTECT(allocVector(REALSXP, n));
-  volatile SEXP y = PROTECT(allocVector(REALSXP, n));
-  SEXP ret = PROTECT(allocVector(VECSXP, 2));
-  SEXP names = PROTECT(allocVector(STRSXP, 2));
-  SET_STRING_ELT(names, 0, mkChar("h"));
-  SET_STRING_ELT(names, 1, mkChar("l"));
-  double *pa = REAL(a);
-  double *px = REAL(x);
-  double *py = REAL(y);
-  volatile double z;
-
-  for (int i = 0; i < n; ++i) {
-    z = pa[i] * 134217729;
-    px[i] = z - (z - pa[i]);
-    py[i] = pa[i] - px[i];
-  }
-
-  SET_VECTOR_ELT(ret, 0, x);
-  SET_VECTOR_ELT(ret, 1, y);
-  setAttrib(ret, R_NamesSymbol, names);
-  UNPROTECT(4);
-  return(ret);
-}
-
-extern SEXP twoProd_c(SEXP a, SEXP b) {
-  const int n = LENGTH(a);
-  SEXP x = PROTECT(allocVector(REALSXP, n));
-  SEXP y = PROTECT(allocVector(REALSXP, n));
-  SEXP ret = PROTECT(allocVector(VECSXP, 2));
-  SEXP names = PROTECT(allocVector(STRSXP, 2));
-  SET_STRING_ELT(names, 0, mkChar("x"));
-  SET_STRING_ELT(names, 1, mkChar("y"));
-  double *pa = REAL(a);
-  double *pb = REAL(b);
-  double *px = REAL(x);
-  double *py = REAL(y);
-  // Below needed if there is no fused-multiply add
-  // double Ah, Al, Bh, Bl;
-
-  for (int i = 0; i < n; ++i) {
-    px[i] = pa[i] * pb[i];
-    py[i] = fma(pa[i], pb[i], -px[i]);
-    // Use below instead if there is no fused-multiply add
-    // Ah = splithigh(pa[i]);
-    // Al = splitlow(pa[i]);
-    // Bh = splithigh(pb[i]);
-    // Bl = splitlow(pb[i]);
-    // py[i] = Al * Bl - (((px[i] - Ah * Bh) - Al * Bh) - Ah * Bl);
-  }
-
-  SET_VECTOR_ELT(ret, 0, x);
-  SET_VECTOR_ELT(ret, 1, y);
-  setAttrib(ret, R_NamesSymbol, names);
-  UNPROTECT(4);
-  return(ret);
-}
-
-// Splits are not used if FMA is used.
-double splithigh(double a) {
-  // For doubles, q = 53 so r = 27 so magic number 2 ^ r + 1 is 134217729
-  volatile double r;
-  double z = a * 134217729;
-  r = z - (z - a);
-  return(r);
-}
-
-double splitlow(double a) {
-  volatile double r;
-  r = a - splithigh(a);
-  return(r);
-}
-
-// # nocov end
-
+// This is the y component of twoSum; the x component is the sum itself.
 double twoSumy(double a, double b) {
   volatile double x, y, z;
   x = a + b;
@@ -158,11 +25,13 @@ double twoSumy(double a, double b) {
   return(y);
 }
 
+// This is the y component of twoProd; the x component is the product itself.
 double twoPrody(double a, double b) {
   volatile double x = a * b;
   return(fma(a, b, -x));
 }
 
+// Error-Free-Transformation (EFT) Horner method of Langlois et al. (2006)
 extern SEXP eftHorner_c(SEXP x, SEXP a) {
   const int m = LENGTH(x);
   const int n = LENGTH(a);
@@ -194,8 +63,7 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   double *ps0 = REAL(s0);
   double *ppiM = REAL(piM);
   double *psigM = REAL(sigM);
-  // The first element of the twoProd is used more than once so save to Ax.
-  // See the R code for equivalent.
+  // The first element of twoProd is used more than once so save to Ax.
   volatile double Ax;
 
   // Since we will return 0 if n = 0---which is technically legal if asking for
@@ -213,6 +81,7 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
       ps0[i] = pa[nm1];
     }
   }
+
   if (n > 1) {
   // If n > 1, we need to use the Compensated Horner scheme to evaluate the
   // polynomial. The algorithm will follow Langlois et al.(2006), which as a
@@ -221,7 +90,7 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   // The key here is to remember R stores matrices as contiguous vectors in
   // COLUMN-MAJOR order. So to get to cell [i, j]---assuming C convention that
   // everything starts at 0---you start by iterating over COLUMNS first and then
-  // actually want vectorindex = (numrows * rowIndex + colIndex). See the R code
+  // actually want vecindex = (numrows * rowIndex + colIndex). See the R code
   // for how it works in R, but it's vectorized, so operations are done for all
   // columns in one row at a time.
   //
@@ -232,7 +101,7 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   // the "last" value. When the inner (column) loop finishes, simply store the
   // new results as the old results and then decrement the row counter.
   //
-  // (AA: 2023-08-20)
+  // (AA: 2023-08-22)
   int vecidx;
     for (int j = nm1; j-- > 0; ) {
       for (int i = 0; i < m; ++i) {
@@ -260,13 +129,14 @@ extern SEXP eftHorner_c(SEXP x, SEXP a) {
   return(ret);
 }
 
+// Horner sum method of Langlois et al. (2006) to estimate correction.
 extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
   const int m = LENGTH(x);
   const int prows = INTEGER(np)[0];
   // Length of the "flattened" matrix. Will be used for error checking.
   const int lp = LENGTH(p);
 
-  // r0 is returned regardles, so declare as an SEXP and initialize here.
+  // r0 is returned regardless, so declare as an SEXP and initialize here.
   SEXP r0 = PROTECT(allocVector(REALSXP, m));
   double *pr0 = REAL(r0);
   memset(pr0, 0, m * sizeof(double));
@@ -295,7 +165,7 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
     for (int i = 0; i < m; ++i) {
       // Proper position of value given flattened column-major matrix.
       vecidx = prows * (i + 1) - 1;
-      pr0[i] = pp[vecidx] +  pq[vecidx];
+      pr0[i] = pp[vecidx] + pq[vecidx];
     }
 
     // See above for why this addressing schema is needed.
@@ -318,10 +188,6 @@ extern SEXP hornerSum_c(SEXP x, SEXP p, SEXP np, SEXP q) {
 }
 
 static const R_CallMethodDef CallEntries[] = {
-  {"horner_c",      (DL_FUNC) &horner_c,    2},
-  {"twoSum_c",      (DL_FUNC) &twoSum_c,    2},
-  {"splitA_c",      (DL_FUNC) &splitA_c,    1},
-  {"twoProd_c",     (DL_FUNC) &twoProd_c,   2},
   {"eftHorner_c",   (DL_FUNC) &eftHorner_c, 2},
   {"hornerSum_c",   (DL_FUNC) &hornerSum_c, 4},
   {NULL,            NULL,                   0}

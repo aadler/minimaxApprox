@@ -27,21 +27,17 @@ callFun <- function(fn, x) {
 # Check that the values passed are oscillating in sign
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
-# Calculate the polynomial approximation. Use in numer & denom for rationals
-# Use Horner's method. This version is fastest of few tried (recursion, Reduce,
-# etc.)
-# polyCalc <- function(x, a) {
-#   ret <- double(length(x))
-#   # Using fastest sequence constructor despite it not checking for empty
-#   # vector as that should not be possible.
-#   for (i in length(a):1L) {
-#     ret <- (ret * x) + a[i]
-#   }
-#   ret
-# }
-
-# Using Compensated Horner Scheme of Langlois et al. (2006)
-polyCalc <- function(x, a) compensatedHorner(x, a)
+# polyCalc uses a Compensated Horner Method based on Langlois et al.(2006)
+# https://drops.dagstuhl.de/opus/volltexte/2006/442/
+# Bottlenecks written in C for speed.
+polyCalc <- function(x, a) {
+  # Only cast x once and use in both calls.
+  x <- as.double(x)
+  EFTH <- .Call(eftHorner_c, x, as.double(a))
+  # We KNOW eftHorner_c returns doubles, so no need to recast EFTH returns.
+  # Use NROW since the return may be a vector or NULL.
+  EFTH$val + .Call(hornerSum_c, x, EFTH$pi, NROW(EFTH$pi), EFTH$sig)
+}
 
 # Function to calculate value of minimax approximation at x given a & b
 evalFunc <- function(x, R) {
