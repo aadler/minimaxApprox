@@ -43,6 +43,18 @@ expect_equal(RR$a, controlA, tolerance = 1e-5)
 expect_equal(RR$b, controlB, tolerance = 1e-5)
 expect_false(RR$Warning)
 
+# Test passing length 0 for polynomials or rationals
+expect_silent(minimaxApprox(exp, 0, 1, 0))
+expect_silent(minimaxApprox(exp, 0, 1, c(0, 1)))
+expect_silent(minimaxApprox(exp, 0, 1, c(1, 0)))
+expect_silent(minimaxApprox(exp, 0, 1, c(0, 0)))
+expect_identical(minimaxApprox(exp, 0, 1, c(0, 0))$a,
+                 minimaxApprox(exp, 0, 1, 0)$a)
+expect_identical(minimaxApprox(exp, 0, 1, c(0, 0))$b, 1)
+expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$a,
+                 minimaxApprox(exp, 0, 1, 3)$a)
+expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$b, 1)
+
 # Test trap for relErr
 errMess <- paste("Relative Error must be a logical value. Default FALSE",
                  "returns absolute error.")
