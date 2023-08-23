@@ -78,8 +78,9 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // it directly.
   //
   // The first loop will calculate the "standard" return and the pi and sigma
-  // matrices. The second loop applies the correction. Now, ASAN/UBSAN should
-  // not complain since piM and sigM are only defined when nm1 > 0.
+  // matrices. The second loop calculates the correction using pi and sigma. The
+  // third loops applies the correction to the return value. Now, ASAN/UBSAN
+  // should not complain since piM and sigM are only defined when nm1 > 0.
   //
   // (AA: 2023-08-23)
 
@@ -101,18 +102,16 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
       }
     }
     // Horner Sum portion of Langlois et al. (2006)
-    if (nm1 > 0) {
-      for (int j = nm1; j-- > 0; ) {
-        for (int i = 0; i < m; ++i) {
-          correction[i] *= px[i];
-          correction[i] += piM[j][i] + sigM[j][i];
-        }
+    for (int j = nm1; j-- > 0; ) {
+      for (int i = 0; i < m; ++i) {
+        correction[i] *= px[i];
+        correction[i] += piM[j][i] + sigM[j][i];
       }
     }
-  }
-  // Add correction to value
-  for (int i = 0; i < m; ++i) {
-    pret[i] += correction[i];
+    // Add correction to value. Only if n > 1 is correction != 0.
+    for (int i = 0; i < m; ++i) {
+      pret[i] += correction[i];
+    }
   }
 
   UNPROTECT(1);
