@@ -18,10 +18,9 @@
 
 // This is the y component of twoSum; the x component is the sum itself.
 double twoSumy(double a, double b) {
-  volatile double x, y, z;
-  x = a + b;
-  z = x - a;
-  y = (a - (x - z)) + (b - z);
+  volatile double x = a + b;
+  volatile double z = x - a;
+  volatile double y = (a - (x - z)) + (b - z);
   return(y);
 }
 
@@ -36,33 +35,29 @@ double twoPrody(double a, double b) {
 extern SEXP compHorner_c(SEXP x, SEXP a) {
   const int m = LENGTH(x);
   const int n = LENGTH(a);
-
-  // ret will be the final value returned to R. In the EFTHorner portion of the
-  // algorithm it replaces s0. In the HornerSum portion it replaces r0.
-  SEXP ret = PROTECT(allocVector(REALSXP, m));
-
-  // Error-Free-Transformation (EFT) Horner portion of Langlois et al. (2006)
-  const int nm1 = n - 1;
-  double piM[nm1][m];
-  double sigM[nm1][m];
-  // The first element of twoProd is used more than once so save to Ax.
-  volatile double Ax;
+  const int nm1 = n - 1;   // Used often
 
   // Per Hadley's suggestion to create helper pointer variable once
   // http://adv-r.had.co.nz/C-interface.html#c-vectors - Accessing vector data
   double *px = REAL(x);
   double *pa = REAL(a);
+
+  // ret will be the final value returned to R. In the EFTHorner portion of the
+  // algorithm it replaces s0. In the HornerSum portion it replaces r0.
+  SEXP ret = PROTECT(allocVector(REALSXP, m));
   double *pret = REAL(ret);
+
+  // Correction vector for compensated Horner
+  double correction[m];
 
   // Since we will return 0 if n = 0---which is technically legal if asking for
   // the best constant estimate or using rational to test polynomial---we must
-  // initialize the ret vector and the pi and sigma matrices with 0.
+  // initialize the ret vector and the correction vector to 0.
   memset(pret, 0, m * sizeof(double));
-  memset(piM, 0, m * nm1 * sizeof(double));
-  memset(sigM, 0, m * nm1 * sizeof(double));
+  memset(correction, 0, m * sizeof(double));
 
   // If n is at least 1, initialize ret with the last value of a. If n == 1 then
-  // there is no need to calculate piM or sigM.
+  // there is no need to calculate piM or sigM and correction is already 0.
   if (n > 0) {
     for (int i = 0; i < m; ++i) {
       pret[i] = pa[nm1];
@@ -73,12 +68,30 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // polynomial. The algorithm will follow Langlois et al.(2006), which as a
   // Horner method, starts at the end and works backwards.
   //
+  // Here is where piM and sigM are needed, but nm1 > 0 so they will be properly
+  // initialized.
+  //
   // Also, looking at the algorithm, one doesn't need the entire matrix---just
   // the "last" value. And one can simply overwrite old with new since each
   // cell, once calculated, is never called on for a new cell. Since in C we are
   // working one cell at a time anyway, we can read the old and write the new to
   // it directly.
+  //
+  // The first loop will calculate the "standard" return and the pi and sigma
+  // matrices. The second loop applies the correction. Now, ASAN/UBSAN should
+  // not complain since piM and sigM are only defined when nm1 > 0.
+  //
+  // (AA: 2023-08-23)
+
   if (n > 1) {
+    // x element of twoProdFMA used more than once so define as variable
+    volatile double Ax;
+    double piM[nm1][m];
+    double sigM[nm1][m];
+    memset(piM, 0, m * nm1 * sizeof(double));
+    memset(sigM, 0, m * nm1 * sizeof(double));
+
+    // Error-Free-Transformation (EFT) Horner portion of Langlois et al. (2006)
     for (int j = nm1; j-- > 0; ) {
       for (int i = 0; i < m; ++i) {
         Ax = pret[i] * px[i];
@@ -87,25 +100,16 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
         sigM[j][i] = twoSumy(Ax, pa[j]);
       }
     }
-  }
-
-  // Horner Sum portion of Langlois et al. (2006)
-  // Use correction vector instead of matrix, as above, and overwrite as we
-  // traverse, as above. Initialize and set as 0 which will be the result if a
-  // is of length 1 (constant polynomial).
-  double correction[m];
-  memset(correction, 0, m * sizeof(double));
-
-  // Now build "upwards" if needed.
-  if (nm1 > 0) {
-    for (int j = nm1; j-- > 0; ) {
-      for (int i = 0; i < m; ++i) {
-        correction[i] *= px[i];
-        correction[i] += piM[j][i] + sigM[j][i];
+    // Horner Sum portion of Langlois et al. (2006)
+    if (nm1 > 0) {
+      for (int j = nm1; j-- > 0; ) {
+        for (int i = 0; i < m; ++i) {
+          correction[i] *= px[i];
+          correction[i] += piM[j][i] + sigM[j][i];
+        }
       }
     }
   }
-
   // Add correction to value
   for (int i = 0; i < m; ++i) {
     pret[i] += correction[i];
