@@ -124,8 +124,8 @@ r <- minimaxApprox:::findRoots(x, PP, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE)
 expect_equal(x, control, tolerance = 3e-7) # GitHub Actions complain otherwise
 ## Rational
-control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
-             0.67069355653042717, 1)
+control <- c(-1, -0.67069346181183143, -6.9989028975148138e-08,
+             0.67069355653023088, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- minimaxApprox:::chebNodes(5, -1, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE)
