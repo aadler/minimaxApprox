@@ -21,16 +21,17 @@
   }
   \subsection{Changed}{
     \itemize{
-      \item Changed linear solution algorithm to use \code{qr.solve} when the
-      default \code{solve} fails with a singular matrix issue. This allows
-      higher degree polynomials in certain cases.
       \item Ported Compensated Horner Scheme algorithms to C for speed. The
-      algorithms are roughly 10x as fast.
+      algorithms are now roughly 10x faster.
+      \item Changed linear solution algorithm to use \code{qr.solve} when the
+      default \code{solve} fails with a singular matrix issue. This \emph{may}
+      allow for higher degree polynomials in certain cases.
+      \item Cleaned up and updated documentation.
       \item Updated unit tests.
+      \item Cleaned up the parameter passing in some internal functions.
       \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
       \file{DESCRIPTION} as suggested on
       \href{https://stat.ethz.ch/pipermail/r-package-devel/2023q3/009417.html}{R-pkg-devel}.
-      \item Cleanup parameter passing to some internal functions.
     }
   }
 }
