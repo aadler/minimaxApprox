@@ -7,7 +7,8 @@
 
 \title{Evaluate Minimax Approximation}
 \description{
-The function evaluates the rational or polynomial approximation at x.
+Evaluates the rational or polynomial approximation stored in \code{mmA} at
+\code{x}.
 }
 \usage{
 minimaxEval(x, mmA)
@@ -17,21 +18,23 @@ minimaxEval(x, mmA)
   \item{mmA}{a \code{"minimaxApprox"} return object}
 }
 \details{
-This is a convenience function to evaluate the approximation at supplied
-\code{x}.
+This is a convenience function to evaluate the approximation at \code{x}.
 }
 \value{
-A vector of the same length as \code{x} containing the approximation values.
+A vector of the same length as \code{x} containing the approximated values.
 }
 \author{Avraham Adler \email{Avraham.Adler@gmail.com}}
 \seealso{\code{\link{minimaxApprox}}}
 \examples{
-x <- seq(0.1, 0.4, 0.025)
+# Show results
+x <- seq(0, 0.5, length.out = 11L)
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
-exp(x)
-minimaxEval(x, mmA)
-exp(x) - minimaxEval(x, mmA)
-all(exp(x) - minimaxEval(x, mmA) <= mmA$EE)
+apErr <- abs(exp(x) - minimaxEval(x, mmA))
+all.equal(max(apErr),  mmA$EE)
+
+# Plot results
+curve(exp, 0.0, 0.5)
+curve(minimaxEval(x, mmA), 0.0, 0.5, add = TRUE, col = "red", lty = 2L)
 }
 
 \keyword{NumericalMathematics}

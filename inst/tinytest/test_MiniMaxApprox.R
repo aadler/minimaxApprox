@@ -93,11 +93,8 @@ expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
 wrnMess <- paste("All errors very near machine double precision. The solution",
                  "may not be optimal given floating point limitations.")
 ## Polynomial
-## This one tests the polynomial failover, I believe
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
-## Rational
-expect_warning(minimaxApprox(fn, -1.5, 1.5, c(15L, 0)), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
@@ -151,6 +148,7 @@ expect_error(minimaxEval(x, sin), errMess)
 # Test HW Borchers request of returning n degree if n fails but n + 1 works with
 # uppermost effectively 0 with Runge function between -1 and 1 and degree 10.
 ## Test successful restart
+## Below also tests the failover to QR
 mess <- paste("The algorithm failed while looking for a polynomial of degree",
               "10 but successfully completed when looking for a polynomial of",
               "degree 11 with the largest coefficient's contribution to the",
@@ -171,11 +169,13 @@ expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 errMess <- paste("The algorithm neither converged when looking for a",
                  "polynomial of length 22 nor when looking for a polynomial of",
                  "degree 23.")
+## Below case has failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMess)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
 ## sensitive to precision as it fails on some of github's test platforms, so
 ## only test on my machine and sacrifice the 100% coverage.
+## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOME") {
   errMess <- paste("The algorithm did not converge when looking for a",
                    "polynomial of length 18 and when looking for a polynomial",
@@ -183,3 +183,6 @@ if (Sys.info()["nodename"] == "HOME") {
                    "zero.")
   expect_error(minimaxApprox(abs, -0.15, 0.15, 18L), errMess)
 }
+
+# This should test RATIONAL failover to QR
+expect_error(minimaxApprox(sin, 0, pi / 2, c(13L, 0L)))

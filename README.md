@@ -83,8 +83,8 @@ the lead maintainer.
 ## Roadmap
 ### Major
 
- * Consider if the "n + 1" check implemented for polynomial approximation
- should also be applied to numerator and denominator of rational approximation.
+ * Research if the "n + 1" check implemented for polynomial approximation can be
+ applied to numerator and denominator of rational approximation.
  * Research
  [barycentric representations](https://www.chebfun.org/publications/remez.pdf)
  to consider if possible to implement in R.
@@ -94,7 +94,7 @@ the lead maintainer.
 ### Minor
 
  * Write a vignette.
- * Consider if switching the nested loop order in C to better reflect R's
+ * Consider if switching the nested loop order in C to more closely reflect
  column-major order would allow for better compiler optimization.
 
 ## Security
