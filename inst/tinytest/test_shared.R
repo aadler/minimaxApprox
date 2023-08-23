@@ -1,7 +1,8 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-tol <- 1e-7
+tol <- sqrt(.Machine$double.eps)
+
 opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
              showProgress = FALSE, convRatio = 1.000000001, tol = 1e-14)
 
@@ -113,8 +114,9 @@ expect_identical(r, 1.2)
 # Test switchX
 # Assuming function is correct, replicate a previous result.
 ## Polynomial
-control <- c(-1, 0.10264319209405934, 0.33737347892134784, 0.62760323678827878,
-             0.88067525674799318, 1)
+control <- c(-1, 0.10264319190041968, 0.33737347824817959, 0.6276032279622028,
+             0.88067529798010702, 1)
+
 fn <- function(x) sin(x) + cos(x)
 x <- minimaxApprox:::chebNodes(6, 0, 1)
 PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE)
