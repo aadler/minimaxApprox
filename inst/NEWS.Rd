@@ -30,6 +30,7 @@
       \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
       \file{DESCRIPTION} as suggested on
       \href{https://stat.ethz.ch/pipermail/r-package-devel/2023q3/009417.html}{R-pkg-devel}.
+      \item Cleanup parameter passing to some internal functions.
     }
   }
 }
