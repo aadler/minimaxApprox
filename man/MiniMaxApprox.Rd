@@ -164,9 +164,7 @@ remains in an experimental state---noted by a 0 major version---the API may
 change at any time.
 
 \subsection{Future Development Ideas}{
-Future developments may include moving the evaluation into a compiled language
-to take advantage of the speed and precision gains of using fused-multiply-add
-(\acronym{FMA}) instructions, possible use of arbitrary-precision math, or
+Future developments may include possible use of arbitrary-precision math or
 using barycentric representations instead of monomials.
 }
 }
