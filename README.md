@@ -7,6 +7,7 @@
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7580/badge)](https://bestpractices.coreinfrastructure.org/projects/7580)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8158855.svg)](https://doi.org/10.5281/zenodo.8158855)
 <!-- badges: end -->
+
 # minimaxApprox
 **minimaxApprox** is an `R` package which implements the algorithm of Remez
 (1962) for polynomial minimax approximation and of Cody et al. (1968)
@@ -93,8 +94,8 @@ the lead maintainer.
 ### Minor
 
  * Write a vignette.
- * Consider switching nested loop order in C to better reflect R's column-major
- order which may allow for better compiler optimization.
+ * Consider iif switching nested loop order in C to better reflect R's
+ column-major order which may allow for better compiler optimization.
 
 ## Security
 ### Expectations
