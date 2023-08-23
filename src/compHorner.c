@@ -61,7 +61,8 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   memset(piM, 0, m * nm1 * sizeof(double));
   memset(sigM, 0, m * nm1 * sizeof(double));
 
-  // If n is at least 1, initialize ret with the last value of a.
+  // If n is at least 1, initialize ret with the last value of a. If n == 1 then
+  // there is no need to calculate piM or sigM.
   if (n > 0) {
     for (int i = 0; i < m; ++i) {
       pret[i] = pa[nm1];
@@ -95,16 +96,9 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   double correction[m];
   memset(correction, 0, m * sizeof(double));
 
-  if (nm1 > 0) {
-    // Replace the 0's with the sum of the LAST rows of p and q (pi and Sigma).
-    for (int i = 0; i < m; ++i) {
-      correction[i] = piM[nm1 - 1][i] + sigM[nm1 - 1][i];
-    }
-  }
-
   // Now build "upwards" if needed.
-  if (nm1 > 1) {
-    for (int j = nm1 - 1; j-- > 0; ) {
+  if (nm1 > 0) {
+    for (int j = nm1; j-- > 0; ) {
       for (int i = 0; i < m; ++i) {
         correction[i] *= px[i];
         correction[i] += piM[j][i] + sigM[j][i];
