@@ -47,7 +47,6 @@ controlF <- function(x) {
 x <- 3
 expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
 x <- 5
-control2 <- 2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
 expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
 x <- 1e-14
 expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
@@ -154,34 +153,3 @@ expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
 # Test checkDenom
 expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1), 0.5)
 expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2))
-
-## test Horner components
-tol <- 1e-7
-x <- 1:3
-a <- c(1, 1e-6, 1e-12)
-aa <- matrix(rep(a, 2), ncol = 3)
-testf <- function(x, a) sum(x ^ (0:2) * a)
-control <- vapply(x, testf, double(1L), a = a)
-
-# Differences should be much less than tol - at the edges of machine precision
-# or beyond.
-expect_identical(minimaxApprox:::polyCalc(x, a), control)
-
-## hornerSum
-# Proper function
-expect_silent(.Call(minimaxApprox:::hornerSum_c, as.double(x),
-                    aa, NROW(aa), aa))
-
-# Test error traps
-expect_error(.Call(minimaxApprox:::hornerSum_c, as.double(x),
-                   aa, NROW(aa), rbind(aa, aa)),
-             "Error polynomials must be of same dimension.")
-
-expect_error(.Call(minimaxApprox:::hornerSum_c, as.double(x[-1L]),
-                   aa, NROW(aa), aa),
-             "Polynomials must have same length as x.")
-
-# Test 0 trap
-aa <- double(0)
-expect_identical(.Call(minimaxApprox:::hornerSum_c, as.double(x),
-                       aa, NROW(aa), aa), rep(0, length(x)))

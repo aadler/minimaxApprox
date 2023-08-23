@@ -31,12 +31,7 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 # https://drops.dagstuhl.de/opus/volltexte/2006/442/
 # Bottlenecks written in C for speed.
 polyCalc <- function(x, a) {
-  # Only cast x once and use in both calls.
-  x <- as.double(x)
-  EFTH <- .Call(eftHorner_c, x, as.double(a))
-  # We KNOW eftHorner_c returns doubles, so no need to recast EFTH returns.
-  # Use NROW since the return may be a vector or NULL.
-  EFTH$val + .Call(hornerSum_c, x, EFTH$pi, NROW(EFTH$pi), EFTH$sig)
+  .Call(compHorner_c, as.double(x), as.double(a))
 }
 
 # Function to calculate value of minimax approximation at x given a & b
