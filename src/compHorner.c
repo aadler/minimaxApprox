@@ -47,17 +47,13 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   SEXP ret = PROTECT(allocVector(REALSXP, m));
   double *pret = REAL(ret);
 
-  // Correction vector for compensated Horner
-  double correction[m];
-
   // Since we will return 0 if n = 0---which is technically legal if asking for
   // the best constant estimate or using rational to test polynomial---we must
-  // initialize the ret vector and the correction vector to 0.
+  // initialize the ret vector to 0.
   memset(pret, 0, m * sizeof(double));
-  memset(correction, 0, m * sizeof(double));
 
   // If n is at least 1, initialize ret with the last value of a. If n == 1 then
-  // there is no need to calculate piM or sigM and correction is already 0.
+  // there is no need to calculate piM, sigM, or correction.
   if (n > 0) {
     for (int i = 0; i < m; ++i) {
       pret[i] = pa[nm1];
@@ -87,8 +83,10 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   if (n > 1) {
     // x element of twoProdFMA used more than once so define as variable
     volatile double Ax;
+    double correction[m];
     double piM[nm1][m];
     double sigM[nm1][m];
+    memset(correction, 0, m * sizeof(double));
     memset(piM, 0, m * nm1 * sizeof(double));
     memset(sigM, 0, m * nm1 * sizeof(double));
 
