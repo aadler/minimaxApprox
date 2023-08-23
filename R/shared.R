@@ -29,7 +29,7 @@ isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
 # polyCalc uses a Compensated Horner Method based on Langlois et al.(2006)
 # https://drops.dagstuhl.de/opus/volltexte/2006/442/
-# Bottlenecks written in C for speed.
+# As primary bottleneck, it was ported to C for speed.
 polyCalc <- function(x, a) {
   .Call(compHorner_c, as.double(x), as.double(a))
 }
