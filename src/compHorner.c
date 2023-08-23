@@ -14,7 +14,7 @@
 // DO NOT WANT the compiler to optimize them out. The entire point of EFT
 // algorithms is to capture the floating-point error as best possible!
 //
-// (AA: 2023-08-22)
+// (AA: 2023-08-23)
 
 // This is the y component of twoSum; the x component is the sum itself.
 double twoSumy(double a, double b) {
@@ -25,12 +25,14 @@ double twoSumy(double a, double b) {
   return(y);
 }
 
-// This is the y component of twoProd; the x component is the product itself.
+// This is the y component of twoProdFMA; the x component is the product itself.
 double twoPrody(double a, double b) {
   volatile double x = a * b;
   return(fma(a, b, -x));
 }
 
+// Compensated Horner method combining the Error-Free Transformation component
+// and the HornerSum component.
 extern SEXP compHorner_c(SEXP x, SEXP a) {
   const int m = LENGTH(x);
   const int n = LENGTH(a);
@@ -41,7 +43,6 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
 
   // Error-Free-Transformation (EFT) Horner portion of Langlois et al. (2006)
   const int nm1 = n - 1;
-  double s1[m];
   double piM[nm1][m];
   double sigM[nm1][m];
   // The first element of twoProd is used more than once so save to Ax.
@@ -55,7 +56,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
 
   // Since we will return 0 if n = 0---which is technically legal if asking for
   // the best constant estimate or using rational to test polynomial---we must
-  // initialize the s0 vector and the pi and sigma matrices with 0.
+  // initialize the ret vector and the pi and sigma matrices with 0.
   memset(pret, 0, m * sizeof(double));
   memset(piM, 0, m * nm1 * sizeof(double));
   memset(sigM, 0, m * nm1 * sizeof(double));
@@ -72,47 +73,48 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // Horner method, starts at the end and works backwards.
   //
   // Also, looking at the algorithm, one doesn't need the entire matrix---just
-  // the "last" value. When the inner (column) loop finishes, simply store the
-  // new results as the old results and then decrement the row counter.
+  // the "last" value. And one can simply overwrite old with new since each
+  // cell, once calculated, is never called on for a new cell. Since in C we are
+  // working one cell at a time anyway, we can read the old and write the new to
+  // it directly.
   if (n > 1) {
     for (int j = nm1; j-- > 0; ) {
       for (int i = 0; i < m; ++i) {
         Ax = pret[i] * px[i];
         piM[j][i] = twoPrody(pret[i], px[i]);
-        s1[i] = Ax + pa[j];
+        pret[i] = Ax + pa[j];
         sigM[j][i] = twoSumy(Ax, pa[j]);
       }
-      memcpy(pret, s1, m * sizeof(double));
     }
   }
 
   // Horner Sum portion of Langlois et al. (2006)
-  // Use two correction vectors (c0 & c1) instead of matrix, as above.
-  double c0[m];
-  memset(c0, 0, m * sizeof(double));
+  // Use correction vector instead of matrix, as above, and overwrite as we
+  // traverse, as above. Initialize and set as 0 which will be the result if a
+  // is of length 1 (constant polynomial).
+  double correction[m];
+  memset(correction, 0, m * sizeof(double));
 
   if (nm1 > 0) {
     // Replace the 0's with the sum of the LAST rows of p and q (pi and Sigma).
     for (int i = 0; i < m; ++i) {
-      c0[i] = piM[nm1 - 1][i] + sigM[nm1 - 1][i];
+      correction[i] = piM[nm1 - 1][i] + sigM[nm1 - 1][i];
     }
   }
 
   // Now build "upwards" if needed.
   if (nm1 > 1) {
-    double c1[m];
     for (int j = nm1 - 1; j-- > 0; ) {
       for (int i = 0; i < m; ++i) {
-        c1[i] = c0[i] * px[i] + piM[j][i] + sigM[j][i];
+        correction[i] *= px[i];
+        correction[i] += piM[j][i] + sigM[j][i];
       }
-      // Once "row" is finished, copy "new" into "old".
-      memcpy(c0, c1, m * sizeof(double));
     }
   }
 
   // Add correction to value
   for (int i = 0; i < m; ++i) {
-    pret[i] += c0[i];
+    pret[i] += correction[i];
   }
 
   UNPROTECT(1);
