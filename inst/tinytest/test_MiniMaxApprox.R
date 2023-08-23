@@ -1,7 +1,7 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-tol <- 1e-7
+tol <- sqrt(.Machine$double.eps)
 
 # Most tests of warnings and messages will perforce check internals too.
 
@@ -32,7 +32,7 @@ expect_equal(RR$EE, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
 ## Rational 3: Based on DLMF 3.11.19 https://dlmf.nist.gov/3.11#iii
-# Difference on Windows machine is 8.15e-6
+# Difference on Windows machine is roughly 8.13e-6
 controlA <- c(0.99999998917854, -0.34038938209347, -0.18915483763222,
               0.06658319420166)
 controlB <- c(1, -0.34039052338838, 0.06086501629812, -0.01864476809090)
@@ -42,6 +42,18 @@ RR <- minimaxApprox(fn, 0, b0, c(3L, 3L))
 expect_equal(RR$a, controlA, tolerance = 1e-5)
 expect_equal(RR$b, controlB, tolerance = 1e-5)
 expect_false(RR$Warning)
+
+# Test passing length 0 for polynomials or rationals
+expect_silent(minimaxApprox(exp, 0, 1, 0))
+expect_silent(minimaxApprox(exp, 0, 1, c(0, 1)))
+expect_silent(minimaxApprox(exp, 0, 1, c(1, 0)))
+expect_silent(minimaxApprox(exp, 0, 1, c(0, 0)))
+expect_identical(minimaxApprox(exp, 0, 1, c(0, 0))$a,
+                 minimaxApprox(exp, 0, 1, 0)$a)
+expect_identical(minimaxApprox(exp, 0, 1, c(0, 0))$b, 1)
+expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$a,
+                 minimaxApprox(exp, 0, 1, 3)$a)
+expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$b, 1)
 
 # Test trap for relErr
 errMess <- paste("Relative Error must be a logical value. Default FALSE",
@@ -81,8 +93,11 @@ expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
 wrnMess <- paste("All errors very near machine double precision. The solution",
                  "may not be optimal given floating point limitations.")
 ## Polynomial
+## This one tests the polynomial failover, I believe
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
+## Rational
+expect_warning(minimaxApprox(fn, -1.5, 1.5, c(15L, 0)), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
@@ -149,8 +164,8 @@ controlE <- 0.06592293
 expect_message(minimaxApprox(fn, -1, 1, 10L), mess)
 PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
 expect_equal(PP$a, control, tolerance = tol)
-expect_equal(PP$EE, controlE, tolerance = tol)
-expect_equal(PP$OE, controlE, tolerance = tol)
+expect_equal(PP$EE, controlE, tolerance = 1e-7) # Only given 8 digits in email
+expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 
 ## Test unsuccessful restart due to two failures
 errMess <- paste("The algorithm neither converged when looking for a",

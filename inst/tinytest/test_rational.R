@@ -1,7 +1,8 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-tol <- 1e-7
+tol <- sqrt(.Machine$double.eps)
+
 opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
              showProgress = FALSE, convRatio = 1.000000001, tol = 1e-14)
 # Test ratMat
