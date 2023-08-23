@@ -90,14 +90,14 @@ expect_warning(minimaxApprox(fn, -1, 1, dg, opts = opts), wrnMess)
 expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
 
 # Test "very near machine double" warning message
-## Cannot create version to test rational which passes all CRAN, Github, and
-## Mac builder machines.
 wrnMess <- paste("All errors very near machine double precision. The solution",
                  "may not be optimal given floating point limitations.")
 ## Polynomial
 ## This one tests the polynomial failover, I believe
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
+## Rational
+expect_warning(minimaxApprox(fn, -1.5, 1.5, c(15L, 0)), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
