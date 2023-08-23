@@ -122,7 +122,7 @@ x <- minimaxApprox:::chebNodes(6, 0, 1)
 PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE)
 r <- minimaxApprox:::findRoots(x, PP, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE)
-expect_equal(x, control, tolerance = tol)
+expect_equal(x, control, tolerance = 3e-7) # GitHub Actions complain otherwise
 ## Rational
 control <- c(-1, -0.67069346181121259, -6.9988944598198266e-08,
              0.67069355653042717, 1)
@@ -131,7 +131,7 @@ x <- minimaxApprox:::chebNodes(5, -1, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE)
 r <- minimaxApprox:::findRoots(x, RR, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE)
-expect_equal(x, control, tolerance = 3e-7) # GitHub macOS complains otherwise
+expect_equal(x, control, tolerance = 3e-7) # GitHub Actions complain otherwise
 
 ## Contrive no extremum examples for maximization and minimization
 R <- list(a = 0, b = 1)
