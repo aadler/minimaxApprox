@@ -44,7 +44,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
   # equations until E converges. Function may remain inside of remRat.
   # Everything but "x" is previously defined and constant inside the main remRat
   # function and thus does not need to be passed.
-  convergeErr <- function(x, relErr) {
+  convergeErr <- function(x) {
     E <- 0
     j <- 0L
     repeat {
@@ -57,7 +57,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     RR
   }
 
-  RR <- convergeErr(x, relErr)
+  RR <- convergeErr(x)
   errs_last <- remErr(x, RR, fn, relErr)
   converged <- FALSE
   unchanged <- FALSE
@@ -68,7 +68,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     i <- i + 1L
     r <- findRoots(x, RR, fn, relErr)
     x <- switchX(r, lower, upper, RR, fn, relErr)
-    RR <- convergeErr(x, relErr)
+    RR <- convergeErr(x)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
