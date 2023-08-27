@@ -14,9 +14,15 @@
       \code{n + 1}. If found, \strong{and} the contribution of that coefficient
       is less than the new option \code{tailtol} (default \code{1e-10}), it will
       return the found polynomial without the uppermost coefficient---which is
-      effectively 0. It will message the user to that effect (see
+      effectively 0. It will message the user to that effect. Passing
+      \code{NULL} skips the test. (see
       \href{https://github.com/aadler/minimaxApprox/issues/2}{Issue 2} with
       thanks to \href{https://github.com/hwborchers}{Hans W. Borchers}).
+      \item New option \code{ztol} (default \code{.Machine$double.eps}) which
+      acts similarly to \code{\link{zapsmall}} in that it will zero out
+      coefficient values---both polynomial and rational---whose contributions
+      are \eqn{\le} \code{ztol} at each step of the iteration. Passing
+      \code{NULL} skips the test.
     }
   }
   \subsection{Changed}{
