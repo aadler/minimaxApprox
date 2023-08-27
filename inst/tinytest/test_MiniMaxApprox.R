@@ -165,6 +165,13 @@ expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$EE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 
+errMess <- paste("The algorithm did not converge when looking for a",
+                  "polynomial of degree 10 and NULL was passed to the tailtol",
+                  "option.")
+
+expect_error(minimaxApprox(fn, -1, 1, 10L, opts = list(tailtol = NULL)),
+             errMess)
+
 ## Test unsuccessful restart due to two failures
 errMess <- paste("The algorithm neither converged when looking for a",
                  "polynomial of length 22 nor when looking for a polynomial of",
