@@ -15,14 +15,14 @@ ratMat <- function(x, E, y, nD, dD, relErr) {
 }
 
 # Function to calculate coefficients given matrix and known values
-ratCoeffs <- function(x, E, fn, nD, dD, relErr) {
+ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
   y <- callFun(fn, x)
   P <- ratMat(x, E, y, nD, dD, relErr)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-12)
-  list(a = PP[seq_len(nD + 1L)],            # Works even if nD = 0
-       b = c(1, PP[seq_len(dD) + nD + 1L]), # Works even if dD = 0
+  list(a = checkIrrelevant(PP[seq_len(nD + 1L)], l, u, zt),
+       b = checkIrrelevant(c(1, PP[seq_len(dD) + nD + 1L]), l, u, zt),
        E = PP[length(PP)])
 }
 
@@ -49,7 +49,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     j <- 0L
     repeat {
       if (j >= opts$maxiter) break
-      RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr)
+      RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr, lower, upper, opts$ztol)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
       j <- j + 1
