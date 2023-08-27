@@ -56,8 +56,16 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             Defaults to \code{1e-14}. See \strong{Details}.
             \item \code{tailtol}: numeric; The tolerance of the coefficient of
             the largest power of \code{x} to be ignored when performing the
-            polynomial approximation a second time. Defaults to \code{1e-10}.
-            See \strong{Details}.
+            polynomial approximation a second time. Defaults to the smaller of
+            \code{1e-10} or the \eqn{1\times 10^{-6}\cdot(textrm{upper} -
+            \textrm{lower}}{1e-6 * (upper - lower)}. Set to \code{NULL} to skip
+            the \code{degree + 1} check completely. See \strong{Details}.
+            \item \code{ztol}: numeric; The tolerance for each polynomial or
+            rational numerator or denominator coefficient's contribution to
+            \strong{not} to be set to 0. Similar to polynomial \code{tailtol}
+            but applied at each step of the algorithm. Defaults to
+            \code{.Machine$double.eps}.  Set to \code{NULL} to leave all
+            coefficients as they are regardless of how miniscule it is.
         }
     }
 }
@@ -106,6 +114,14 @@ coefficient by the endpoint with the larger absolute magnitude raised to the
 \code{n + 1} power. This is done to prevent errors in cases where a very small
 coefficient is found on a range with very large absolute values and the
 resulting contribution to the approximation is \strong{not} \emph{de minimis}.
+Setting \code{tailtol} to \code{NULL} will skip the \code{n + 1} test
+completely.
+}
+\subsection{Close-to-Zero Tolerance}{
+For each step of the algorithms' iterations, the contribution of the found
+coefficient to the total sum (as measured in the above section) is compared to
+the \code{ztol} option. When less than or equal to \code{ztol}, that coefficient
+is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely.
 }
 }
 \value{
