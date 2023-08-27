@@ -165,6 +165,12 @@ expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$EE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 
+# Test ztol NULL with result with known low value (~8.2e-15)
+PP1 <- minimaxApprox(fn, -1, 1, 3L)
+PP2 <- minimaxApprox(fn, -1, 1, 3L, opts = list(ztol = NULL))
+expect_identical(PP1, PP2)
+
+# Test tailtol NULL
 errMess <- paste("The algorithm did not converge when looking for a",
                   "polynomial of degree 10 and NULL was passed to the tailtol",
                   "option.")
