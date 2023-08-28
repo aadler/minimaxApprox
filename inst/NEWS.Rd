@@ -18,11 +18,10 @@
       \code{NULL} skips the test. (see
       \href{https://github.com/aadler/minimaxApprox/issues/2}{Issue 2} with
       thanks to \href{https://github.com/hwborchers}{Hans W. Borchers}).
-      \item New option \code{ztol} (default \code{.Machine$double.eps}) which
-      acts similarly to \code{\link{zapsmall}} in that it will zero out
-      coefficient values---both polynomial and rational---whose contributions
-      are \eqn{\le} \code{ztol} at each step of the iteration. Passing
-      \code{NULL} skips the test.
+      \item New option \code{ztol} which acts similarly to
+      \code{\link{zapsmall}} in that it will zero out coefficient values---both
+      polynomial and rational---whose contributions are \eqn{\le} \code{ztol}
+      at each step of the iteration. The default, \code{NULL}, skips the test.
     }
   }
   \subsection{Changed}{

@@ -42,7 +42,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   }
 
   if (!("ztol" %in% names(opts))) {
-    opts$ztol <- .Machine$double.eps
+    opts$ztol <- NULL
   }
 
   if (!is.logical(relErr)) {

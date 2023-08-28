@@ -64,8 +64,8 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             rational numerator or denominator coefficient's contribution to
             \strong{not} to be set to 0. Similar to polynomial \code{tailtol}
             but applied at each step of the algorithm. Defaults to
-            \code{.Machine$double.eps}.  Set to \code{NULL} to leave all
-            coefficients as they are regardless of how miniscule it is.
+            \code{NULL} which leaves all coefficients as they are regardless
+            of magnitude.
         }
     }
 }

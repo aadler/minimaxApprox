@@ -165,10 +165,15 @@ expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$EE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 
-# Test ztol NULL with result with known low value (~8.2e-15)
+# Test ztol not NULL
 PP1 <- minimaxApprox(fn, -1, 1, 3L)
-PP2 <- minimaxApprox(fn, -1, 1, 3L, opts = list(ztol = NULL))
-expect_identical(PP1, PP2)
+PP2 <- minimaxApprox(fn, -1, 1, 3L, opts = list(ztol = 1e-14))
+
+expect_equal(PP2$a[c(1, 3)], PP1$a[c(1, 3)], tolerance = tol)
+expect_identical(PP2$a[c(2, 4)], c(0, 0))
+expect_equal(PP2$EE, PP1$EE, tolerance = tol)
+expect_equal(PP2$OE, PP1$OE, tolerance = tol)
+expect_equal(PP2$x, PP1$x, tolerance = 1e-6)
 
 # Test tailtol NULL
 errMess <- paste("The algorithm did not converge when looking for a",
