@@ -151,7 +151,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   }
 
   coefficients <- if (ratApprox) list(a = mmA$a, b = mmA$b) else list(a = mmA$a)
-  diagnostics <- list(EE = mmA$expe, OE = mmA$mxae,  iterations = mmA$i,
+  diagnostics <- list(EE = mmA$expe, OE = mmA$mxae, iterations = mmA$i,
                       x = mmA$x, Warning = gotWarning)
   ret <- c(coefficients, diagnostics)
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
@@ -174,7 +174,7 @@ minimaxEval <- function(x, mmA) {
   evalFunc(x, mmA)
 }
 
-# Error given mmA object convenience function. Based on remErr but takes a
+# Minimax approximation error convenience function. Based on remErr but takes a
 # completed mmA object.
 
 minimaxErr <- function(x, mmA) {
