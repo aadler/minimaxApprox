@@ -24,11 +24,20 @@ degree of accuracy. This is important in the computer age as there are many
 functions which are difficult to properly represent in code, especially given
 the limitations of floating-point representation
 ([Goldberg 1991](https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html)).
-Therefore, it is common to use polynomial approximations to such functions,
-especially near poles or singularities.
+Therefore, it is common to use approximations to such functions, especially near
+poles or singularities.
 
-There are various kinds of polynomial approximation, including Maclaurin and
-Taylor series. 
+There are various kinds of approximations. Perhaps the simplest and best known
+are the polynomial approximations. Most people are introduced to them through
+Maclaurin and Taylor series. These are polynomial approximations to the function
+around zero (Maclaurin) or around a point other than zero (Taylor). In some
+ways, they are the *best* polynomial approximation at that point.
+
+There are better approximations than a pure polynomial, though. Henri Padé
+showed that the ratio of two polynomials---a rational function---can provide
+better estimates to the function than a polynomial can.
+
+
 
  * Chebyshev
 
@@ -70,7 +79,5 @@ You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footn
 knitr::kable(head(mtcars, 10))
 ```
 
-Also a quote using `>`:
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+## References
