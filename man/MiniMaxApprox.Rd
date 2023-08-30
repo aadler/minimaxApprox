@@ -186,11 +186,7 @@ using barycentric representations instead of monomials.
 }
 }
 
-\seealso{
-\code{\link{minimaxEval}} for a convenience function to calculate approximation
-values and \code{\link[Pade:Pade]{Pade}} for a function to calculate
-\enc{Padé}{Pade} coefficients given suitable Taylor series coefficients.
-}
+\seealso{\code{\link{minimaxEval}}, \code{\link{minimaxErr}}}
 
 \examples{
 minimaxApprox(exp, 0, 1, 5)                              # Built-in & polynomial

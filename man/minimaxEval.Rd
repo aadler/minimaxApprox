@@ -24,13 +24,13 @@ This is a convenience function to evaluate the approximation at \code{x}.
 A vector of the same length as \code{x} containing the approximated values.
 }
 \author{Avraham Adler \email{Avraham.Adler@gmail.com}}
-\seealso{\code{\link{minimaxApprox}}}
+\seealso{\code{\link{minimaxApprox}}, \code{\link{minimaxErr}}}
 \examples{
 # Show results
 x <- seq(0, 0.5, length.out = 11L)
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 apErr <- abs(exp(x) - minimaxEval(x, mmA))
-all.equal(max(apErr),  mmA$EE)
+all.equal(max(apErr), mmA$EE)
 
 # Plot results
 curve(exp, 0.0, 0.5)

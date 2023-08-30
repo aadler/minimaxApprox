@@ -144,16 +144,6 @@ expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
 expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
              "The 3 degree polynomial in the denominator has a zero at 2.80961")
 
-# Test evaluation function
-x <- seq(0.1, 0.4, 0.025)
-mmA <- minimaxApprox(exp, 0, 0.5, 5L)
-expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
-mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
-expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
-## Check error trap
-errMess <- "This function only works with 'minimaxApprox' objects."
-expect_error(minimaxEval(x, sin), errMess)
-
 # Test HW Borchers request of returning n degree if n fails but n + 1 works with
 # uppermost effectively 0 with Runge function between -1 and 1 and degree 10.
 ## Test successful restart
@@ -213,3 +203,21 @@ if (Sys.info()["nodename"] == "HOME") {
 
 # This should test RATIONAL failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, c(13L, 0L)))
+
+# Test evaluation function
+x <- seq(0.1, 0.4, 0.025)
+mmA <- minimaxApprox(exp, 0, 0.5, 5L)
+expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
+mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
+expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
+## Check error trap
+errMess <- "This function only works with 'minimaxApprox' objects."
+expect_error(minimaxEval(x, sin), errMess)
+
+# Test error function
+x <- seq(0.1, 0.4, 0.025)
+mmA <- minimaxApprox(exp, 0, 0.5, 5L)
+expect_identical(minimaxEval(x, mmA) - exp(x), minimaxErr(x, mmA))
+## Check error trap
+errMess <- "This function only works with 'minimaxApprox' objects."
+expect_error(minimaxErr(x, sin), errMess)

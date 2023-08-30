@@ -7,6 +7,7 @@ importFrom("graphics", "abline", "legend", "points")
 # Exports
 export(minimaxApprox,
        minimaxEval,
+       minimaxErr,
        print.minimaxApprox,
        plot.minimaxApprox,
        coef.minimaxApprox)

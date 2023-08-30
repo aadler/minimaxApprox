@@ -85,8 +85,9 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   # less than tailtol (which defaults to 1e-10) to the result then consider it 0
   # and return the resulting degree n and message appropriately.
 
-  if (inherits(mmA, "simpleError") &&
-        grepl("singular", mmA$message, fixed = TRUE)) {
+  if (!ratApprox && inherits(mmA, "simpleError") &&
+      grepl("singular", mmA$message, fixed = TRUE)) {
+
     if (!is.null(opts$tailtol)) {
       mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L), relErr,
                               opts),
@@ -150,7 +151,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   }
 
   coefficients <- if (ratApprox) list(a = mmA$a, b = mmA$b) else list(a = mmA$a)
-  diagnostics <- list(EE = mmA$expe, OE = mmA$mxae,  iterations = mmA$i,
+  diagnostics <- list(EE = mmA$expe, OE = mmA$mxae, iterations = mmA$i,
                       x = mmA$x, Warning = gotWarning)
   ret <- c(coefficients, diagnostics)
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
@@ -171,4 +172,14 @@ minimaxEval <- function(x, mmA) {
     stop("This function only works with 'minimaxApprox' objects.")
   }
   evalFunc(x, mmA)
+}
+
+# Minimax approximation error convenience function. Based on remErr but takes a
+# completed mmA object.
+
+minimaxErr <- function(x, mmA) {
+  if (!inherits(mmA, "minimaxApprox")) {
+    stop("This function only works with 'minimaxApprox' objects.")
+  }
+  remErr(x, mmA, attr(mmA, "func"), attr(mmA, "relErr"))
 }
