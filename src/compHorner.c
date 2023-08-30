@@ -20,8 +20,7 @@
 double twoSumy(double a, double b) {
   volatile double x = a + b;
   volatile double z = x - a;
-  volatile double y = (a - (x - z)) + (b - z);
-  return(y);
+  return((a - (x - z)) + (b - z));
 }
 
 // This is the y component of twoProdFMA; the x component is the product itself.
