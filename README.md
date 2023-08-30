@@ -94,8 +94,6 @@ the lead maintainer.
 ### Minor
 
  * Write a vignette.
- * Consider if switching the nested loop order in C to more closely reflect
- column-major order would allow for better compiler optimization.
 
 ## Security
 ### Expectations
