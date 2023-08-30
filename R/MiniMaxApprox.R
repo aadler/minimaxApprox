@@ -173,3 +173,13 @@ minimaxEval <- function(x, mmA) {
   }
   evalFunc(x, mmA)
 }
+
+# Error given mmA object convenience function. Based on remErr but takes a
+# completed mmA object.
+
+minimaxErr <- function(x, mmA) {
+  if (!inherits(mmA, "minimaxApprox")) {
+    stop("This function only works with 'minimaxApprox' objects.")
+  }
+  remErr(x, mmA, attr(mmA, "func"), attr(mmA, "relErr"))
+}
