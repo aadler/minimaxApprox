@@ -12,13 +12,13 @@ polyMat <- function(x, y, relErr) {
 }
 
 # Function to calculate coefficients given matrix and known values
-polyCoeffs <- function(x, fn, relErr) {
+polyCoeffs <- function(x, fn, relErr, l, u, zt) {
   y <- callFun(fn, x)
   P <- polyMat(x, y, relErr)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-12)
-  list(a = PP[-length(PP)], E = PP[length(PP)])
+  list(a = checkIrrelevant(PP[-length(PP)], l, u, zt), E = PP[length(PP)])
 }
 
 # Main function to calculate and return the minimax polynomial approximation
@@ -28,7 +28,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
   x <- chebNodes(degree + 2L, lower, upper)
 
   # Initial Polynomial Guess
-  PP <- polyCoeffs(x, fn, relErr)
+  PP <- polyCoeffs(x, fn, relErr, lower, upper, opts$ztol)
   errs_last <- remErr(x, PP, fn, relErr)
   converged <- FALSE
   unchanged <- FALSE
@@ -40,7 +40,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
     i <- i + 1L
     r <- findRoots(x, PP, fn, relErr)
     x <- switchX(r, lower, upper, PP, fn, relErr)
-    PP <- polyCoeffs(x, fn, relErr)
+    PP <- polyCoeffs(x, fn, relErr, lower, upper, opts$ztol)
     errs <- remErr(x, PP, fn, relErr)
     mxae <- max(abs(errs))
     expe <- abs(PP$E)

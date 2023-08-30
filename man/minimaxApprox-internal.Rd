@@ -22,6 +22,7 @@
 \alias{switchX}
 \alias{isConverged}
 \alias{checkDenom}
+\alias{checkIrrelevant}
 \alias{polyMat}
 \alias{polyCoeffs}
 \alias{remPoly}

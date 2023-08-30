@@ -55,6 +55,15 @@ expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$a,
                  minimaxApprox(exp, 0, 1, 3)$a)
 expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$b, 1)
 
+# Test negative and integer trap
+errMess <- "Polynomial degrees must be integers of least 0 (constant)."
+expect_error(minimaxApprox(exp, 0, 1, 0.2), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, -1L), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, -2), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(1, -2)), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(1.2, 2)), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(-1.2, 8.01)), errMess, fixed = TRUE)
+
 # Test trap for relErr
 errMess <- paste("Relative Error must be a logical value. Default FALSE",
                  "returns absolute error.")
@@ -164,6 +173,24 @@ PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
 expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$EE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
+
+# Test ztol not NULL
+PP1 <- minimaxApprox(fn, -1, 1, 3L)
+PP2 <- minimaxApprox(fn, -1, 1, 3L, opts = list(ztol = 1e-14))
+
+expect_equal(PP2$a[c(1, 3)], PP1$a[c(1, 3)], tolerance = tol)
+expect_identical(PP2$a[c(2, 4)], c(0, 0))
+expect_equal(PP2$EE, PP1$EE, tolerance = tol)
+expect_equal(PP2$OE, PP1$OE, tolerance = tol)
+expect_equal(PP2$x, PP1$x, tolerance = 1e-6)
+
+# Test tailtol NULL
+errMess <- paste("The algorithm did not converge when looking for a",
+                 "polynomial of degree 10 and NULL was passed to the tailtol",
+                 "option.")
+
+expect_error(minimaxApprox(fn, -1, 1, 10L, opts = list(tailtol = NULL)),
+             errMess)
 
 ## Test unsuccessful restart due to two failures
 errMess <- paste("The algorithm neither converged when looking for a",

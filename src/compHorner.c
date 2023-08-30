@@ -20,8 +20,7 @@
 double twoSumy(double a, double b) {
   volatile double x = a + b;
   volatile double z = x - a;
-  volatile double y = (a - (x - z)) + (b - z);
-  return(y);
+  return((a - (x - z)) + (b - z));
 }
 
 // This is the y component of twoProdFMA; the x component is the product itself.
@@ -47,25 +46,17 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   SEXP ret = PROTECT(allocVector(REALSXP, m));
   double *pret = REAL(ret);
 
-  // Since we will return 0 if n = 0---which is technically legal if asking for
-  // the best constant estimate or using rational to test polynomial---we must
-  // initialize the ret vector to 0.
-  memset(pret, 0, m * sizeof(double));
-
-  // If n is at least 1, initialize ret with the last value of a. If n == 1 then
-  // there is no need to calculate piM, sigM, or correction.
-  if (n > 0) {
-    for (int i = 0; i < m; ++i) {
-      pret[i] = pa[nm1];
+  // n must be at least 1 since degree must be >= 0. Therefore initialize ret
+  // with the last value of a. If n == 1 then there is no need to calculate pi,
+  // sig, or correction.
+  for (int i = 0; i < m; ++i) {
+    pret[i] = pa[nm1];
     }
-  }
 
   // If n > 1, we need to use the Compensated Horner scheme to evaluate the
   // polynomial. The algorithm will follow Langlois et al.(2006), which as a
-  // Horner method, starts at the end and works backwards.
-  //
-  // Here is where piM and sigM are needed, but nm1 > 0 so they will be properly
-  // initialized.
+  // Horner method, starts at the end and works backwards which explains the j
+  // decrementation.
   //
   // Also, looking at the algorithm, one doesn't need the entire matrix---just
   // the "last" value. And one can simply overwrite old with new since each
@@ -73,41 +64,38 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // working one cell at a time anyway, we can read the old and write the new to
   // it directly.
   //
-  // The first loop will calculate the "standard" return and the pi and sigma
-  // matrices. The second loop calculates the correction using pi and sigma. The
-  // third loops applies the correction to the return value. Now, ASAN/UBSAN
-  // should not complain since piM and sigM are only defined when nm1 > 0.
+  // By reversing the order of the loop variables and traversing the i's first,
+  // each "x" is complete after an outer loop. The inner loop calculates the
+  // "standard" return and the correction using pi and sigma. Since the pi and
+  // sigma are unique to the i/j combination, both EFT and Horner summ can be
+  // combined in inner loop. Once the inner loop finishes, so is the correction
+  // for that x, so it applied at the end of the outer loop. Now only one nested
+  // loop is needed.
   //
-  // (AA: 2023-08-23)
+  // (AA: 2023-08-29)
 
   if (n > 1) {
     // x element of twoProdFMA used more than once so define as variable
     volatile double Ax;
+    volatile double pi;
+    volatile double sig;
     double correction[m];
-    double piM[nm1][m];
-    double sigM[nm1][m];
     memset(correction, 0, m * sizeof(double));
-    memset(piM, 0, m * nm1 * sizeof(double));
-    memset(sigM, 0, m * nm1 * sizeof(double));
 
-    // Error-Free-Transformation (EFT) Horner portion of Langlois et al. (2006)
-    for (int j = nm1; j-- > 0; ) {
-      for (int i = 0; i < m; ++i) {
-        Ax = pret[i] * px[i];
-        piM[j][i] = twoPrody(pret[i], px[i]);
-        pret[i] = Ax + pa[j];
-        sigM[j][i] = twoSumy(Ax, pa[j]);
-      }
-    }
-    // Horner Sum portion of Langlois et al. (2006)
-    for (int j = nm1; j-- > 0; ) {
-      for (int i = 0; i < m; ++i) {
-        correction[i] *= px[i];
-        correction[i] += piM[j][i] + sigM[j][i];
-      }
-    }
-    // Add correction to value. Only if n > 1 is correction != 0.
+    // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
+    // et al. (2006).
     for (int i = 0; i < m; ++i) {
+      for (int j = nm1; j-- > 0; ) {
+        // EFT
+        Ax = pret[i] * px[i];
+        pi = twoPrody(pret[i], px[i]);
+        pret[i] = Ax + pa[j];
+        sig = twoSumy(Ax, pa[j]);
+        // Horner Sum
+        correction[i] *= px[i];
+        correction[i] += pi + sig;
+      }
+      // Now apply correction in outer loop
       pret[i] += correction[i];
     }
   }

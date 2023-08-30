@@ -147,3 +147,14 @@ checkDenom <- function(a, l, u) {
     return(dngrRt$root)
   }
 }
+
+# Check for coefficient irrelevancy
+checkIrrelevant <- function(a, l, u, zt) {
+  if (!is.null(zt) && length(a) > 0) {
+    xmax <- max(abs(l), abs(u))
+    for (i in seq_along(a)) {
+      if (abs(a[i] * xmax ^ (i - 1L)) <= zt) a[i] <- 0
+    }
+  }
+  a
+}

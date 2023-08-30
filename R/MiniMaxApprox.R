@@ -38,12 +38,20 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   # Used for cases where we check polynomial degree n + 1.
   # See issue 2 https://github.com/aadler/minimaxApprox/issues/2
   if (!("tailtol" %in% names(opts))) {
-    opts$tailtol <- 1e-10
+    opts$tailtol <- min(1e-10, (upper - lower) / 1e6)
+  }
+
+  if (!("ztol" %in% names(opts))) {
+    opts$ztol <- NULL
   }
 
   if (!is.logical(relErr)) {
     stop("Relative Error must be a logical value. ",
          "Default FALSE returns absolute error.")
+  }
+
+  if (any(degree < 0) || any(floor(degree) < degree)) {
+    stop("Polynomial degrees must be integers of least 0 (constant).")
   }
 
   if (length(degree) == 2L) {        # Rational approximation requested
@@ -79,32 +87,38 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
   if (inherits(mmA, "simpleError") &&
         grepl("singular", mmA$message, fixed = TRUE)) {
-    mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
-                            relErr, opts),
-                    error = function(cond) simpleError(trimws(cond$message)))
-    if (!inherits(mmA, "simpleError")) {
-      xmax <- max(abs(lower), abs(upper))
-      n <- length(mmA$a)
-      if ((mmA$a[n] * xmax ^ (n - 1L)) <= opts$tailtol) {
-        mess <- paste("The algorithm failed while looking for a polynomial of",
-                      "degree", degree, "but successfully completed when",
-                      "looking for a polynomial of degree", degree + 1L,
-                      "with the largest coefficient's contribution to the",
-                      "approximation <=", paste0(opts$tailtol, ":"), "the",
-                      "tailtol option. The result is a polynomial of length",
-                      degree, "as the uppermost coefficient is effectively 0.")
-        mmA$a <- mmA$a[-length(mmA$a)]
-        message(mess)
+    if (!is.null(opts$tailtol)) {
+      mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L), relErr,
+                              opts),
+                      error = function(cond) simpleError(trimws(cond$message)))
+      if (!inherits(mmA, "simpleError")) {
+        xmax <- max(abs(lower), abs(upper))
+        n <- length(mmA$a)
+        if ((mmA$a[n] * xmax ^ (n - 1L)) <= opts$tailtol) {
+          mess <- paste("The algorithm failed while looking for a polynomial",
+                        "of degree", degree, "but successfully completed when",
+                        "looking for a polynomial of degree", degree + 1L,
+                        "with the largest coefficient's contribution to the",
+                        "approximation <=", paste0(opts$tailtol, ":"), "the",
+                        "tailtol option. The result is a polynomial of length",
+                        degree, "as the uppermost coefficient is effectively",
+                        "0.")
+          mmA$a <- mmA$a[-length(mmA$a)]
+          message(mess)
+        } else {
+          stop("The algorithm did not converge when looking for a polynomial ",
+               "of length ", degree, " and when looking for a polynomial of ",
+               "degree ", degree + 1L, " the uppermost coefficient is not ",
+               "effectively zero.")
+        }
       } else {
-        stop("The algorithm did not converge when looking for a polynomial ",
-             "of length ", degree, " and when looking for a polynomial of ",
-             "degree ", degree + 1L, " the uppermost coefficient is not ",
-             "effectively zero.")
+        stop("The algorithm neither converged when looking for a polynomial of",
+             " length ", degree, " nor when looking for a polynomial of ",
+             "degree ", degree + 1L, ".")
       }
     } else {
-      stop("The algorithm neither converged when looking for a polynomial of ",
-           "length ", degree, " nor when looking for a polynomial of degree ",
-           degree + 1L, ".")
+      stop("The algorithm did not converge when looking for a polynomial of ",
+           "degree ", degree, " and NULL was passed to the tailtol option.")
     }
   }
 
