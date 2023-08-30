@@ -55,6 +55,15 @@ expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$a,
                  minimaxApprox(exp, 0, 1, 3)$a)
 expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$b, 1)
 
+# Test negative and integer trap
+errMess <- "Polynomial degrees must be integers of least 0 (constant)."
+expect_error(minimaxApprox(exp, 0, 1, 0.2), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, -1L), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, -2), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(1, -2)), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(1.2, 2)), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(-1.2, 8.01)), errMess, fixed = TRUE)
+
 # Test trap for relErr
 errMess <- paste("Relative Error must be a logical value. Default FALSE",
                  "returns absolute error.")
