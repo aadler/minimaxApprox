@@ -46,18 +46,12 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   SEXP ret = PROTECT(allocVector(REALSXP, m));
   double *pret = REAL(ret);
 
-  // Since we will return 0 if n = 0---which is technically legal if asking for
-  // the best constant estimate or using rational to test polynomial---we must
-  // initialize the ret vector to 0.
-  memset(pret, 0, m * sizeof(double));
-
-  // If n is at least 1, initialize ret with the last value of a. If n == 1 then
-  // there is no need to calculate piM, sigM, or correction.
-  if (n > 0) {
-    for (int i = 0; i < m; ++i) {
-      pret[i] = pa[nm1];
+  // n must be at least 1 since degree must be >= 0. Therefore initialize ret
+  // with the last value of a. If n == 1 then there is no need to calculate pi,
+  // sig, or correction.
+  for (int i = 0; i < m; ++i) {
+    pret[i] = pa[nm1];
     }
-  }
 
   // If n > 1, we need to use the Compensated Horner scheme to evaluate the
   // polynomial. The algorithm will follow Langlois et al.(2006), which as a
