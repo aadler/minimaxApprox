@@ -62,10 +62,8 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
 
   // If n > 1, we need to use the Compensated Horner scheme to evaluate the
   // polynomial. The algorithm will follow Langlois et al.(2006), which as a
-  // Horner method, starts at the end and works backwards.
-  //
-  // Here is where piM and sigM are needed, but nm1 > 0 so they will be properly
-  // initialized.
+  // Horner method, starts at the end and works backwards which explains the j
+  // decrementation.
   //
   // Also, looking at the algorithm, one doesn't need the entire matrix---just
   // the "last" value. And one can simply overwrite old with new since each
@@ -73,13 +71,13 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // working one cell at a time anyway, we can read the old and write the new to
   // it directly.
   //
-  // The first loop will calculate the "standard" return and the correction
-  // using pi and sigma. Since the pi and sigma are unique to the i/j
-  // combination, the two loops can be combined. However, for each x, the
-  // correction value is adjusted for each "a" coefficient, as traversed by j,
-  // so the final correction needs to be in its own loop. This second loop
-  // applies the correction to the return value. Now, ASAN/UBSAN should not
-  // complain since piM and sigM are only defined when nm1 > 0.
+  // By reversing the order of the loop variables and traversing the i's first,
+  // each "x" is complete after an outer loop. The inner loop calculates the
+  // "standard" return and the correction using pi and sigma. Since the pi and
+  // sigma are unique to the i/j combination, both EFT and Horner summ can be
+  // combined in inner loop. Once the inner loop finishes, so is the correction
+  // for that x, so it applied at the end of the outer loop. Now only one nested
+  // loop is needed.
   //
   // (AA: 2023-08-29)
 
@@ -92,10 +90,9 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
     memset(correction, 0, m * sizeof(double));
 
     // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
-    // et al. (2006). Adjusts correction as it "climbs up" the a coefficients
-    // using j.
-    for (int j = nm1; j-- > 0; ) {
-      for (int i = 0; i < m; ++i) {
+    // et al. (2006).
+    for (int i = 0; i < m; ++i) {
+      for (int j = nm1; j-- > 0; ) {
         // EFT
         Ax = pret[i] * px[i];
         pi = twoPrody(pret[i], px[i]);
@@ -105,9 +102,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
         correction[i] *= px[i];
         correction[i] += pi + sig;
       }
-    }
-    // Add correction to value. Only if n > 1 is correction != 0.
-    for (int i = 0; i < m; ++i) {
+      // Now apply correction in outer loop
       pret[i] += correction[i];
     }
   }
