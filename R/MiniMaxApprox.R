@@ -85,8 +85,9 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   # less than tailtol (which defaults to 1e-10) to the result then consider it 0
   # and return the resulting degree n and message appropriately.
 
-  if (inherits(mmA, "simpleError") &&
-        grepl("singular", mmA$message, fixed = TRUE)) {
+  if (!ratApprox && inherits(mmA, "simpleError") &&
+      grepl("singular", mmA$message, fixed = TRUE)) {
+
     if (!is.null(opts$tailtol)) {
       mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L), relErr,
                               opts),
