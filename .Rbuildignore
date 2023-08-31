@@ -4,3 +4,5 @@
 ^CITATION\.cff$
 ^CodeofConduct.md$
 LICENSE
+^\.pdf$
+^\.tex$
