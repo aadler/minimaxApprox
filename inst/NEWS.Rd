@@ -6,7 +6,7 @@
 
 \title{NEWS file for the minimaxApprox package}
 
-\section{Version 0.1.0.9999 (2023-08-20)}{
+\section{Version 0.2.0 (2023-09-01)}{
   \subsection{Added}{
     \itemize{
       \item When the polynomial algorithm fails with a singular matrix error
