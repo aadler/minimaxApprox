@@ -93,8 +93,8 @@ QQ <- minimaxApprox:::polyCoeffs(x, function(x) expm1(x), TRUE, 0, 1, opts$ztol)
 control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE)
 PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, TRUE)
-
-expect_equal(r, control, tolerance = tol)
+## Need weaker tolerance here since functions are not exactly the same
+expect_equal(r, control, tolerance = 1e-7)
 ## Rational
 QQ <- minimaxApprox:::ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE, 0, 1,
                                 opts$ztol)
@@ -102,7 +102,7 @@ control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
-expect_equal(r, control, tolerance = tol)
+expect_equal(r, control, tolerance = 1e-7)
 ## Test error trap with contrived example
 ## Polynomial
 mmA <- minimaxApprox(exp, 1, 2, 4L)
@@ -124,7 +124,7 @@ PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE)
 # Need weaker tolerance here due to different build platforms
-expect_equal(x, control, tolerance = 5e-6)
+expect_equal(x, control, tolerance = 3.5e-5)
 
 ## Rational
 control <- c(-1, -0.6706726462230721, -2.8931353340360859e-14,
@@ -135,7 +135,7 @@ RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, -1, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE)
 # Need weaker tolerance here due to different build platforms
-expect_equal(x, control, tolerance = 5e-6)
+expect_equal(x, control, tolerance = 3.5e-5)
 
 ## Contrive no extremum examples for maximization and minimization
 R <- list(a = 0, b = 1)

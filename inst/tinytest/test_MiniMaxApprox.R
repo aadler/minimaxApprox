@@ -195,10 +195,10 @@ expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMess)
 ## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOME") {
   errMess <- paste("The algorithm did not converge when looking for a",
-                   "polynomial of length 20 and when looking for a polynomial",
-                   "of degree 21 the uppermost coefficient is not effectively",
+                   "polynomial of length 22 and when looking for a polynomial",
+                   "of degree 23 the uppermost coefficient is not effectively",
                    "zero.")
-  expect_error(minimaxApprox(abs, -0.15, 0.15, 20L), errMess)
+  expect_error(minimaxApprox(abs, -0.15, 0.15, 22L), errMess)
 }
 
 # This should test RATIONAL failover to QR

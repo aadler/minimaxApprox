@@ -59,9 +59,8 @@ findRoots <- function(x, R, fn, relErr) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no",
-                             tol = .Machine$double.eps, R = R, fn = fn,
-                             relErr = relErr),
+    root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no", R = R,
+                             fn = fn, relErr = relErr),
                      error = function(cond) simpleError(trimws(cond$message)))
 
     # If there is no root in the interval, take the endpoint closest to zero
@@ -83,8 +82,7 @@ switchX <- function(r, l, u, R, fn, relErr) {
   maximize <- sign(remErr(l, R, fn, relErr)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
-    extrma <- tryCatch(optimize(remErr, interval = intv,
-                                tol = 3 * .Machine$double.eps, R = R, fn = fn,
+    extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
                                 relErr = relErr, maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
