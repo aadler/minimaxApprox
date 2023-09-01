@@ -76,7 +76,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     remRat(fn, lower, upper, numerd, denomd, relErr, xi, opts)
   } else {
     tryCatch(remPoly(fn, lower, upper, as.integer(degree), relErr, opts),
-             error = function(cond) simpleError(trimws(cond$message)))
+             error = function(e) simpleError(trimws(e$message)))
   }
 
   # In response to issue 2, https://github.com/aadler/minimaxApprox/issues/2,
@@ -88,33 +88,33 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   if (!ratApprox && inherits(mmA, "simpleError")) {
     if (grepl("singular", mmA$message, fixed = TRUE)) {
       if (!is.null(opts$tailtol)) {
-        mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L), relErr,
-                                opts),
-                        error = function(cond) simpleError(trimws(cond$message)))
+        mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
+                                relErr, opts),
+                        error = function(e) simpleError(trimws(e$message)))
         if (!inherits(mmA, "simpleError")) {
           xmax <- max(abs(lower), abs(upper))
           n <- length(mmA$a)
           if ((mmA$a[n] * xmax ^ (n - 1L)) <= opts$tailtol) {
             mess <- paste("The algorithm failed while looking for a polynomial",
-                          "of degree", degree, "but successfully completed when",
-                          "looking for a polynomial of degree", degree + 1L,
-                          "with the largest coefficient's contribution to the",
-                          "approximation <=", paste0(opts$tailtol, ":"), "the",
-                          "tailtol option. The result is a polynomial of length",
-                          degree, "as the uppermost coefficient is effectively",
-                          "0.")
+                          "of degree", degree, "but successfully completed",
+                          "when looking for a polynomial of degree",
+                          degree + 1L, "with the largest coefficient's",
+                          "contribution to the approximation <=",
+                          paste0(opts$tailtol, ":"), "the tailtol option. The",
+                          "result is a polynomial of length", degree, "as the",
+                          "uppermost coefficient is effectively 0.")
             mmA$a <- mmA$a[-length(mmA$a)]
             message(mess)
           } else {
-            stop("The algorithm did not converge when looking for a polynomial ",
-                 "of length ", degree, " and when looking for a polynomial of ",
-                 "degree ", degree + 1L, " the uppermost coefficient is not ",
-                 "effectively zero.")
+            stop("The algorithm did not converge when looking for a polynomial",
+                 " of length ", degree, " and when looking for a polynomial of",
+                 " degree ", degree + 1L, " the uppermost coefficient is not",
+                 " effectively zero.")
           }
         } else {
-          stop("The algorithm neither converged when looking for a polynomial of",
-               " length ", degree, " nor when looking for a polynomial of ",
-               "degree ", degree + 1L, ".")
+          stop("The algorithm neither converged when looking for a polynomial",
+               " of length ", degree, " nor when looking for a polynomial of",
+               " degree ", degree + 1L, ".")
         }
       } else {
         stop("The algorithm did not converge when looking for a polynomial of ",
