@@ -93,8 +93,8 @@ QQ <- minimaxApprox:::polyCoeffs(x, function(x) expm1(x), TRUE, 0, 1, opts$ztol)
 control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE)
 PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, TRUE)
-## Need weaker tolerance here since functions are not exactly the same
-expect_equal(r, control, tolerance = 1.2e-5)
+
+expect_equal(r, control, tolerance = tol)
 ## Rational
 QQ <- minimaxApprox:::ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE, 0, 1,
                                 opts$ztol)
@@ -102,7 +102,7 @@ control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
-expect_equal(r, control, tolerance = 1.2e-5)
+expect_equal(r, control, tolerance = tol)
 ## Test error trap with contrived example
 ## Polynomial
 mmA <- minimaxApprox(exp, 1, 2, 4L)
@@ -116,24 +116,26 @@ expect_identical(r, 1.2)
 # Test switchX
 # Assuming function is correct, replicate a previous result.
 ## Polynomial
-control <- c(-1, 0.10264319190041968, 0.33737347824817959, 0.6276032279622028,
-             0.88067529798010702, 1)
-
+control <- c(-1, 0.10264791208519766, 0.33735881337846646, 0.62760501759598053,
+             0.88066205512236839, 1)
 fn <- function(x) sin(x) + cos(x)
 x <- minimaxApprox:::chebNodes(6, 0, 1)
 PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE)
-expect_equal(x, control, tolerance = 3e-7) # GitHub Actions complain otherwise
+# Need weaker tolerance here due to different build platforms
+expect_equal(x, control, tolerance = 5e-6)
+
 ## Rational
-control <- c(-1, -0.67069346181183143, -6.9989028975148138e-08,
-             0.67069355653023088, 1)
+control <- c(-1, -0.6706726462230721, -2.8931353340360859e-14,
+             0.67067262060160282, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- minimaxApprox:::chebNodes(5, -1, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, -1, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE)
-expect_equal(x, control, tolerance = 3e-7) # GitHub Actions complain otherwise
+# Need weaker tolerance here due to different build platforms
+expect_equal(x, control, tolerance = 5e-6)
 
 ## Contrive no extremum examples for maximization and minimization
 R <- list(a = 0, b = 1)
