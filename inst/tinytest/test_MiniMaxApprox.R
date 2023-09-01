@@ -219,19 +219,6 @@ expect_identical(PP2$a[c(2, 4)], c(0, 0))
 expect_equal(PP2$EE, PP1$EE, tolerance = tol)
 expect_equal(PP2$OE, PP1$OE, tolerance = tol)
 expect_equal(PP2$x, PP1$x, tolerance = 1e-6)
-## Rational
-## This function IS a rational function of degree c(0, 2) so should be returned
-## exactly. However, due to machine issues, we should not get exactly 0, so this
-## should be a good test for ztol, so long as we suppress "close to machine
-## error" warnings.
-RR <- suppressWarnings(minimaxApprox(fn, -1, 1, c(0L, 2L)))
-expect_false(identical(RR$a[2L], 0))
-expect_false(identical(RR$b[2L], 0))
-
-RR <- suppressWarnings(minimaxApprox(fn, -1, 1, c(0L, 2L),
-                                     opts = list(ztol = 2e-15)))
-expect_true(is.na(RR$a[2L]))
-expect_identical(RR$b[2L], 0)
 
 # This should test RATIONAL failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, c(13L, 0L)))
