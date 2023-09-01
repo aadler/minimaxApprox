@@ -14,8 +14,8 @@ chebNodes <- function(n, a, b) {
 
 # Create Vandermonde matrix to a polynomial degree n, or n + 1 terms
 vanderMat <- function(x, n) {
-  n1 <- n + 1L
-  matrix(rep(x, each = n1) ^ (seq_len(n1) - 1L), ncol = n1, byrow = TRUE)
+  np1 <- n + 1L
+  matrix(rep(x, each = np1) ^ (seq_len(np1) - 1L), ncol = np1, byrow = TRUE)
 }
 
 # Call the function being approximated on the points x
@@ -59,8 +59,8 @@ findRoots <- function(x, R, fn, relErr) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
-    root <- tryCatch(uniroot(remErr, interval = intv, R = R, fn = fn,
-                             relErr = relErr),
+    root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no", R = R,
+                             fn = fn, relErr = relErr),
                      error = function(cond) simpleError(trimws(cond$message)))
 
     # If there is no root in the interval, take the endpoint closest to zero

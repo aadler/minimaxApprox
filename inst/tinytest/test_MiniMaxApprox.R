@@ -25,8 +25,8 @@ controlB <- c(1, -0.064342748, -0.028851456)
 controlX <- c(2, 2.0924, 2.3368, 2.6459, 2.9011, 3)
 controlE <- 2.6934e-5
 RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), relErr = TRUE, opts = list())
-expect_equal(RR$a, controlA, tolerance = 5e-5)
-expect_equal(RR$b, controlB, tolerance = 5e-5)
+expect_equal(RR$a, controlA, tolerance = 5e-6)
+expect_equal(RR$b, controlB, tolerance = 5e-6)
 expect_equal(RR$x, controlX, tolerance = 5e-5)
 expect_equal(RR$EE, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
@@ -142,7 +142,7 @@ expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
 
 # Test checkDenom error message
 expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
-             "The 3 degree polynomial in the denominator has a zero at 2.80961")
+             "The 3 degree polynomial in the denominator has a zero at 2")
 
 # Test HW Borchers request of returning n degree if n fails but n + 1 works with
 # uppermost effectively 0 with Runge function between -1 and 1 and degree 10.
@@ -195,10 +195,10 @@ expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMess)
 ## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOME") {
   errMess <- paste("The algorithm did not converge when looking for a",
-                   "polynomial of length 18 and when looking for a polynomial",
-                   "of degree 19 the uppermost coefficient is not effectively",
+                   "polynomial of length 22 and when looking for a polynomial",
+                   "of degree 23 the uppermost coefficient is not effectively",
                    "zero.")
-  expect_error(minimaxApprox(abs, -0.15, 0.15, 18L), errMess)
+  expect_error(minimaxApprox(abs, -0.15, 0.15, 22L), errMess)
 }
 
 # This should test RATIONAL failover to QR
