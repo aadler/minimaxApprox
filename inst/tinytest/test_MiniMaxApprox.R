@@ -110,8 +110,6 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
 ## Rational
-fn <- function(x) 1 / (1 + (5 * x) ^ 2)
-expect_warning(minimaxApprox(fn, -1, 1, c(0, 2)), wrnMess)
 # The various CRAN and Github testbeds are diverse enough that I cannot find a
 # rational minimax approximation example "close enough" to machine precision to
 # pass on all of them.
