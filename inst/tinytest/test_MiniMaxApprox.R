@@ -57,9 +57,11 @@ expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$b, 1)
 
 # Test negative and integer trap
 errMess <- "Polynomial degrees must be integers of least 0 (constant)."
+## Polynomial
 expect_error(minimaxApprox(exp, 0, 1, 0.2), errMess, fixed = TRUE)
 expect_error(minimaxApprox(exp, 0, 1, -1L), errMess, fixed = TRUE)
 expect_error(minimaxApprox(exp, 0, 1, -2), errMess, fixed = TRUE)
+## Rational
 expect_error(minimaxApprox(exp, 0, 1, c(1, -2)), errMess, fixed = TRUE)
 expect_error(minimaxApprox(exp, 0, 1, c(1.2, 2)), errMess, fixed = TRUE)
 expect_error(minimaxApprox(exp, 0, 1, c(-1.2, 8.01)), errMess, fixed = TRUE)
@@ -67,9 +69,12 @@ expect_error(minimaxApprox(exp, 0, 1, c(-1.2, 8.01)), errMess, fixed = TRUE)
 # Test trap for relErr
 errMess <- paste("Relative Error must be a logical value. Default FALSE",
                  "returns absolute error.")
-expect_error(minimaxApprox(fn, -1, 1, 9L, "abs"), errMess)
+## Polynomial
+expect_error(minimaxApprox(exp, -1, 1, 9L, "abs"), errMess)
+## Rational
+expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), "abs"), errMess)
 
-# Test showProgress. Also tests passing miniter
+# Test showProgress; also tests passing miniter.
 ## Polynomial
 fn <- function(x) exp(x) - 1
 opts <- list(miniter = 1L, showProgress = TRUE)
@@ -104,6 +109,13 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
 ## Polynomial
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
+## Rational
+fn <- function(x) 1 / (1 + (5 * x) ^ 2)
+expect_warning(minimaxApprox(fn, -1, 1, c(0, 2)), wrnMess)
+# The various CRAN and Github testbeds are diverse enough that I cannot find a
+# rational minimax approximation example "close enough" to machine precision to
+# pass on all of them.
+# (AA: 2023-09-01)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
@@ -120,6 +132,9 @@ expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
 errMess <- paste("Algorithm is choosing basis point where functional value is",
                  "0. Please approximate using absolute, and not relative,",
                  "error.")
+# Polynomial
+expect_error(minimaxApprox(atan, 0, 1, 17, TRUE), errMess)
+# Rational
 expect_error(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), errMess)
 
 # Test passing incorrect degree (at minimaxApprox level)
@@ -127,18 +142,21 @@ errMess <- paste("Polynomial approximation takes one value for degree and",
                  "rational approximation takes a vector of two values for",
                  "numerator and denominator degrees. Any other inputs are",
                  "invalid.")
-expect_error(minimaxApprox(fn, -1, 1, 1:3), errMess)
+expect_error(minimaxApprox(exp, -1, 1, 1:3), errMess)
 
 # Test passing xi
 ## Polynomial - Check that it is ignored
 wrnMess <- paste("Polynomial approximation uses Chebyshev nodes for initial",
                  "guess. Any passed xi is ignored.")
-expect_message(minimaxApprox(fn, -1, 1, 10L, xi = 6), wrnMess)
+expect_message(minimaxApprox(exp, -1, 1, 10L, xi = 6), wrnMess)
 ## Rational - Check that proper length is passed
 errMess <- paste("Given the requested degrees for numerator and denominator,",
                  "the x-vector needs to have 8 elements.")
 xi <- minimaxApprox:::chebNodes(5L, -1, 1)
-expect_error(minimaxApprox(fn, -1, 1, c(3L, 3L), xi = xi), errMess)
+expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi), errMess)
+# Test that passing proper size works for rational
+xi <- xi + 0.01
+expect_silent(minimaxApprox(exp, -1, 1, c(2L, 1L), xi = xi))
 
 # Test checkDenom error message
 expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
@@ -163,16 +181,6 @@ PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
 expect_equal(PP$a, control, tolerance = tol)
 expect_equal(PP$EE, controlE, tolerance = 1e-7) # Only given 8 digits in email
 expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
-
-# Test ztol not NULL
-PP1 <- minimaxApprox(fn, -1, 1, 3L)
-PP2 <- minimaxApprox(fn, -1, 1, 3L, opts = list(ztol = 1e-14))
-
-expect_equal(PP2$a[c(1, 3)], PP1$a[c(1, 3)], tolerance = tol)
-expect_identical(PP2$a[c(2, 4)], c(0, 0))
-expect_equal(PP2$EE, PP1$EE, tolerance = tol)
-expect_equal(PP2$OE, PP1$OE, tolerance = tol)
-expect_equal(PP2$x, PP1$x, tolerance = 1e-6)
 
 # Test tailtol NULL
 errMess <- paste("The algorithm did not converge when looking for a",
@@ -200,6 +208,30 @@ if (Sys.info()["nodename"] == "HOME") {
                    "zero.")
   expect_error(minimaxApprox(abs, -0.15, 0.15, 22L), errMess)
 }
+
+# Test ztol
+## Polynomial
+PP1 <- minimaxApprox(fn, -1, 1, 3L)
+PP2 <- minimaxApprox(fn, -1, 1, 3L, opts = list(ztol = 1e-14))
+
+expect_equal(PP2$a[c(1, 3)], PP1$a[c(1, 3)], tolerance = tol)
+expect_identical(PP2$a[c(2, 4)], c(0, 0))
+expect_equal(PP2$EE, PP1$EE, tolerance = tol)
+expect_equal(PP2$OE, PP1$OE, tolerance = tol)
+expect_equal(PP2$x, PP1$x, tolerance = 1e-6)
+## Rational
+## This function IS a rational function of degree c(0, 2) so should be returned
+## exactly. However, due to machine issues, we should not get exactly 0, so this
+## should be a good test for ztol, so long as we suppress "close to machine
+## error" warnings.
+RR <- suppressWarnings(minimaxApprox(fn, -1, 1, c(0L, 2L)))
+expect_false(identical(RR$a[2L], 0))
+expect_false(identical(RR$b[2L], 0))
+
+RR <- suppressWarnings(minimaxApprox(fn, -1, 1, c(0L, 2L),
+                                     opts = list(ztol = 2e-15)))
+expect_true(is.na(RR$a[2L]))
+expect_identical(RR$b[2L], 0)
 
 # This should test RATIONAL failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, c(13L, 0L)))
