@@ -33,7 +33,7 @@
       allow for higher degree polynomials in certain cases.
       \item Cleaned up and updated documentation.
       \item Updated unit tests.
-      \item Cleaned up the parameter passing in some internal functions.
+      \item Tightened tolerances and cleaned up some internal functions.
       \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
       \file{DESCRIPTION} as suggested on
       \href{https://stat.ethz.ch/pipermail/r-package-devel/2023q3/009417.html}{R-pkg-devel}.
