@@ -24,7 +24,7 @@ double twoSumy(double a, double b) {
 }
 
 // This is the y component of twoProdFMA; the x component is the product itself.
-double twoPrody(double a, double b) {
+double twoProdFMAy(double a, double b) {
   volatile double x = a * b;
   return(fma(a, b, -x));
 }
@@ -67,7 +67,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // By reversing the order of the loop variables and traversing the i's first,
   // each "x" is complete after an outer loop. The inner loop calculates the
   // "standard" return and the correction using pi and sigma. Since the pi and
-  // sigma are unique to the i/j combination, both EFT and Horner summ can be
+  // sigma are unique to the i/j combination, both EFT and Horner sum can be
   // combined in inner loop. Once the inner loop finishes, so is the correction
   // for that x, so it applied at the end of the outer loop. Now only one nested
   // loop is needed.
@@ -79,24 +79,24 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
     volatile double Ax;
     volatile double pi;
     volatile double sig;
-    double correction[m];
-    memset(correction, 0, m * sizeof(double));
+    double correction;
 
     // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
     // et al. (2006).
     for (int i = 0; i < m; ++i) {
+      correction = 0.0;
       for (int j = nm1; j-- > 0; ) {
         // EFT
         Ax = pret[i] * px[i];
-        pi = twoPrody(pret[i], px[i]);
+        pi = twoProdFMAy(pret[i], px[i]);
         pret[i] = Ax + pa[j];
         sig = twoSumy(Ax, pa[j]);
         // Horner Sum
-        correction[i] *= px[i];
-        correction[i] += pi + sig;
+        correction *= px[i];
+        correction += pi + sig;
       }
       // Now apply correction in outer loop
-      pret[i] += correction[i];
+      pret[i] += correction;
     }
   }
 

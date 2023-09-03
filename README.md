@@ -44,6 +44,10 @@ Please ensure that all contributions comply with both
 
 ### Versioning
 This project attempts to follow [Semantic Versioning](https://semver.org/).
+However, so long as the package remains in its experimental development
+state---noted by a 0 major version---the API may change without incrementing the
+major version. Please read the development notes (NEWS) carefully. Breaking
+changes will be prefaced by "**Breaking:**".
 
 ### Changelog
 This project attempts to follow the changelog system at

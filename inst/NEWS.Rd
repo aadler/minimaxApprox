@@ -6,6 +6,15 @@
 
 \title{NEWS file for the minimaxApprox package}
 
+\section{Developmental Note: Version 0.0.0+}{
+  \itemize{
+    \item So long as the package remains in its experimental development
+    state---noted by a 0 major version---the API may change without incrementing
+    the major version. Please read these development notes carefully. Breaking
+    changes will be prefaced by \dQuote{\strong{Breaking:}}.
+  }
+}
+
 \section{Version 0.2.0 (2023-09-01)}{
   \subsection{Added}{
     \itemize{
@@ -31,8 +40,11 @@
       \item Changed linear solution algorithm to use \code{qr.solve} when the
       default \code{solve} fails with a singular matrix issue. This \emph{may}
       allow for higher degree polynomials in certain cases.
-      \item Cleaned up and updated documentation.
+      \item \strong{Breaking:} Changed name of \sQuote{\code{round}} parameter
+      in print method to \sQuote{\code{digits}} to prevent any confusion with
+      base function \code{round}.
       \item Updated unit tests.
+      \item Cleaned up and updated some documentation and various messages.
       \item Tightened tolerances and cleaned up some internal functions.
       \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
       \file{DESCRIPTION} as suggested on

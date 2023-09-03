@@ -12,12 +12,12 @@ Provides a more human-readable output of a \code{"minimaxApprox"} object.
 }
 
 \usage{
-\method{print}{minimaxApprox}(x, round = 6L, \dots)
+\method{print}{minimaxApprox}(x, digits = 6L, \dots)
 }
 
 \arguments{
     \item{x}{An object inheriting from \link{class} \code{"minimaxApprox"}.}
-    \item{round}{integer; Number of digits to which to round the ratio.}
+    \item{digits}{integer; Number of digits to which to round the ratio.}
     \item{\dots}{Further arguments to \code{print}.}
 }
 
@@ -38,7 +38,7 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 \examples{
 PP <- minimaxApprox(exp, 0, 1, 5)
 PP
-print(PP, round = 2L)
+print(PP, digits = 2L)
 print.default(PP)
 }
 

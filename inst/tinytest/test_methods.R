@@ -16,7 +16,7 @@ RR <- minimaxApprox(function(x) exp(x), 0, 1, c(2L, 2L))
 expect_identical(unlist(coef(RR)$a, use.names = FALSE), RR$a)
 expect_identical(unlist(coef(RR)$b, use.names = FALSE), RR$b)
 expect_stdout(print(RR))
-expect_stdout(print(RR, round = 2L))
+expect_stdout(print(RR, digits = 2L))
 expect_stdout(plot(RR))
 
 RR <- suppressWarnings(minimaxApprox(exp, 0, 1, c(2L, 2L), TRUE))

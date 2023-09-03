@@ -112,7 +112,7 @@ switchX <- function(r, l, u, R, fn, relErr) {
     # Test for 0 value at function if relative error
     if (relErr && callFun(fn, x[i]) == 0) {
       stop("Algorithm is choosing basis point where functional value is ",
-           "0. Please approximate using absolute, and not relative, error.")
+           "0. Please approximate using absolute---not relative---error.")
     }
 
     # Flip maximize
@@ -139,7 +139,7 @@ isConverged <- function(errs, expe, convrat, tol) {
 
 # Check denominator polynomial for zero in the requested range
 checkDenom <- function(a, l, u) {
-  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), a = a),
+  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), extendInt = "no", a = a),
                      error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(dngrRt, "simpleError")) {
     return(NULL)
