@@ -79,12 +79,12 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
     volatile double Ax;
     volatile double pi;
     volatile double sig;
-    double correction[m];
-    memset(correction, 0, m * sizeof(double));
+    double correction;
 
     // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
     // et al. (2006).
     for (int i = 0; i < m; ++i) {
+      correction = 0;
       for (int j = nm1; j-- > 0; ) {
         // EFT
         Ax = pret[i] * px[i];
@@ -92,11 +92,11 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
         pret[i] = Ax + pa[j];
         sig = twoSumy(Ax, pa[j]);
         // Horner Sum
-        correction[i] *= px[i];
-        correction[i] += pi + sig;
+        correction *= px[i];
+        correction += pi + sig;
       }
       // Now apply correction in outer loop
-      pret[i] += correction[i];
+      pret[i] += correction;
     }
   }
 
