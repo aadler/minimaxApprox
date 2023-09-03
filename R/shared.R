@@ -139,7 +139,7 @@ isConverged <- function(errs, expe, convrat, tol) {
 
 # Check denominator polynomial for zero in the requested range
 checkDenom <- function(a, l, u) {
-  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), a = a),
+  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), extendInt = "no", a = a),
                      error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(dngrRt, "simpleError")) {
     return(NULL)
