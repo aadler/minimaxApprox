@@ -24,7 +24,7 @@ double twoSumy(double a, double b) {
 }
 
 // This is the y component of twoProdFMA; the x component is the product itself.
-double twoPrody(double a, double b) {
+double twoProdFMAy(double a, double b) {
   volatile double x = a * b;
   return(fma(a, b, -x));
 }
@@ -88,7 +88,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
       for (int j = nm1; j-- > 0; ) {
         // EFT
         Ax = pret[i] * px[i];
-        pi = twoPrody(pret[i], px[i]);
+        pi = twoProdFMAy(pret[i], px[i]);
         pret[i] = Ax + pa[j];
         sig = twoSumy(Ax, pa[j]);
         // Horner Sum
