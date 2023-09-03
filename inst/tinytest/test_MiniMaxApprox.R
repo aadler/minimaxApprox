@@ -128,8 +128,7 @@ expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
 
 # Test function choosing basis x as 0 trap
 errMess <- paste("Algorithm is choosing basis point where functional value is",
-                 "0. Please approximate using absolute, and not relative,",
-                 "error.")
+                 "0. Please approximate using absolute---not relative---error.")
 # Polynomial
 expect_error(minimaxApprox(atan, 0, 1, 17, TRUE), errMess)
 # Rational

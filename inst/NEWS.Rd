@@ -43,8 +43,8 @@
       \item \strong{Breaking:} Changed name of \sQuote{\code{round}} parameter
       in print method to \sQuote{\code{digits}} to prevent any confusion with
       base function \code{round}.
-      \item Cleaned up and updated documentation.
       \item Updated unit tests.
+      \item Cleaned up and updated some documentation and various messages.
       \item Tightened tolerances and cleaned up some internal functions.
       \item Added \file{LICENSE} to \file{.Rbuildignore} and removed from
       \file{DESCRIPTION} as suggested on

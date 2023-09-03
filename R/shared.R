@@ -112,7 +112,7 @@ switchX <- function(r, l, u, R, fn, relErr) {
     # Test for 0 value at function if relative error
     if (relErr && callFun(fn, x[i]) == 0) {
       stop("Algorithm is choosing basis point where functional value is ",
-           "0. Please approximate using absolute, and not relative, error.")
+           "0. Please approximate using absolute---not relative---error.")
     }
 
     # Flip maximize
