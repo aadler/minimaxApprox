@@ -84,7 +84,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
     // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
     // et al. (2006).
     for (int i = 0; i < m; ++i) {
-      correction = 0;
+      correction = 0.0;
       for (int j = nm1; j-- > 0; ) {
         // EFT
         Ax = pret[i] * px[i];
