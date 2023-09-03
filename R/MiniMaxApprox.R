@@ -82,11 +82,11 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   # In response to issue 2, https://github.com/aadler/minimaxApprox/issues/2,
   # allow the polynomial algorithm to try degree n + 1 if it fails due to
   # singular error in degree n. IF the resulting highest coefficient contributes
-  # less than tailtol (which defaults to 1e-10) to the result then consider it 0
-  # and return the resulting degree n and message appropriately.
+  # less than opts$tailtol to the result then consider it 0 and return the
+  # resulting degree n and message appropriately.
 
   if (!ratApprox && inherits(mmA, "simpleError")) {
-    if (grepl("singular", mmA$message, fixed = TRUE)) {
+    if (grepl("singular", mmA$message, fixed = TRUE)) { # May be different error
       if (!is.null(opts$tailtol)) {
         mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
                                 relErr, opts),
