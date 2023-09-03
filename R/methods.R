@@ -2,17 +2,17 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Print method (hide i and basis/x but leave in list and not in attribute)
-print.minimaxApprox <- function(x, round = 6L, ...) {
+print.minimaxApprox <- function(x, digits = 6L, ...) {
   if (attr(x, "type") == "Polynomial") {
     coefficients <- list(a = x$a)
   } else {
     coefficients <- list(a = x$a, b = x$b)
   }
 
-  round <- as.integer(round)
+  digits <- as.integer(digits)
   diagnostics <- list(x$EE,
                       x$OE,
-                      Ratio = round(x$OE / x$EE, round),
+                      Ratio = round(x$OE / x$EE, digits),
                       Difference = abs(x$OE - x$EE),
                       Warnings = x$Warning)
 

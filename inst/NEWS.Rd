@@ -31,6 +31,9 @@
       \item Changed linear solution algorithm to use \code{qr.solve} when the
       default \code{solve} fails with a singular matrix issue. This \emph{may}
       allow for higher degree polynomials in certain cases.
+      \item Changed name of \sQuote{\code{round}} parameter in print method to
+      \sQuote{\code{digits}} to prevent any confusion with base function
+      \code{round}.
       \item Cleaned up and updated documentation.
       \item Updated unit tests.
       \item Tightened tolerances and cleaned up some internal functions.
