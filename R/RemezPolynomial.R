@@ -17,7 +17,7 @@ polyCoeffs <- function(x, fn, relErr, l, u, zt) {
   P <- polyMat(x, y, relErr)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
-  if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-12)
+  if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-14)
   list(a = checkIrrelevant(PP[-length(PP)], l, u, zt), E = PP[length(PP)])
 }
 
