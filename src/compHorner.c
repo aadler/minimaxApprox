@@ -67,7 +67,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // By reversing the order of the loop variables and traversing the i's first,
   // each "x" is complete after an outer loop. The inner loop calculates the
   // "standard" return and the correction using pi and sigma. Since the pi and
-  // sigma are unique to the i/j combination, both EFT and Horner summ can be
+  // sigma are unique to the i/j combination, both EFT and Horner sum can be
   // combined in inner loop. Once the inner loop finishes, so is the correction
   // for that x, so it applied at the end of the outer loop. Now only one nested
   // loop is needed.
