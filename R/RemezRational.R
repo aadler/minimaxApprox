@@ -49,10 +49,10 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     j <- 0L
     repeat {
       if (j >= opts$maxiter) break
+      j <- j + 1
       RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr, lower, upper, opts$ztol)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
-      j <- j + 1
     }
     RR
   }
