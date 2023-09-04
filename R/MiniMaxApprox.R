@@ -17,7 +17,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   if (!("conviter" %in% names(opts))) {
     opts$conviter <- 10L
   } else {
-    # If actually passed then overwrite maxiter if conviter > maxiter
+    # If actually passed then overwrite maxiter if conviter > maxiter.
     opts$maxiter <- max(opts$maxiter, opts$conviter)
   }
 
@@ -125,7 +125,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     }
   }
 
-  # Handle all warnings centrally
+  # Handle all warnings centrally.
   gotWarning <- FALSE
 
   if (mmA$i >= opts$maxiter && !mmA$converged) {
@@ -178,7 +178,6 @@ minimaxEval <- function(x, mmA) {
 
 # Minimax approximation error convenience function. Based on remErr but takes a
 # completed mmA object.
-
 minimaxErr <- function(x, mmA) {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")

@@ -1,11 +1,11 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Function to create augmented Vandermonde matrix for rational approximation
+# Function to create augmented Vandermonde matrix for rational approximation.
 ratMat <- function(x, E, y, nD, dD, relErr) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
-  # For relative error, need to weight the E by f(x)
+  # For relative error, need to weight the E by f(x).
   if (relErr)  altSgn <- altSgn * y
   altE <- altSgn * E
   yvctr <- -(y + altE)
@@ -14,7 +14,7 @@ ratMat <- function(x, E, y, nD, dD, relErr) {
   cbind(aMat, bMat, -altSgn, deparse.level = 0L)
 }
 
-# Function to calculate coefficients given matrix and known values
+# Function to calculate coefficients given matrix and known values.
 ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
   y <- callFun(fn, x)
   P <- ratMat(x, E, y, nD, dD, relErr)
@@ -26,7 +26,7 @@ ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
        E = PP[length(PP)])
 }
 
-# Main function to calculate and return the minimax rational approximation
+# Main function to calculate and return the minimax rational approximation.
 remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 
   # Initial x's
@@ -36,14 +36,14 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     x <- xi
     if (length(xi) != numerd + denomd + 2L) {
       stop("Given the requested degrees for numerator and denominator, ",
-           "the x-vector needs to have ", numerd + denomd + 2, " elements.")
+           "the x-vector needs to have ", numerd + denomd + 2L, " elements.")
     }
   }
 
-  # Since E is initially a guess we need to iterate solving the system of
-  # equations until E converges. Function may remain inside of remRat.
-  # Everything but "x" is previously defined and constant inside the main remRat
-  # function and thus does not need to be passed.
+  # Since E is initially a guess, we need to iterate solving the system of
+  # equations until E converges. This function remains *inside* of remRat;
+  # therefore, Everything but "x" is previously defined and constant inside the
+  # main remRat function and does not need to be passed.
   convergeErr <- function(x) {
     E <- 0
     j <- 0L
@@ -93,7 +93,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     }
 
     # Check that solution is evolving. If solution is not evolving then further
-    # iterations will just not help.
+    # iterations will not help.
     if (all(errs / errs_last <= opts$convrat) ||
           all(abs(errs - errs_last) <= opts$tol)) {
       unchanging_i <- unchanging_i + 1L

@@ -1,17 +1,17 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Function to create augmented Vandermonde matrix for polynomial approximation
+# Function to create augmented Vandermonde matrix for polynomial approximation.
 polyMat <- function(x, y, relErr) {
   n <- length(x)
   A <- vanderMat(x, n - 2L)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
-  # For relative error, need to weight the E by f(x)
+  # For relative error, need to weight the E by f(x).
   if (relErr) altSgn <- altSgn * y
   cbind(A, altSgn, deparse.level = 0L)
 }
 
-# Function to calculate coefficients given matrix and known values
+# Function to calculate coefficients given matrix and known values.
 polyCoeffs <- function(x, fn, relErr, l, u, zt) {
   y <- callFun(fn, x)
   P <- polyMat(x, y, relErr)
@@ -21,7 +21,7 @@ polyCoeffs <- function(x, fn, relErr, l, u, zt) {
   list(a = checkIrrelevant(PP[-length(PP)], l, u, zt), E = PP[length(PP)])
 }
 
-# Main function to calculate and return the minimax polynomial approximation
+# Main function to calculate and return the minimax polynomial approximation.
 remPoly <- function(fn, lower, upper, degree, relErr, opts) {
 
   # Initial x's
@@ -56,7 +56,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
     }
 
     # Check that solution is evolving. If solution is not evolving then further
-    # iterations will just not help.
+    # iterations will not help.
     if (all(errs / errs_last <= opts$convrat) ||
           all(abs(errs - errs_last) <= opts$tol)) {
       unchanging_i <- unchanging_i + 1L
