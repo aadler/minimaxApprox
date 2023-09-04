@@ -30,13 +30,14 @@ ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
 remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 
   # Initial x's
+  nodeCount <- numerd + denomd + 2L
   if (is.null(xi)) {
-    x <- chebNodes(numerd + denomd + 2L, lower, upper)
+    x <- chebNodes(nodeCount, lower, upper)
   } else {
     x <- xi
-    if (length(xi) != numerd + denomd + 2L) {
+    if (length(xi) != nodeCount) {
       stop("Given the requested degrees for numerator and denominator, ",
-           "the x-vector needs to have ", numerd + denomd + 2L, " elements.")
+           "the x-vector needs to have ", nodeCount, " elements.")
     }
   }
 
@@ -49,7 +50,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     j <- 0L
     repeat {
       if (j >= opts$maxiter) break
-      j <- j + 1
+      j <- j + 1L
       RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr, lower, upper, opts$ztol)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
