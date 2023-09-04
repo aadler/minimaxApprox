@@ -10,11 +10,9 @@
 // Based on Langlois et al. (2006)
 // https://drops.dagstuhl.de/opus/volltexte/2006/442/
 //
-// Many of the variables need to be initialized as "volatile" as we specifically
+// Some of the variables need to be initialized as "volatile" as we specifically
 // DO NOT WANT the compiler to optimize them out. The entire point of EFT
 // algorithms is to capture the floating-point error as best possible!
-//
-// (AA: 2023-08-23)
 
 // This is the y component of twoSum; the x component is the sum itself.
 double twoSumy(double a, double b) {
@@ -36,8 +34,6 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   const int n = LENGTH(a);
   const int nm1 = n - 1;   // Used often
 
-  // Per Hadley's suggestion to create helper pointer variable once
-  // http://adv-r.had.co.nz/C-interface.html#c-vectors - Accessing vector data
   double *px = REAL(x);
   double *pa = REAL(a);
 
@@ -55,27 +51,16 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
 
   // If n > 1, we need to use the Compensated Horner scheme to evaluate the
   // polynomial. The algorithm will follow Langlois et al.(2006), which as a
-  // Horner method, starts at the end and works backwards which explains the j
-  // decrementation.
+  // Horner method, starts at the end and works backwards; thus j.
   //
-  // Also, looking at the algorithm, one doesn't need the entire matrix---just
-  // the "last" value. And one can simply overwrite old with new since each
-  // cell, once calculated, is never called on for a new cell. Since in C we are
-  // working one cell at a time anyway, we can read the old and write the new to
-  // it directly.
-  //
-  // By reversing the order of the loop variables and traversing the i's first,
-  // each "x" is complete after an outer loop. The inner loop calculates the
-  // "standard" return and the correction using pi and sigma. Since the pi and
-  // sigma are unique to the i/j combination, both EFT and Horner sum can be
-  // combined in inner loop. Once the inner loop finishes, so is the correction
-  // for that x, so it applied at the end of the outer loop. Now only one nested
-  // loop is needed.
-  //
-  // (AA: 2023-08-29)
+  // By traversing i in the outer loop, each "x" is complete after each inner
+  // loop. The inner loop calculates the "standard" return and the correction
+  // using pi and sigma. Since the pi and sigma are unique to the i/j
+  // combination, both EFT and Horner sum can be combined in the inner loop.
+  // Once the inner loop finishes, so too is the correction for that x, so it
+  // applied at the end of the outer loop. Now only one nested loop is needed.
 
   if (n > 1) {
-    // x element of twoProdFMA used more than once so define as variable
     volatile double Ax;
     volatile double pi;
     volatile double sig;
@@ -91,11 +76,10 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
         pi = twoProdFMAy(pret[i], px[i]);
         pret[i] = Ax + pa[j];
         sig = twoSumy(Ax, pa[j]);
-        // Horner Sum
+        // Horner Sum correction
         correction *= px[i];
         correction += pi + sig;
       }
-      // Now apply correction in outer loop
       pret[i] += correction;
     }
   }
