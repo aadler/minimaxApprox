@@ -9,12 +9,11 @@
 
 // Based on Langlois et al. (2006)
 // https://drops.dagstuhl.de/opus/volltexte/2006/442/
-//
-// Some of the variables need to be initialized as "volatile" as we specifically
-// DO NOT WANT the compiler to optimize them out. The entire point of EFT
-// algorithms is to capture the floating-point error as best possible!
 
-// This is the y component of twoSum; the x component is the sum itself.
+// This is the y component of twoSum; the x component is the sum itself. These
+// variables need to be initialized as "volatile" as we specifically DO NOT WANT
+// the compiler to optimize them out (z to a for example). The entire point of
+// EFT algorithms is to capture the floating-point error as best possible!
 double twoSumy(double a, double b) {
   volatile double x = a + b;
   volatile double z = x - a;
