@@ -46,8 +46,9 @@ Please ensure that all contributions comply with both
 This project attempts to follow [Semantic Versioning](https://semver.org/).
 However, so long as the package remains in its experimental development
 state---noted by a 0 major version---the API may change without incrementing the
-major version. Please read the development notes (NEWS) carefully. Breaking
-changes will be prefaced by "**Breaking:**".
+major version. Please read the development notes
+([NEWS](https://CRAN.R-project.org/package=minimaxApprox/news.html)) carefully.
+Breaking changes will be prefaced by "**Breaking:**".
 
 ### Changelog
 This project attempts to follow the changelog system at
@@ -94,6 +95,8 @@ the lead maintainer.
  to consider if possible to implement in R.
  * Alternatively, research if possible to use [Rmpfr](https://CRAN.R-project.org/package=Rmpfr)
  package for increased precision.
+ * Alternatively, consider using Chebyshev polynomials instead of monomials as
+ basis for linear equation solutions.
 
 ### Minor
 
