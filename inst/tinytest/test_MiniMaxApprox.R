@@ -214,14 +214,14 @@ if (Sys.info()["nodename"] == "HOME") {
 
 # Test ztol
 ## Polynomial
-PP1 <- minimaxApprox(fn, -1, 1, 3L)
-PP2 <- minimaxApprox(fn, -1, 1, 3L, opts = list(ztol = 1e-14))
+PP1 <- minimaxApprox(sin, -1, 1, 4L)
+PP2 <- minimaxApprox(sin, -1, 1, 4L, opts = list(ztol = 1e-12))
 
-expect_equal(PP2$a[c(1, 3)], PP1$a[c(1, 3)], tolerance = tol)
-expect_identical(PP2$a[c(2, 4)], c(0, 0))
+expect_equal(PP2$a[c(2L, 4L)], PP1$a[c(2L, 4L)], tolerance = tol)
+expect_identical(PP2$a[c(1L, 3L)], c(0, 0))
 expect_equal(PP2$EE, PP1$EE, tolerance = tol)
 expect_equal(PP2$OE, PP1$OE, tolerance = tol)
-expect_equal(PP2$x, PP1$x, tolerance = 1e-6)
+expect_equal(PP2$x, PP1$x, tolerance = tol)
 
 # This should test RATIONAL failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, c(13L, 0L)))
