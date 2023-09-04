@@ -15,7 +15,7 @@
   }
 }
 
-\section{Version 0.2.0 (2023-09-01)}{
+\section{Version 0.2.0 (2023-09-04)}{
   \subsection{Added}{
     \itemize{
       \item When the polynomial algorithm fails with a singular matrix error
