@@ -23,7 +23,7 @@ double twoSumy(double a, double b) {
 
 // This is the y component of twoProdFMA; the x component is the product itself.
 double twoProdFMAy(double a, double b) {
-  volatile double x = a * b;
+  double x = a * b;
   return(fma(a, b, -x));
 }
 
@@ -61,9 +61,9 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // applied at the end of the outer loop. Now only one nested loop is needed.
 
   if (n > 1) {
-    volatile double Ax;
-    volatile double pi;
-    volatile double sig;
+    double Ax;
+    double pi;
+    double sig;
     double correction;
 
     // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
