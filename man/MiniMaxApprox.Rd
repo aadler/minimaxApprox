@@ -34,9 +34,9 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     \emph{absolute} error.}
     \item{xi}{numeric; For rational approximation, a vector of initial points of
     the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
-    missing, approximation will use the appropriate Chebyshev nodes. Polynomial
-    approximation \strong{always} uses Chebyshev nodes and will ignore \code{xi}
-    with a message.}
+    missing, the approximation will use the appropriate Chebyshev nodes.
+    Polynomial approximation \strong{always} uses Chebyshev nodes and will
+    ignore \code{xi} with a message.}
     \item{opts}{\link{list}; Configuration options including:
         \itemize{
             \item \code{maxiter}: integer; The maximum number of iterations to
@@ -51,15 +51,16 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             \item \code{showProgress}: logical; If \code{TRUE} will print error
             values at each iteration.
             \item \code{convRatio}: numeric; The convergence ratio tolerance.
-            Defaults to \code{1+1e-9}. See \strong{Details}.
+            Defaults to \eqn{1 + 1 \times 10^{-9}}{1+1e-9}. See \strong{Details}.
             \item \code{tol}: numeric; The absolute difference tolerance.
-            Defaults to \code{1e-14}. See \strong{Details}.
+            Defaults to \eqn{1 \times 10^{-14}}{1e-14}. See \strong{Details}.
             \item \code{tailtol}: numeric; The tolerance of the coefficient of
             the largest power of \code{x} to be ignored when performing the
             polynomial approximation a second time. Defaults to the smaller of
-            \code{1e-10} or the \eqn{1\times 10^{-6}\cdot(textrm{upper} -
-            \textrm{lower}}{1e-6 * (upper - lower)}. Set to \code{NULL} to skip
-            the \code{degree + 1} check completely. See \strong{Details}.
+            \eqn{1\times 10^{-10}}{1e-10} or \eqn{\frac{\code{upper} -
+            \code{lower}}{10^6}}{(\code{upper} - \code{upper}) / 1e6}. Set to
+            \code{NULL} to skip the \code{degree + 1} check completely. See
+            \strong{Details}.
             \item \code{ztol}: numeric; The tolerance for each polynomial or
             rational numerator or denominator coefficient's contribution to
             \strong{not} to be set to 0. Similar to polynomial \code{tailtol}
@@ -121,7 +122,9 @@ completely.
 For each step of the algorithms' iterations, the contribution of the found
 coefficient to the total sum (as measured in the above section) is compared to
 the \code{ztol} option. When less than or equal to \code{ztol}, that coefficient
-is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely.
+is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely. For
+intervals near or containing zero, setting this option to anything other than
+\code{NULL} may result in either non-convergence or poorer results.
 }
 }
 \value{
@@ -179,11 +182,6 @@ means that the approximations are at best slightly worse. Research proceeds on
 more precise, stable, and efficient implementations. So long as the package
 remains in an experimental state---noted by a 0 major version---the API may
 change at any time.
-
-\subsection{Future Development Ideas}{
-Future developments may include possible use of arbitrary-precision math or
-using barycentric representations instead of monomials.
-}
 }
 
 \seealso{\code{\link{minimaxEval}}, \code{\link{minimaxErr}}}

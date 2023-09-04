@@ -18,7 +18,7 @@ the basis points and the error bounds.
     \item{y}{Ignored. In call as required by \R in
     \href{https://cran.r-project.org/doc/manuals/R-exts.html#Generic-functions-and-methods}{Writing R Extensions:chapter 7}.}
     \item{\dots}{Further arguments to plot. Specifically to pass \code{ylim} to
-    allow zooming in or out.}
+    allow for zooming in or out.}
 }
 
 \value{No return value; called for side effects.}
