@@ -15,6 +15,16 @@
   }
 }
 
+\section{Version 0.2.1 (2023-09-04)}{
+  \subsection{Changed}{
+    \itemize{
+      \item Test for calculating polynomial of degree \code{n + 1} when one of
+      degree \code{n} fails, while passing both R Mac Builder and Github's Mac
+      platform, failed on CRAN's testbed. So test is not run for Mac.
+    }
+  }
+}
+
 \section{Version 0.2.0 (2023-09-04)}{
   \subsection{Added}{
     \itemize{
