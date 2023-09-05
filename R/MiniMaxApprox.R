@@ -38,7 +38,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   # Used for cases where we check polynomial degree n + 1.
   # See issue 2 https://github.com/aadler/minimaxApprox/issues/2
   if (!("tailtol" %in% names(opts))) {
-    opts$tailtol <- min(1e-10, (upper - lower) / 1e6)
+    opts$tailtol <- min(sqrt(.Machine$double.eps), (upper - lower) / 1e6)
   }
 
   if (!("ztol" %in% names(opts))) {
@@ -99,10 +99,10 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                           "of degree", degree, "but successfully completed",
                           "when looking for a polynomial of degree",
                           degree + 1L, "with the largest coefficient's",
-                          "contribution to the approximation <=",
-                          paste0(opts$tailtol, ":"), "the tailtol option. The",
-                          "result is a polynomial of length", degree, "as the",
-                          "uppermost coefficient is effectively 0.")
+                          "contribution to the approximation <= the tailtol",
+                          "option. The result is a polynomial of length",
+                          degree, "as the uppermost coefficient is effectively",
+                          "0.")
             mmA$a <- mmA$a[-length(mmA$a)]
             message(mess)
           } else {

@@ -15,12 +15,24 @@
   }
 }
 
+\section{Version 0.2.1.9000 (2023-09-05)}{
+  \subsection{Changed}{
+    \itemize{
+      \item \strong{Breaking:} Reduced \code{tailtol} tolerance to
+      \code{sqrt(.Machine$double.eps)} as one of the myriad \acronym{CRAN}
+      testbeds also had issues with convergence. Different \acronym{BLAS}
+      implementations seem to display different levels of precision.
+    }
+  }
+}
+
 \section{Version 0.2.1 (2023-09-04)}{
   \subsection{Changed}{
     \itemize{
       \item Test for calculating polynomial of degree \code{n + 1} when one of
-      degree \code{n} fails, while passing both R Mac Builder and Github's Mac
-      platform, failed on CRAN's testbed. So test is not run for Mac.
+      degree \code{n} fails, while passing both R \acronym{Mac} Builder and
+      Github's \acronym{Mac} platform, failed on \acronym{CRAN}'s testbed.
+      So test is no longer run for \acronym{Mac} on \acronym{CRAN}.
     }
   }
 }

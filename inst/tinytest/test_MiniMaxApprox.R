@@ -171,7 +171,7 @@ if (!("darwin" %in% tolower(Sys.info()[["sysname"]]))) {
   mess <- paste("The algorithm failed while looking for a polynomial of degree",
                 "10 but successfully completed when looking for a polynomial of",
                 "degree 11 with the largest coefficient's contribution to the",
-                "approximation <= 1e-10: the tailtol option. The result is a",
+                "approximation <= the tailtol option. The result is a",
                 "polynomial of length 10 as the uppermost coefficient is",
                 "effectively 0.")
   fn <- function(x) 1 / (1 + (5 * x) ^ 2)
