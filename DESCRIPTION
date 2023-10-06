@@ -17,3 +17,4 @@ Suggests: tinytest, covr
 ByteCompile: yes
 NeedsCompilation: yes
 Encoding: UTF-8
+UseLTO: yes
