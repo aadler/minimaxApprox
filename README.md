@@ -1,3 +1,7 @@
+---
+title: Package minimaxApprox
+---
+
 <!-- badges: start -->
 [![](https://www.r-pkg.org/badges/version-last-release/minimaxApprox)](https://cran.r-project.org/package=minimaxApprox)
 [![](http://cranlogs.r-pkg.org/badges/last-month/minimaxApprox)](https://cran.r-project.org/package=minimaxApprox)
@@ -8,31 +12,14 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8158855.svg)](https://doi.org/10.5281/zenodo.8158855)
 <!-- badges: end -->
 
-# minimaxApprox
+## Description
 **minimaxApprox** is an `R` package which implements the algorithm of Remez
 (1962) for polynomial minimax approximation and of Cody et al. (1968)
 <doi:10.1007/BF02162506> for rational minimax approximation.
 
 ## Citation
-If you use the package, please cite it as:
-
-  Adler A (2023). minimaxApprox: Implementation of Remez Algorithm for
-  Polynomial and Rational Function Approximation.
-  [doi: 10.5281/zenodo.8158855](https://doi.org/10.5281/zenodo.8158855),
-  R package version 0.2.1.9000, https://CRAN.R-project.org/package=minimaxApprox
-
-A BibTeX entry for LaTeX users is:
-
-```
-  @Manual{,
-    author = {Avraham Adler},
-    title = {minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational Function Approximation},
-    year = {2023},
-    url = {https://CRAN.R-project.org/package=minimaxApprox},
-    doi = {10.5281/zenodo.8158855},
-    note = {R package version 0.2.1.9000},
-  }
-```
+If you use the package, please cite it as per
+[CITATION](https://CRAN.R-project.org/package=minimaxApprox/citation.html).
 
 ## Acknowledgements
 The author is grateful to [Martin Maechler](https://stat.ethz.ch/~maechler/) for
