@@ -57,8 +57,7 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             \item \code{tailtol}: numeric; The tolerance of the coefficient of
             the largest power of \code{x} to be ignored when performing the
             polynomial approximation a second time. Defaults to the smaller of
-            \eqn{\sqrt{\text{.Machine\$double.eps}} \approx 1.49\times
-            10^{-8}}{\code{sqrt(.Machine$double.eps)}} or
+            \eqn{1 \times 10^{-10}}{1e-10} or
             \eqn{\frac{\code{upper} - \code{lower}}{10^6}}{(\code{upper} -
             \code{upper}) / 1e6}. Set to \code{NULL} to skip the
             \code{degree + 1} check completely. See \strong{Details}.

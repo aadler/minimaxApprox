@@ -38,7 +38,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   # Used for cases where we check polynomial degree n + 1.
   # See issue 2 https://github.com/aadler/minimaxApprox/issues/2
   if (!("tailtol" %in% names(opts))) {
-    opts$tailtol <- min(sqrt(.Machine$double.eps), (upper - lower) / 1e6)
+    opts$tailtol <- min(1e-10, (upper - lower) / 1e6)
   }
 
   if (!("ztol" %in% names(opts))) {
