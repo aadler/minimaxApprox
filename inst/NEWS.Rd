@@ -15,13 +15,22 @@
   }
 }
 
-\section{Version 0.2.1.9000 (2023-09-05)}{
+\section{Version 0.2.2 (2023-10-10)}{
   \subsection{Changed}{
     \itemize{
       \item \strong{Breaking:} Reduced \code{tailtol} tolerance to
-      \code{sqrt(.Machine$double.eps)} as one of the myriad \acronym{CRAN}
+      \code{sqrt(.Machine$double.eps)} as some of the myriad \acronym{CRAN}
       testbeds also had issues with convergence. Different \acronym{BLAS}
       implementations seem to display different levels of precision.
+      \item Refactored \file{README} to split out security and contributions
+      wordings to their own respective files and link the citation to the file
+      on \acronym{CRAN}.
+    }
+  }
+  \subsection{Added}{
+    \itemize{
+      \item Added \code{LTO_OPT} to \file{Makevars} and \code{UseLTO} to
+      \file{DESCRIPTION}.
     }
   }
 }
