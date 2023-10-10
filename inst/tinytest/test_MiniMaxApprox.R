@@ -224,7 +224,7 @@ expect_equal(PP2$OE, PP1$OE, tolerance = tol)
 expect_equal(PP2$x, PP1$x, tolerance = tol)
 
 # This should test RATIONAL failover to QR
-expect_error(minimaxApprox(sin, 0, pi / 2, c(13L, 0L)))
+expect_error(minimaxApprox(sin, 0, pi / 2, c(100L, 0L)))
 
 # Test evaluation function
 x <- seq(0.1, 0.4, 0.025)
