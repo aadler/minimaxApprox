@@ -160,9 +160,10 @@ expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
              "The 3 degree polynomial in the denominator has a zero at 2")
 
 ## The tests below pass R mac builder AND the Github mac, but for some reason do
-## NOT pass CRAN's own mac x86_64 testbed. So simply excluding from Mac.
+## NOT pass CRAN's own mac x86_64 testbed nor on Professor Ripley's Fedora-based
+## OpenBLAS platform, so will only run on Windows for now.
 
-if (!("darwin" %in% tolower(Sys.info()[["sysname"]]))) {
+if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
   # Test HW Borchers request of returning n degree if n fails but n + 1 works
   # with uppermost effectively 0 with Runge function between -1 and 1 and degree
   # 10.

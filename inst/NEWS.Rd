@@ -21,7 +21,7 @@
       \item Refactored \file{README} to split out security and contributions
       wordings to their own respective files and link the citation to the file
       on \acronym{CRAN}.
-      \item Changed some tests to be more \acronym{CRAN} appropriate.
+      \item Changed some tests to be more acceptable for \acronym{CRAN}.
     }
   }
   \subsection{Added}{
