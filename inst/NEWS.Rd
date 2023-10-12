@@ -15,7 +15,7 @@
   }
 }
 
-\section{Version 0.2.2 (2023-10-10)}{
+\section{Version 0.2.2 (2023-10-12)}{
   \subsection{Changed}{
     \itemize{
       \item Refactored \file{README} to split out security and contributions
