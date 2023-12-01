@@ -126,12 +126,16 @@ isConverged <- function(errs, expe, convrat, tol) {
   aerrs <- abs(errs)
   mxae <- max(aerrs)
   mnae <- min(aerrs)
+  a_mxa_exp <- abs(mxae - expe)
+  mx_mn <- mxae - mnae
 
   # Check observed errors are close enough to expected by ratio or tolerance.
-  errDistance <- mxae / expe <= convrat || abs(mxae - expe) <= tol
+  errDistance <- mxae / expe <= convrat ||
+    (a_mxa_exp <= tol && a_mxa_exp > .Machine$double.eps)
 
   # Check observed errors are close enough to each other by ratio or tolerance.
-  errMagnitude <- mxae / mnae <= convrat || mxae - mnae <= tol
+  errMagnitude <- mxae / mnae <= convrat ||
+    (mx_mn <= tol && mx_mn > .Machine$double.eps)
 
   # Converged if magnitude and distance are close and error oscillates in sign.
   isOscil(errs) && errDistance && errMagnitude
