@@ -15,7 +15,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   }
 
   if (!("conviter" %in% names(opts))) {
-    opts$conviter <- 10L
+    opts$conviter <- 30L
   } else {
     # If actually passed then overwrite maxiter if conviter > maxiter.
     opts$maxiter <- max(opts$maxiter, opts$conviter)
@@ -140,7 +140,8 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     warning("Convergence to requested ratio and tolerance not achieved in ",
             mmA$i, " iterations.\n", mmA$unchanging_i, " successive ",
             "calculated errors were too close to each other to warrant ",
-            "further iterations.\nThe ratio is ", fC(mmA$mxae / mmA$expe),
+            "further iterations.\nThe ratio is ",
+            fC(mmA$mxae / mmA$expe, d = 14L),
             " times expected and the difference is ",
             fC(abs(mmA$mxae - mmA$expe)), " from the expected.")
     gotWarning <- TRUE
