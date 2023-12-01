@@ -4,7 +4,7 @@
 tol <- sqrt(.Machine$double.eps)
 
 opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
-             showProgress = FALSE, convRatio = 1.000000001, tol = 1e-14,
+             showProgress = FALSE, convrat = 1.000000001, tol = 1e-14,
              ztol = .Machine$double.eps)
 
 # Test fC
