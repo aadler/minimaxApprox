@@ -15,7 +15,7 @@
   }
 }
 
-\section{Version 0.2.3 (2024-10-12)}{
+\section{Version 0.3.0 (2024-01-25)}{
   \subsection{Changed}{
     \itemize{
       \item \strong{Breaking:} More descriptive names in return object. See the
