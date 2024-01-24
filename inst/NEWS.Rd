@@ -18,6 +18,8 @@
 \section{Version 0.2.3 (2024-10-12)}{
   \subsection{Changed}{
     \itemize{
+      \item \strong{Breaking:} More descriptive names in return object. See the
+      \strong{Value} section of \code{help("minimaxApprox")} for details.
       \item \strong{Breaking:} When using relative error for convergence and one
       of the basis points is 0, instead of stopping with an error, the algorithm
       will perturb that basis point by \code{1e-12} in the appropriate direction
