@@ -18,6 +18,10 @@
 \section{Version 0.2.3 (2024-10-12)}{
   \subsection{Changed}{
     \itemize{
+      \item \strong{Breaking:} When using relative error for convergence and one
+      of the basis points is 0, instead of stopping with an error, the algorithm
+      will perturb that basis point by \code{1e-12} in the appropriate direction
+      and proceed with a warning.
       \item \strong{Breaking:} Forced convergence to look \emph{only} at the
       ratio if the difference between tested values is \eqn{\le}{<=}
       \code{.Machine$double.eps}.
