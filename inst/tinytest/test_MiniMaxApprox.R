@@ -27,7 +27,7 @@ controlE <- 2.6934e-5
 RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), relErr = TRUE, opts = list())
 expect_equal(RR$a, controlA, tolerance = 5e-6)
 expect_equal(RR$b, controlB, tolerance = 5e-6)
-expect_equal(RR$x, controlX, tolerance = 5e-5)
+expect_equivalent(RR$x, controlX, tolerance = 5e-5)
 expect_equal(RR$EE, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
@@ -127,12 +127,11 @@ expect_warning(minimaxApprox(fn, -1, 1, 12L, opts = opts), wrnMess)
 expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
 
 # Test function choosing basis x as 0 trap
-errMess <- paste("Algorithm is choosing basis point where functional value is",
-                 "0. Please approximate using absolute---not relative---error.")
+wrnMess <- "functional value is 0"
 # Polynomial
-expect_error(minimaxApprox(atan, 0, 1, 17, TRUE), errMess)
+expect_warning(minimaxApprox(atan, 0, 1, 14, TRUE), wrnMess)
 # Rational
-expect_error(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), errMess)
+expect_warning(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), wrnMess)
 
 # Test passing incorrect degree (at minimaxApprox level)
 errMess <- paste("Polynomial approximation takes one value for degree and",
