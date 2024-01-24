@@ -24,6 +24,9 @@ polyCoeffs <- function(x, fn, relErr, l, u, zt) {
 # Main function to calculate and return the minimax polynomial approximation.
 remPoly <- function(fn, lower, upper, degree, relErr, opts) {
 
+  # Set ZeroBasis relErr flag
+  relErrZeroBasis <- FALSE
+
   # Initial x's
   x <- chebNodes(degree + 2L, lower, upper)
 
@@ -40,6 +43,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
     i <- i + 1L
     r <- findRoots(x, PP, fn, relErr)
     x <- switchX(r, lower, upper, PP, fn, relErr)
+    if (attr(x, "ZeroBasis")) relErrZeroBasis <- TRUE
     PP <- polyCoeffs(x, fn, relErr, lower, upper, opts$ztol)
     errs <- remErr(x, PP, fn, relErr)
     mxae <- max(abs(errs))
@@ -69,5 +73,6 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
   }
 
   list(a = PP$a, expe = expe, mxae = mxae, i = i, x = x, converged = converged,
-       unchanged = unchanged, unchanging_i = unchanging_i)
+       unchanged = unchanged, unchanging_i = unchanging_i,
+       zeroBasisError = relErrZeroBasis)
 }

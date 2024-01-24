@@ -29,6 +29,9 @@ ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
 # Main function to calculate and return the minimax rational approximation.
 remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 
+  # Set ZeroBasis relErr flag
+  relErrZeroBasis <- FALSE
+
   # Initial x's
   nodeCount <- numerd + denomd + 2L
   if (is.null(xi)) {
@@ -69,6 +72,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     i <- i + 1L
     r <- findRoots(x, RR, fn, relErr)
     x <- switchX(r, lower, upper, RR, fn, relErr)
+    if (attr(x, "ZeroBasis")) relErrZeroBasis <- TRUE
     RR <- convergeErr(x)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
@@ -108,5 +112,5 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 
   list(a = RR$a, b = RR$b, expe = expe, mxae = mxae, i = i, x = x,
        converged = converged, unchanged = unchanged,
-       unchanging_i = unchanging_i)
+       unchanging_i = unchanging_i, zeroBasisError = relErrZeroBasis)
 }

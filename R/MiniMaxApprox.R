@@ -153,6 +153,13 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     gotWarning <- TRUE
   }
 
+  if (mmA$zeroBasisError) {
+    warning("During convergence, the algorithm chose basis point(s) where the ",
+            "functional value is 0. The basis point was perturbed by 1e-12, ",
+            "but consider approximating using absolute---not relative---error.")
+    gotWarning <- TRUE
+  }
+
   coefficients <- if (ratApprox) list(a = mmA$a, b = mmA$b) else list(a = mmA$a)
   diagnostics <- list(EE = mmA$expe, OE = mmA$mxae, iterations = mmA$i,
                       x = mmA$x, Warning = gotWarning)
