@@ -43,7 +43,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, opts) {
     i <- i + 1L
     r <- findRoots(x, PP, fn, relErr)
     x <- switchX(r, lower, upper, PP, fn, relErr)
-    if (attr(x, "ZeroBasis")) relErrZeroBasis <- TRUE
+    relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     PP <- polyCoeffs(x, fn, relErr, lower, upper, opts$ztol)
     errs <- remErr(x, PP, fn, relErr)
     mxae <- max(abs(errs))

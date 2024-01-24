@@ -72,7 +72,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     i <- i + 1L
     r <- findRoots(x, RR, fn, relErr)
     x <- switchX(r, lower, upper, RR, fn, relErr)
-    if (attr(x, "ZeroBasis")) relErrZeroBasis <- TRUE
+    relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     RR <- convergeErr(x)
     dngr <- checkDenom(RR$b, lower, upper)
     if (!is.null(dngr)) {
