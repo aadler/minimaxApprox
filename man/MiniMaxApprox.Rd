@@ -66,7 +66,7 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             \strong{not} to be set to 0. Similar to polynomial \code{tailtol}
             but applied at each step of the algorithm. Defaults to
             \code{NULL} which leaves all coefficients as they are regardless
-            of magnitude.
+            of magnitude. See \strong{Details}.
         }
     }
 }
@@ -86,10 +86,10 @@ three of the following criteria are met:
     }
 \dQuote{Within tolerance} can be met in one of two ways:
     \enumerate{
-        \item The difference between the absolute magnitudes is less than or
-        equal to \code{tol}.
-        \item The ratio between the absolute magnitudes of the larger and
-        smaller is less than or equal to \code{convRatio}.
+        \item \strong{Difference}: The difference between the absolute
+        magnitudes is less than or equal to \code{tol}.
+        \item \strong{Ratio}: The ratio between the absolute magnitudes of the
+        larger and smaller is less than or equal to \code{convRatio}.
     }
 
 For efficiency, the \strong{Distance Test} is taken between the absolute value
@@ -97,7 +97,9 @@ of the largest observed error and the absolute value of the expected error.
 Similarly, the \strong{Magnitude Test} is taken between the absolute value of
 the largest observed error and the absolute value of the smallest observed
 error. Both tests can be passed by \strong{either} being within \code{tol} or
-\code{convRatio} as described above.
+\code{convRatio} as described above. When the \strong{Difference} test returns
+values less than machine precision it is ignored in favor of the \strong{Ratio}
+test.
 }
 \subsection{Polynomial Evaluation}{
 The polynomials are evaluated using the Compensated Horner Scheme of Langlois et
