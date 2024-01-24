@@ -32,6 +32,11 @@
       convergence given a distance \eqn{\le}{<=} \code{.Machine$double.eps}.
     }
   }
+  \subsection{Added}{
+    \itemize{
+      \item Added unit tests for additional functionality.
+    }
+  }
   \subsection{Fixed}{
     \itemize{
       \item Fixed a misnamed option value in some unit tests.
