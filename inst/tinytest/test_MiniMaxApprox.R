@@ -181,8 +181,8 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
   expect_message(minimaxApprox(fn, -1, 1, 10L), mess)
   PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
   expect_equal(PP$a, control, tolerance = tol)
-  expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only given 8 digits in email
-  expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only given 8 digits in email
+  expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only 8 digits in email
+  expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 }
 
 ## Test unsuccessful restart due to two failures

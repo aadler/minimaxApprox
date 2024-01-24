@@ -14,11 +14,11 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     opts$miniter <- 10L
   }
 
-  if (!("conviter" %in% names(opts))) {
-    opts$conviter <- 30L
-  } else {
+  if ("conviter" %in% names(opts)) {
     # If actually passed then overwrite maxiter if conviter > maxiter.
     opts$maxiter <- max(opts$maxiter, opts$conviter)
+  } else {
+    opts$conviter <- 30L
   }
 
   if (!("showProgress" %in% names(opts))) {
@@ -91,7 +91,11 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
         mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
                                 relErr, opts),
                         error = function(e) simpleError(trimws(e$message)))
-        if (!inherits(mmA, "simpleError")) {
+        if (inherits(mmA, "simpleError")) {
+          stop("The algorithm neither converged when looking for a polynomial",
+               " of length ", degree, " nor when looking for a polynomial of",
+               " degree ", degree + 1L, ".")
+        } else {
           xmax <- max(abs(lower), abs(upper))
           n <- length(mmA$a)
           if ((mmA$a[n] * xmax ^ (n - 1L)) <= opts$tailtol) {
@@ -111,10 +115,6 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                  " degree ", degree + 1L, " the uppermost coefficient is not",
                  " effectively zero.")
           }
-        } else {
-          stop("The algorithm neither converged when looking for a polynomial",
-               " of length ", degree, " nor when looking for a polynomial of",
-               " degree ", degree + 1L, ".")
         }
       } else {
         stop("The algorithm did not converge when looking for a polynomial of ",
