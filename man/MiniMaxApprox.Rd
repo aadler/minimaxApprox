@@ -144,14 +144,14 @@ components:
     coefficients.}
     \item{b}{The rational denominator coefficients. Missing for polynomial
     approximation.}
-    \item{EE}{The absolute value of the expected error as calculated by the
+    \item{ExpErr}{The absolute value of the expected error as calculated by the
     Remez algorithms.}
-    \item{OE}{The absolute value of largest observed error between the function
+    \item{ObsErr}{The absolute value of largest observed error between the function
     and the approximation at the extremal basis points.}
     \item{iterations}{The number of iterations of the algorithm. This does not
     include any iterations required to converge the error value in rational
     approximation.}
-    \item{x}{The basis points at which the minimax error was achieved.}
+    \item{Basis}{The basis points at which the minimax error was achieved.}
     \item{Warning}{A logical flag indicating if any warnings were thrown.}
 }
 
