@@ -16,7 +16,7 @@ fn <- function(x) gamma(x + 1)
 RR <- minimaxApprox(fn, 0, 1, c(3L, 4L), relErr = FALSE)
 expect_equal(RR$a, controlA, tolerance = tol)
 expect_equal(RR$b, controlB, tolerance = tol)
-expect_true(RR$EE <= controlE)
+expect_true(RR$ExpErr <= controlE)
 expect_false(RR$Warning)
 ## Rational 2: Based on Cody (1968) pp 250--251. Using weaker tolerance since
 ## taking values printed on paper.
@@ -27,8 +27,8 @@ controlE <- 2.6934e-5
 RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), relErr = TRUE, opts = list())
 expect_equal(RR$a, controlA, tolerance = 5e-6)
 expect_equal(RR$b, controlB, tolerance = 5e-6)
-expect_equivalent(RR$x, controlX, tolerance = 5e-5)
-expect_equal(RR$EE, controlE, tolerance = 5e-5)
+expect_equivalent(RR$Basis, controlX, tolerance = 5e-5)
+expect_equal(RR$ExpErr, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
 ## Rational 3: Based on DLMF 3.11.19 https://dlmf.nist.gov/3.11#iii
@@ -181,8 +181,8 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
   expect_message(minimaxApprox(fn, -1, 1, 10L), mess)
   PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
   expect_equal(PP$a, control, tolerance = tol)
-  expect_equal(PP$EE, controlE, tolerance = 1e-7) # Only given 8 digits in email
-  expect_equal(PP$OE, controlE, tolerance = 1e-7) # Only given 8 digits in email
+  expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only given 8 digits in email
+  expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only given 8 digits in email
 }
 
 ## Test unsuccessful restart due to two failures
@@ -219,9 +219,9 @@ PP2 <- minimaxApprox(sin, -1, 1, 4L, opts = list(ztol = 1e-12))
 
 expect_equal(PP2$a[c(2L, 4L)], PP1$a[c(2L, 4L)], tolerance = tol)
 expect_identical(PP2$a[c(1L, 3L)], c(0, 0))
-expect_equal(PP2$EE, PP1$EE, tolerance = tol)
-expect_equal(PP2$OE, PP1$OE, tolerance = tol)
-expect_equal(PP2$x, PP1$x, tolerance = tol)
+expect_equal(PP2$ExpErr, PP1$ExpErr, tolerance = tol)
+expect_equal(PP2$ObsErr, PP1$ObsErr, tolerance = tol)
+expect_equal(PP2$Basis, PP1$Basis, tolerance = tol)
 
 # This should test RATIONAL failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, c(100L, 0L)))
@@ -229,9 +229,9 @@ expect_error(minimaxApprox(sin, 0, pi / 2, c(100L, 0L)))
 # Test evaluation function
 x <- seq(0.1, 0.4, 0.025)
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
-expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
+expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
-expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$EE))
+expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
 ## Check error trap
 errMess <- "This function only works with 'minimaxApprox' objects."
 expect_error(minimaxEval(x, sin), errMess)
