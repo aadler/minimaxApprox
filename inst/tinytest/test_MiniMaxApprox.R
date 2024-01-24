@@ -129,7 +129,10 @@ expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
 # Test function choosing basis x as 0 trap
 wrnMess <- "functional value is 0"
 # Polynomial
+## Zero is lower bound
 expect_warning(minimaxApprox(atan, 0, 1, 14, TRUE), wrnMess)
+## Zero is upper bound
+expect_warning(minimaxApprox(atan, -1, 0, 10, TRUE), wrnMess)
 # Rational
 expect_warning(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), wrnMess)
 
