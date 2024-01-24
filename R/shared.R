@@ -79,6 +79,7 @@ switchX <- function(r, l, u, R, fn, relErr) {
   bottoms <- c(l, r)
   tops <- c(r, u)
   x <- double(length(bottoms))
+  attr(x, "ZeroBasis") <- FALSE
   maximize <- sign(remErr(l, R, fn, relErr)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
@@ -111,8 +112,20 @@ switchX <- function(r, l, u, R, fn, relErr) {
 
     # Test for 0 value at function if relative error
     if (relErr && callFun(fn, x[i]) == 0) {
-      stop("Algorithm is choosing basis point where functional value is ",
-           "0. Please approximate using absolute---not relative---error.")
+      attr(x, "ZeroBasis") <- TRUE
+      if (x[i] == l) {
+        x[i] <- x[i] + 1e-12
+      } else if (x[i] == u) {
+        x[i] <- x[i] - 1e-12
+      } else {
+        xreplace <- c(x[i] - 1e-12, x[i] + 1e-12)
+        fnreplace <- callFun(fn, xreplace)
+        if (maximize) {
+          x[i] <- xreplace[which.max(fnreplace)]
+        } else {
+          x[i] <- xreplace[which.min(fnreplace)]
+        }
+      }
     }
 
     # Flip maximize.
