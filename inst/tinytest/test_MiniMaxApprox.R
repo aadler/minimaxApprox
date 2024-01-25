@@ -132,9 +132,14 @@ wrnMess <- "functional value is 0"
 ## Zero is lower bound
 expect_warning(minimaxApprox(atan, 0, 1, 14, TRUE), wrnMess)
 ## Zero is upper bound
-expect_warning(minimaxApprox(atan, -1, 0, 10, TRUE), wrnMess)
+fn <- function(x) exp(cos(x)) - 1
+expect_warning(minimaxApprox(fn, 0, pi / 2, 4, TRUE), wrnMess)
 # Rational
 expect_warning(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), wrnMess)
+## Zero is in the middle. Cheat by using rational where we can pass a known 0
+xi <- c(-3.1415926535897931, -2.8528682884167589, -2.0679141961268077,
+        -1.5707963267948966, -0.77077941189031729, -0.19864802181061084, 0)
+expect_warning(minimaxApprox(fn, -pi, 0, c(1, 4), TRUE, xi = xi), wrnMess)
 
 # Test passing incorrect degree (at minimaxApprox level)
 errMess <- paste("Polynomial approximation takes one value for degree and",
