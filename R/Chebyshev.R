@@ -33,3 +33,22 @@ chebPoly <- function(x, k) {
                                  cos(k * acos(x)),
                                  cosh(k * acosh(x)))))
 }
+
+# Create the equivalent of a Vandermonde matrix but using Chebyshev polynomials.
+# Commented out version was original for development. Final version is an order
+# of magnitude faster because it is more vectorized.
+# chebMat <- function(x, n) {
+#   k <- length(x)
+#   np1 <- n + 1L
+#   ret <- matrix(0, ncol = np1, nrow = k)
+#   for (i in seq_len(np1)) {
+#     ret[, i] <- chebPoly(x, i - 1L)
+#   }
+#   ret
+# }
+
+chebMat <- function(x, n) {
+  outer(x, 0:n, chebPoly)
+}
+
+

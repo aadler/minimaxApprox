@@ -37,3 +37,14 @@ expect_equal(minimaxApprox:::chebPoly(x, 6),
 x <- c(3, "A")
 expect_error(minimaxApprox:::chebPoly(x, 3) , "is.numeric\\(x\\) is not TRUE")
 expect_error(minimaxApprox:::chebPoly(3, -1), "k >= 0 is not TRUE")
+
+# chebMat
+x <- c(-0.5, 0, 0.5)
+k <- 3
+control <- matrix(c(minimaxApprox:::chebPoly(x, 0L),
+                    minimaxApprox:::chebPoly(x, 1L),
+                    minimaxApprox:::chebPoly(x, 2L),
+                    minimaxApprox:::chebPoly(x, 3L)),
+                  ncol = 4L, byrow = FALSE)
+
+expect_equal(minimaxApprox:::chebMat(x, k), control, tolerance = tol)
