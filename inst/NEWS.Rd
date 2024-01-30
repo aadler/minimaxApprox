@@ -15,6 +15,23 @@
   }
 }
 
+\section{Version 0.3.0.9000 (2025-01-25)}{
+  \subsection{Added}{
+    \itemize{
+      \item Began work on using Chebyshev polynomials as basis instead of
+      monomials.
+    }
+  }
+  \subsection{Changed}{
+    \itemize{
+      \item \strong{Breaking:} Changed names in return object. What was
+      \code{Basis} is now \code{Extrema}. \code{Basis} will return whether
+      monomials or Chebyshev polynomials were used.
+      \item Internal tolerances were tightened.
+    }
+  }
+}
+
 \section{Version 0.3.0 (2024-01-25)}{
   \subsection{Changed}{
     \itemize{
