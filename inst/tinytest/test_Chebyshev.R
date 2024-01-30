@@ -3,7 +3,7 @@
 
 tol <- sqrt(.Machine$double.eps)
 
-# See https://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html
+# See https://oeis.org/wiki/Chebyshev_polynomials
 
 x <- 3
 
