@@ -58,3 +58,19 @@ control <- c(2 * 1 + 3 * -0.5 + 4 * (2 * (-0.5) ^ 2 - 1) +
                5 * (4 * 1.5 ^ 3 - 3 * 1.5))
 
 expect_equal(minimaxApprox:::chebCalc(x, a), control, tolerance = tol)
+
+# evalFuncCheb
+## Uses a from immediately previous
+
+## Polynomial
+R <- list(a = a)
+expect_equal(minimaxApprox:::evalFuncCheb(x, R), control, tolerance = tol)
+
+## Rational
+b <- c(-0.5, -1, 2)
+controlD <- c(-0.5 * 1 - (-0.5) + 2 * (2 * (-0.5) ^ 2 - 1),
+              -0.5 * 1 - 1.5 + 2 * (2 * 1.5 ^ 2 - 1))
+control <- control / controlD
+R <- list(a = a, b = b)
+
+expect_equal(minimaxApprox:::evalFuncCheb(x, R), control, tolerance = tol)

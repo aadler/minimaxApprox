@@ -60,3 +60,11 @@ chebMat <- function(x, n) {
 chebCalc <- function(x, a) {
   drop(chebMat(x, length(a) - 1L) %*% a)
 }
+
+evalFuncCheb <- function(x, R) {
+  ret <- chebCalc(x, R$a)
+  if ("b" %in% names(R)) {
+    ret <- ret / chebCalc(x, R$b)
+  }
+  ret
+}
