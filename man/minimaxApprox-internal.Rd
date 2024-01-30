@@ -29,5 +29,9 @@
 \alias{ratMat}
 \alias{ratCoeffs}
 \alias{remRat}
+\alias{chebPoly}
+\alias{chebMat}
+\alias{chebCalc}
+\alias{evalFuncCheb}
 
 \keyword{internal}
