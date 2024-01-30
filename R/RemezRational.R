@@ -20,7 +20,8 @@ ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
   P <- ratMat(x, E, y, nD, dD, relErr)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
-  if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-14)
+  if (inherits(PP, "simpleError")) PP <- qr.solve(P, y,
+                                                  tol = .Machine$double.eps)
   list(a = checkIrrelevant(PP[seq_len(nD + 1L)], l, u, zt),
        b = checkIrrelevant(c(1, PP[seq_len(dD) + nD + 1L]), l, u, zt),
        E = PP[length(PP)])
