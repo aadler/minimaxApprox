@@ -48,3 +48,13 @@ control <- matrix(c(minimaxApprox:::chebPoly(x, 0L),
                   ncol = 4L, byrow = FALSE)
 
 expect_equal(minimaxApprox:::chebMat(x, k), control, tolerance = tol)
+
+# chebCalc
+a <- 2:5
+x <- c(-0.5, 1.5)
+control <- c(2 * 1 + 3 * -0.5 + 4 * (2 * (-0.5) ^ 2 - 1) +
+               5 * (4 * (-0.5) ^ 3 - 3 * (-0.5)),
+             2 * 1 + 3 * 1.5 + 4 * (2 * 1.5 ^ 2 - 1) +
+               5 * (4 * 1.5 ^ 3 - 3 * 1.5))
+
+expect_equal(minimaxApprox:::chebCalc(x, a), control, tolerance = tol)

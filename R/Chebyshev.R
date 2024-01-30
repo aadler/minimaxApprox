@@ -51,4 +51,12 @@ chebMat <- function(x, n) {
   outer(x, 0:n, chebPoly)
 }
 
+# Function to evaluate Chebyshev polynomials and their coefficient. Should port
+# this to C eventually. Going to use matrix multiplication for now. Checked with
+# VanderMat, this invocation is the "fastest" equivalent to polyCalc although an
+# order of magnitude slower, its an order of magnitude faster than rowSums on
+# "sweep"ing the multiplication.
 
+chebCalc <- function(x, a) {
+  drop(chebMat(x, length(a) - 1L) %*% a)
+}
