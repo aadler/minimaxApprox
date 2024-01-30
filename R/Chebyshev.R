@@ -23,7 +23,10 @@
 
 chebPoly <- function(x, k) {
   k <- as.integer(k)
-  stopifnot(k >= 0, is.numeric(x))
+  stopifnot(exprs = {
+    k >= 0
+    is.numeric(x)
+  })
   suppressWarnings(ifelse(x <= -1,
                           (-1) ^ k * cosh(k * acosh(-x)),
                           ifelse(x <= 1L,
