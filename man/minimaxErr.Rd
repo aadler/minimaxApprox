@@ -16,6 +16,8 @@ minimaxErr(x, mmA)
 }
 \details{
 This is a convenience function to evaluate the approximation error at \code{x}.
+It will use the same polynomial basis as was used in the approximation; see
+\code{\link{minimaxApprox}} for more details.
 }
 \value{
 A vector of the same length as \code{x} containing the approximation error

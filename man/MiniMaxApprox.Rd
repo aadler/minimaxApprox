@@ -15,8 +15,8 @@ Compensated Horner Scheme of Langlois et al. (2006).
 }
 
 \usage{
-minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
-              opts = list())
+minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="monomial",
+              xi = NULL, opts = list())
 }
 
 \arguments{
@@ -32,6 +32,10 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     \item{relErr}{logical; If \code{TRUE}, calculate the minimax approximation
     using \emph{relative} error. The default is \code{FALSE} which uses
     \emph{absolute} error.}
+    \item{basis}{character; Which polynomial basis to use in the analysis.
+    "Monomial" uses the standard \eqn{x^k} basis. "Chebyshev" uses the Chebyshev
+    polynomials of the first kind, \eqn{T_k}. The default is "monomial", and the
+    parameter is case-insensitive and may be abbreviated.}
     \item{xi}{numeric; For rational approximation, a vector of initial points of
     the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
     missing, the approximation will use the appropriate Chebyshev nodes.
@@ -42,7 +46,8 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             \item \code{maxiter}: integer; The maximum number of iterations to
             attempt convergence. Defaults to 100.
             \item \code{miniter}:  integer; The minimum number of iterations
-            before allowing convergence. Defaults to 10.
+            before allowing convergence. Defaults to 10 for monomials and 5 for
+            Chebyshev polynomials.
             \item \code{conviter}: integer; The number of successive iterations
             with the same results allowed before assuming no further convergence
             is possible. Defaults to 10. Will overwrite \code{maxiter} if
@@ -102,8 +107,9 @@ values less than machine precision it is ignored in favor of the \strong{Ratio}
 test.
 }
 \subsection{Polynomial Evaluation}{
-The polynomials are evaluated using the Compensated Horner Scheme of Langlois et
-al. (2006) to enhance both stability and precision.
+Monomial polynomials are evaluated using the Compensated Horner Scheme of
+Langlois et al. (2006) to enhance both stability and precision. Chebyshev
+polynomials are evaluated normally.
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
@@ -141,18 +147,37 @@ An object of class \code{"minimaxApprox"} is a list containing the following
 components:
 
     \item{a}{The polynomial coefficients or the rational numerator
-    coefficients.}
+    coefficients. When using Chebyshev polynomials, these are the coefficients
+    for \eqn{T_k}.}
     \item{b}{The rational denominator coefficients. Missing for polynomial
-    approximation.}
+    approximation. When using Chebyshev polynomials, these are the coefficients
+    for \eqn{T_k}.}
+    \item{aMono}{When using Chebyshev polynomials, these are the polynomial or
+    rational numerator coefficients for monomial expansion in \eqn{x^k}. Missing
+    for monomial-based approximation.}
+    \item{bMono}{When using Chebyshev polynomials, these are the rational
+    denominator coefficients for monomial expansion in \eqn{x^k}. Missing for
+    both polynomial and monomial-based rational approximation.}
     \item{ExpErr}{The absolute value of the expected error as calculated by the
     Remez algorithms.}
-    \item{ObsErr}{The absolute value of largest observed error between the function
-    and the approximation at the extremal basis points.}
+    \item{ObsErr}{The absolute value of largest observed error between the
+    function and the approximation at the extremal basis points.}
     \item{iterations}{The number of iterations of the algorithm. This does not
     include any iterations required to converge the error value in rational
     approximation.}
-    \item{Basis}{The basis points at which the minimax error was achieved.}
+    \item{Extrema}{The basis points at which the minimax error was achieved.}
     \item{Warning}{A logical flag indicating if any warnings were thrown.}
+
+The object also contains the following attributes:
+
+    \item{type}{"Rational" or "Polynomial".}
+    \item{basis}{"Monomial" or "Chebyshev".}
+    \item{func}{The function being approximated.}
+    \item{range}{The range on which the function is being approximated.}
+    \item{relErr}{A logical indicating that relative error was used. If
+    \code{FALSE}, then absolute error was used.}
+    \item{tol}{The tolerance used for the \strong{Distance Test}.}
+    \item{convrat}{The tolerance used for the \strong{Magnitude Test}.}
 }
 
 \references{

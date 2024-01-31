@@ -16,6 +16,7 @@
 \alias{callFun}
 \alias{isOscil}
 \alias{polyCalc}
+\alias{evalFuncMono}
 \alias{evalFunc}
 \alias{remErr}
 \alias{findRoots}
@@ -33,5 +34,6 @@
 \alias{chebMat}
 \alias{chebCalc}
 \alias{evalFuncCheb}
+\alias{cheb2mon}
 
 \keyword{internal}

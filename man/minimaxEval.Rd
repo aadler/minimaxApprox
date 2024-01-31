@@ -11,11 +11,16 @@ Evaluates the rational or polynomial approximation stored in \code{mmA} at
 \code{x}.
 }
 \usage{
-minimaxEval(x, mmA)
+minimaxEval(x, mmA, basis = "monomial")
 }
 \arguments{
   \item{x}{a numeric vector}
   \item{mmA}{a \code{"minimaxApprox"} return object}
+  \item{basis}{character; Which polynomial basis to use in to evaluate the
+  function; see \code{\link{minimaxApprox}} for more details. If Chebyshev is
+  asked for but the analysis used monomials, an error will be returned. The
+  default is "monomial", and the parameter is sase-insensitive and may be
+  abbreviated.}
 }
 \details{
 This is a convenience function to evaluate the approximation at \code{x}.
