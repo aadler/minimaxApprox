@@ -18,16 +18,26 @@
 \section{Version 0.3.0.9000 (2025-01-25)}{
   \subsection{Added}{
     \itemize{
-      \item Began work on using Chebyshev polynomials as basis instead of
-      monomials.
+      \item \strong{Breaking:} Analysis can now use Chebyshev polynomials,
+      \eqn{T_k}, as the basis instead of monomials, \eqn{x^k}.
     }
   }
   \subsection{Changed}{
     \itemize{
       \item \strong{Breaking:} Changed names in return object. What was
-      \code{Basis} is now \code{Extrema}. \code{Basis} will return whether
-      monomials or Chebyshev polynomials were used.
+      \code{Basis} is now \code{Extrema}. The \code{basis} parameter is now used
+      to capture whether monomials or Chebyshev polynomials should be/were used.
+      \item \strong{Breaking:} User-facing functions now have \code{basis}
+      parameter to determine which basis to use; see appropriate help files.
+      Parameter positions have thus changed.
+      \item Print and plot methods updated for basis selection.
       \item Internal tolerances were tightened.
+      \item Updated documentation for new functionality.
+    }
+  }
+  \subsection{Fixed}{
+    \itemize{
+      \item Incorrect \file{NEWS} entries fixed.
     }
   }
 }
@@ -38,9 +48,9 @@
       \item \strong{Breaking:} More descriptive names in return object. See the
       \strong{Value} section of \code{help("minimaxApprox")} for details.
       \item \strong{Breaking:} When using relative error for convergence and one
-      of the basis points is 0, instead of stopping with an error, the algorithm
-      will perturb that basis point by \code{1e-12} in the appropriate direction
-      and proceed with a warning.
+      of the basis points has a functional value of 0, instead of stopping with
+      an error, the algorithm will perturb that basis point by \code{1e-12} in
+      the appropriate direction and proceed with a warning.
       \item \strong{Breaking:} Forced convergence to look \emph{only} at the
       ratio if the difference between tested values is \eqn{\le}{<=}
       \code{.Machine$double.eps}.
