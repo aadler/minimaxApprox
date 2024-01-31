@@ -3,10 +3,20 @@
 
 # Print method (hide i and basis/x but leave in list and not in attribute)
 print.minimaxApprox <- function(x, digits = 6L, ...) {
+  basis <- list(`Polynomial Basis` = attr(x, "basis"))
   if (attr(x, "type") == "Polynomial") {
     coefficients <- list(a = x$a)
   } else {
     coefficients <- list(a = x$a, b = x$b)
+  }
+
+  if (attr(x, "basis") == "Chebyshev") {
+    monomialEq <- list(aMono = x$aMono)
+    if ((attr(x, "type") == "Rational")) {
+      monomialEq <- c(monomialEq, list(bMono = x$bMono))
+    }
+  } else {
+    monomialEq <- NULL
   }
 
   digits <- as.integer(digits)
@@ -22,7 +32,7 @@ print.minimaxApprox <- function(x, digits = 6L, ...) {
     c("ExpectedAbsError", "ObservedAbsError")
   }
 
-  print(c(coefficients, diagnostics))
+  print(c(basis, coefficients, monomialEq, diagnostics))
 }
 
 coef.minimaxApprox <- function(object, ...) {
@@ -44,10 +54,11 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
   args <- list(...)
   rng <- attr(x, "range")
   fn <- attr(x, "func")
+  monoB <- attr(x, "basis") == "Monomial"
   relErr <- attr(x, "relErr")
   z <- seq(rng[1], rng[2], length.out = 1001L)
-  zz <- remErr(z, x, fn, relErr)
-  y <- remErr(x$Basis, x, fn, relErr)
+  zz <- remErr(z, x, fn, relErr, monoB)
+  y <- remErr(x$Extrema, x, fn, relErr, monoB)
 
   # Default y-axis label
   ylab <- if (relErr) "Relative Error" else "Absolute Error"
@@ -62,10 +73,11 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
 
   plot(z, zz, type = "l", xlab = "x", ylab = ylab, ...)
   abline(h = 0)
-  points(x$Basis, y, col = "red", pch = 16L)
+  points(x$Extrema, y, col = "red", pch = 16L)
   abline(h = c(-x$ObsErr, x$ObsErr), lty = 2L, col = "blue")
   abline(h = c(-x$ExpErr, x$ExpErr), lty = 3L, col = "red")
   legend(x = "bottomleft", inset = c(0.35, 1), col = c("red", "red", "blue"),
-         lty = c(NA, 3L, 2L), legend = c("Basis", "Exp Err", "Obs Err"),
+         lty = c(NA, 3L, 2L), legend = c("Extrema", "Exp Err", "Obs Err"),
          pch = c(16L, NA, NA), bg = "transparent", xpd = TRUE)
+  title(sub = paste("Polynomial Basis:", attr(x, "basis")))
 }
