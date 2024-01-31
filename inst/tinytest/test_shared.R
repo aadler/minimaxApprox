@@ -61,12 +61,12 @@ x <- c(-0.1, 0.2, 2)
 controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
 ## Polynomial
 P <- list(a = 1:4)
-expect_equal(minimaxApprox:::evalFunc(x, P), controlN, tolerance = tol)
+expect_equal(minimaxApprox:::evalFunc(x, P, TRUE), controlN, tolerance = tol)
 ## Rational
 R <- list(a = 1:4, b = c(1, 2.2, 4.1))
 controlD <- 1 + 2.2 * x + 4.1 * x ^ 2
 control <- controlN / controlD
-expect_equal(minimaxApprox:::evalFunc(x, R), control, tolerance = tol)
+expect_equal(minimaxApprox:::evalFunc(x, R, TRUE), control, tolerance = tol)
 
 # Test remErr
 # Using fact that exp(1) has analytic answer for degree 1 and pass a zero-degree
@@ -78,39 +78,42 @@ tstFn <- function(x) m * x + c
 x <- minimaxApprox:::chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
 ## Polynomial
-PP <- minimaxApprox:::remPoly(fn, 0, 1, 1, FALSE, opts)
-expect_equal(minimaxApprox:::remErr(x, PP, fn, FALSE), control, tolerance = tol)
+PP <- minimaxApprox:::remPoly(fn, 0, 1, 1, FALSE, TRUE, opts)
+expect_equal(minimaxApprox:::remErr(x, PP, fn, FALSE, TRUE), control,
+             tolerance = tol)
 ## Rational
-RR <- minimaxApprox:::remRat(fn, 0, 1, 1, 0, FALSE, NULL, opts)
-expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE), control, tolerance = tol)
+RR <- minimaxApprox:::remRat(fn, 0, 1, 1, 0, FALSE, TRUE, NULL, opts)
+expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE, TRUE), control,
+             tolerance = tol)
 
 # Test findRoots
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 fn <- function(x) exp(x) - 1
 x <- minimaxApprox:::chebNodes(3, 0, 1)
 ## Polynomial
-QQ <- minimaxApprox:::polyCoeffs(x, function(x) expm1(x), TRUE, 0, 1, opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE)
-PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, PP, fn, TRUE)
+QQ <- minimaxApprox:::polyCoeffs(x, function(x) expm1(x), TRUE, 0, 1, TRUE,
+                                 opts$ztol)
+control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, TRUE)
+PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, 0, 1, TRUE, opts$ztol)
+r <- minimaxApprox:::findRoots(x, PP, fn, TRUE, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 ## Rational
 QQ <- minimaxApprox:::ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE, 0, 1,
-                                opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE)
-RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, RR, fn, TRUE)
+                                TRUE, opts$ztol)
+control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, TRUE)
+RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, 0, 1, TRUE, opts$ztol)
+r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 ## Test error trap with contrived example
 ## Polynomial
 mmA <- minimaxApprox(exp, 1, 2, 4L)
-r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE)
+r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, TRUE)
 expect_identical(r, 1.2)
 ## Rational
 mmA <- minimaxApprox(exp, 1, 2, c(2L, 2L))
-r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE)
+r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, TRUE)
 expect_identical(r, 1.2)
 
 # Test switchX
@@ -120,9 +123,9 @@ control <- c(-1, 0.10264791208519766, 0.33735881337846646, 0.62760501759598053,
              0.88066205512236839, 1)
 fn <- function(x) sin(x) + cos(x)
 x <- minimaxApprox:::chebNodes(6, 0, 1)
-PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, PP, fn, FALSE)
-x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE)
+PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, TRUE, 0, 1, opts$ztol)
+r <- minimaxApprox:::findRoots(x, PP, fn, FALSE, TRUE)
+x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE, TRUE)
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
@@ -131,19 +134,19 @@ control <- c(-1, -0.6706726462230721, -2.8931353340360859e-14,
              0.67067262060160282, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- minimaxApprox:::chebNodes(5, -1, 1)
-RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, -1, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, RR, fn, FALSE)
-x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE)
+RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, -1, 1, TRUE, opts$ztol)
+r <- minimaxApprox:::findRoots(x, RR, fn, FALSE, TRUE)
+x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE, TRUE)
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
 ## Contrive no extremum examples for maximization and minimization
 R <- list(a = 0, b = 1)
 fn <- function(x) 3
-expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
+expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, TRUE), c(0, 0),
                   tolerance = tol)
 fn <- function(x) -3
-expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
+expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, TRUE), c(0, 0),
                   tolerance = tol)
 
 # Check isConverged
@@ -157,5 +160,5 @@ errs <- c(-0.2, 0.1, -0.1)
 expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
 
 # Test checkDenom
-expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1), 0.5)
-expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2))
+expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1, TRUE), 0.5)
+expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2, TRUE))

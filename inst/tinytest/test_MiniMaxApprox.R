@@ -27,7 +27,7 @@ controlE <- 2.6934e-5
 RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), relErr = TRUE, opts = list())
 expect_equal(RR$a, controlA, tolerance = 5e-6)
 expect_equal(RR$b, controlB, tolerance = 5e-6)
-expect_equivalent(RR$Basis, controlX, tolerance = 5e-5)
+expect_equivalent(RR$Extrema, controlX, tolerance = 5e-5)
 expect_equal(RR$ExpErr, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
