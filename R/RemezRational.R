@@ -2,22 +2,26 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix for rational approximation.
-ratMat <- function(x, E, y, nD, dD, relErr) {
+ratMat <- function(x, E, y, nD, dD, relErr, monoB) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x).
   if (relErr)  altSgn <- altSgn * y
   altE <- altSgn * E
   yvctr <- -(y + altE)
-  aMat <- vanderMat(x, nD)
-  bMat <- vanderMat(x, dD)[, -1L] * yvctr
+  aMat <- if (monoB) vanderMat(x, nD) else chebMat(x, nD)
+  bMat <- if (monoB) {
+    vanderMat(x, dD)[, -1L] * yvctr
+  } else {
+    chebMat(x, dD)[, -1L] * yvctr
+  }
   cbind(aMat, bMat, -altSgn, deparse.level = 0L)
 }
 
 # Function to calculate coefficients given matrix and known values.
-ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
+ratCoeffs <- function(x, E, fn, nD, dD, relErr, monoB, l, u, zt) {
   y <- callFun(fn, x)
-  P <- ratMat(x, E, y, nD, dD, relErr)
+  P <- ratMat(x, E, y, nD, dD, relErr, monoB)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y,
@@ -28,7 +32,7 @@ ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
 }
 
 # Main function to calculate and return the minimax rational approximation.
-remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
+remRat <- function(fn, lower, upper, numerd, denomd, relErr, monoB, xi, opts) {
 
   # Set ZeroBasis relErr flag
   relErrZeroBasis <- FALSE
@@ -55,7 +59,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     repeat {
       if (j >= opts$maxiter) break
       j <- j + 1L
-      RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr, lower, upper, opts$ztol)
+      RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr, monoB, lower, upper,
+                      opts$ztol)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
     }
@@ -63,7 +68,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
   }
 
   RR <- convergeErr(x)
-  errs_last <- remErr(x, RR, fn, relErr)
+  errs_last <- remErr(x, RR, fn, relErr, monoB)
   converged <- FALSE
   unchanged <- FALSE
   unchanging_i <- 0L
@@ -71,11 +76,11 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
   repeat {
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- findRoots(x, RR, fn, relErr)
-    x <- switchX(r, lower, upper, RR, fn, relErr)
+    r <- findRoots(x, RR, fn, relErr, monoB)
+    x <- switchX(r, lower, upper, RR, fn, relErr, monoB)
     relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     RR <- convergeErr(x)
-    dngr <- checkDenom(RR$b, lower, upper)
+    dngr <- checkDenom(RR$b, lower, upper, monoB)
     if (!is.null(dngr)) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fC(dngr), " which makes rational approximation perilous ",
@@ -83,7 +88,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
            "the numerator or denominator degree by 1 sometimes allows ",
            "convergence.")
     }
-    errs <- remErr(x, RR, fn, relErr)
+    errs <- remErr(x, RR, fn, relErr, monoB)
     mxae <- max(abs(errs))
     expe <- abs(RR$E)
 
