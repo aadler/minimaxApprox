@@ -35,8 +35,6 @@ suggestions which helped the author with minimax approximation.
  to consider if possible to implement in R.
  * Alternatively, research if possible to use [Rmpfr](https://CRAN.R-project.org/package=Rmpfr)
  package for increased precision.
- * Alternatively, consider using Chebyshev polynomials instead of monomials as
- basis for linear equation solutions.
 
 ### Minor
 
