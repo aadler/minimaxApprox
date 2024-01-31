@@ -127,8 +127,6 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
         stop("The algorithm did not converge when looking for a polynomial of ",
              "degree ", degree, " and NULL was passed to the tailtol option.")
       }
-    } else {
-      stop(mmA$message)
     }
   }
 
