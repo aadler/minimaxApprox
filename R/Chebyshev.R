@@ -68,3 +68,23 @@ evalFuncCheb <- function(x, R) {
   }
   ret
 }
+
+# Based on open-source Netlib function "dconcm" in mathc90.
+
+cheb2mon <- function(a) {
+  n <- length(a)
+  nm2 <- n - 2L
+  tp <- 1
+  for (j in 1:nm2) {
+    # Cannot vectorize next step since already adjusted "a"s affect downstream
+    # "a"s as part of the recursion.
+    for (i in nm2:j) {
+      a[i] <- a[i] - a[i + 2L]
+    }
+    a[j + 1L] <- a[j + 1L] / 2
+    a[j] <- a[j] * tp
+    tp <- tp * 2
+  }
+  a[c(n - 1L, n)] <- a[c(n - 1L, n)] * tp
+  a
+}
