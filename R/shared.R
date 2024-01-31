@@ -12,12 +12,6 @@ chebNodes <- function(n, a, b) {
   sort(0.5 * (a + b + (b - a) * cos((2 * seq_len(n) - 1) * pi / (2 * n))))
 }
 
-# Create Vandermonde matrix to a polynomial degree n, or n + 1 terms.
-vanderMat <- function(x, n) {
-  np1 <- n + 1L
-  matrix(rep(x, each = np1) ^ (seq_len(np1) - 1L), ncol = np1, byrow = TRUE)
-}
-
 # Call the function being approximated on the points x.
 callFun <- function(fn, x) {
   if (!is.function(fn)) stop("Unable to parse function.")
@@ -27,40 +21,28 @@ callFun <- function(fn, x) {
 # Check that the values passed are oscillating in sign
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
-# polyCalc uses a Compensated Horner Method based on Langlois et al.(2006)
-# https://drops.dagstuhl.de/opus/volltexte/2006/442/
-# As primary bottleneck, it was ported to C for speed.
-polyCalc <- function(x, a) {
-  .Call(compHorner_c, as.double(x), as.double(a))
-}
-
-# Function to calculate value of minimax approximation at x given a & b.
-evalFunc <- function(x, R) {
-  ret <- polyCalc(x, R$a)
-  if ("b" %in% names(R)) {
-    ret <- ret / polyCalc(x, R$b)
-  }
-  ret
+evalFunc <- function(x, R, monoB) {
+  if (monoB) evalFuncMono(x, R) else evalFuncCheb(x, R)
 }
 
 # Function to calculate error between known and calculated values.
-remErr <- function(x, R, fn, relErr) {
+remErr <- function(x, R, fn, relErr, monoB) {
   if (relErr) {
     y <- callFun(fn, x)
-    (evalFunc(x, R) - y) / y
+    (evalFunc(x, R, monoB) - y) / y
   } else {
-    evalFunc(x, R) - callFun(fn, x)
+    evalFunc(x, R, monoB) - callFun(fn, x)
   }
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima.
-findRoots <- function(x, R, fn, relErr) {
+findRoots <- function(x, R, fn, relErr, monoB) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
     root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no", R = R,
-                             fn = fn, relErr = relErr),
+                             fn = fn, relErr = relErr, monoB = monoB),
                      error = function(cond) simpleError(trimws(cond$message)))
 
     # If there is no root in the interval, take the endpoint closest to zero.
@@ -75,22 +57,23 @@ findRoots <- function(x, R, fn, relErr) {
 
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
-switchX <- function(r, l, u, R, fn, relErr) {
+switchX <- function(r, l, u, R, fn, relErr, monoB) {
   bottoms <- c(l, r)
   tops <- c(r, u)
   x <- double(length(bottoms))
   attr(x, "ZeroBasis") <- FALSE
-  maximize <- sign(remErr(l, R, fn, relErr)) == 1
+  maximize <- sign(remErr(l, R, fn, relErr, monoB)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
     extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
-                                relErr = relErr, maximum = maximize),
+                                relErr = relErr, monoB = monoB,
+                                maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
     # If no extremum then the take endpoint with "better" value depending if we
     # are maximizing or minimizing.
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, R, fn, relErr)
+      endPtErr <- remErr(intv, R, fn, relErr, monoB)
       if (maximize) {
         x[i] <- intv[which.max(endPtErr)]
       } else {
@@ -102,7 +85,7 @@ switchX <- function(r, l, u, R, fn, relErr) {
 
     # Test endpoints for max/min even if an extremum was found.
     p <- c(bottoms[i], x[i], tops[i])
-    E <- remErr(p, R, fn, relErr)
+    E <- remErr(p, R, fn, relErr, monoB)
 
     if (maximize) {
       x[i] <- p[which.max(E)]
@@ -155,8 +138,9 @@ isConverged <- function(errs, expe, convrat, tol) {
 }
 
 # Check denominator polynomial for zero in the requested range.
-checkDenom <- function(a, l, u) {
-  dngrRt <- tryCatch(uniroot(polyCalc, c(l, u), extendInt = "no", a = a,
+checkDenom <- function(a, l, u, monoB) {
+  calcFn <- if (monoB) polyCalc else chebCalc
+  dngrRt <- tryCatch(uniroot(calcFn, c(l, u), extendInt = "no", a = a,
                              tol = .Machine$double.eps),
                      error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(dngrRt, "simpleError")) {
