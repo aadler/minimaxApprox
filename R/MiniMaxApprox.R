@@ -2,8 +2,15 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Master user-exposed function
-minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
-                          opts = list()) {
+minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
+                          basis = "monomial", xi = NULL, opts = list()) {
+
+  basis <- tolower(substr(basis, 1L, 1L))
+  if (!(basis %in% c("c", "m"))) {
+    stop("Must select either 'Cheb'yshev or 'mono'mial basis for analysis.")
+  } else {
+    monoB <- (basis == "m")
+  }
 
   # Handle configuration options
   if (!("maxiter" %in% names(opts))) {
@@ -11,7 +18,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
   }
 
   if (!("miniter" %in% names(opts))) {
-    opts$miniter <- 10L
+    opts$miniter <- if (monoB) 10L else 5L
   }
 
   if ("conviter" %in% names(opts)) {
@@ -54,12 +61,12 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     stop("Polynomial degrees must be integers of least 0 (constant).")
   }
 
-  if (length(degree) == 2L) {        # Rational approximation requested
+    if (length(degree) == 2L) {       # Rational approximation requested
     numerd <- as.integer(degree[1L])
     denomd <- as.integer(degree[2L])
     ratApprox <- TRUE
   } else if (length(degree) == 1L) {
-    ratApprox <- FALSE               # Polynomial approximation requested
+    ratApprox <- FALSE                # Polynomial approximation requested
     if (!is.null(xi)) {
       message("Polynomial approximation uses Chebyshev nodes for initial ",
               "guess. Any passed xi is ignored.")
@@ -73,9 +80,9 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
   # Call Calculation Functions
   mmA <- if (ratApprox) {
-    remRat(fn, lower, upper, numerd, denomd, relErr, xi, opts)
+    remRat(fn, lower, upper, numerd, denomd, relErr, monoB, xi, opts)
   } else {
-    tryCatch(remPoly(fn, lower, upper, as.integer(degree), relErr, opts),
+    tryCatch(remPoly(fn, lower, upper, as.integer(degree), relErr, monoB, opts),
              error = function(e) simpleError(trimws(e$message)))
   }
 
@@ -89,7 +96,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     if (grepl("singular", mmA$message, fixed = TRUE)) { # May be different error
       if (!is.null(opts$tailtol)) {
         mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
-                                relErr, opts),
+                                relErr, monoB, opts),
                         error = function(e) simpleError(trimws(e$message)))
         if (inherits(mmA, "simpleError")) {
           stop("The algorithm neither converged when looking for a polynomial",
@@ -160,11 +167,30 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     gotWarning <- TRUE
   }
 
-  coefficients <- if (ratApprox) list(a = mmA$a, b = mmA$b) else list(a = mmA$a)
+  coefficients <- if (ratApprox) {
+    list(a = mmA$a, b = mmA$b)
+  } else {
+    list(a = mmA$a)
+  }
+
+  if (monoB) {
+    monomialEq <- NULL
+    PolynomalBasis <- "Monomial"
+  } else {
+    monomialEq <- list(aMono = cheb2mon(mmA$a))
+    PolynomalBasis <- "Chebyshev"
+    if (ratApprox) {
+      monomialEq <- c(monomialEq, list(bMono = cheb2mon(mmA$b)))
+      monomialEq <- mapply(`/`, monomialEq, monomialEq$bMono[1L],
+                           SIMPLIFY = FALSE)
+    }
+  }
+
   diagnostics <- list(ExpErr = mmA$expe, ObsErr = mmA$mxae, iterations = mmA$i,
-                      Basis = mmA$x, Warning = gotWarning)
-  ret <- c(coefficients, diagnostics)
+                      Extrema = mmA$x, Warning = gotWarning)
+  ret <- c(coefficients, monomialEq, diagnostics)
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
+  attr(ret, "basis") <- PolynomalBasis
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
   attr(ret, "relErr") <- relErr
@@ -177,18 +203,41 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
 
 # Evaluation convenience function. Identical to evalFunc but tests for
 # inheritance from minimaxApprox.
-minimaxEval <- function(x, mmA) {
+minimaxEval <- function(x, mmA, basis = "monomial") {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")
   }
-  evalFunc(x, mmA)
+  basis <- tolower(substr(basis, 1L, 1L))
+  if (!(basis %in% c("c", "m"))) {
+    stop("Select either the 'M'onomial or 'C'hebyshev basis.")
+  }
+  if (basis == "c") {
+    if ((attr(mmA, "basis") == "Chebyshev")) {
+      evalFuncCheb(x, mmA)
+    } else {
+      stop("Analysis was run using a monomial basis. No coefficients were ",
+           "calculated for Chebyshev polynomials.")
+    }
+  } else {
+    if ((attr(mmA, "basis") == "Chebyshev")) {
+      RR <- list(a = mmA$aMono)
+      if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
+      evalFuncMono(x, RR)
+    } else {
+      evalFuncMono(x, mmA)
+    }
+  }
 }
 
 # Minimax approximation error convenience function. Based on remErr but takes a
-# completed mmA object.
+# completed mmA object with relErr and basis as attributes.
 minimaxErr <- function(x, mmA) {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")
   }
-  remErr(x, mmA, attr(mmA, "func"), attr(mmA, "relErr"))
+  y <- callFun(attr(mmA, "func"), x)
+  ret <- evalFunc(x, mmA, attr(mmA, "basis") == "Monomial") - y
+  if (attr(mmA, "relErr")) ret <- ret / y
+
+  ret
 }
