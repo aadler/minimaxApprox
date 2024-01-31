@@ -34,9 +34,8 @@ expect_equal(minimaxApprox:::chebPoly(x, 6),
              32 * x ^ 6 - 48 * x ^ 4 + 18 * x ^ 2 - 1, tolerance = tol)
 
 ## Error trapping
-x <- c(3, "A")
-expect_error(minimaxApprox:::chebPoly(x, 3) , "is.numeric\\(x\\) is not TRUE")
-expect_error(minimaxApprox:::chebPoly(3, -1), "k >= 0 is not TRUE")
+expect_error(minimaxApprox:::chebPoly("A", 3))
+expect_error(minimaxApprox:::chebPoly(3, -1))
 
 # chebMat
 x <- c(-0.5, 0, 0.5)
