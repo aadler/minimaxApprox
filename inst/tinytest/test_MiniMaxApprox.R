@@ -43,6 +43,11 @@ expect_equal(RR$a, controlA, tolerance = 1e-5)
 expect_equal(RR$b, controlB, tolerance = 1e-5)
 expect_false(RR$Warning)
 
+# Test incorrect basis for analysis
+errMsg <- "Must select either 'Cheb'yshev or 'mono'mial basis for analysis."
+expect_error(minimaxApprox(exp, 0, 1, 0, basis = "x"), errMsg)
+expect_error(minimaxApprox(exp, 0, 1, 0, basis = 4), errMsg)
+
 # Test passing length 0 for polynomials or rationals
 expect_silent(minimaxApprox(exp, 0, 1, 0))
 expect_silent(minimaxApprox(exp, 0, 1, c(0, 1)))
@@ -56,23 +61,23 @@ expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$a,
 expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$b, 1)
 
 # Test negative and integer trap
-errMess <- "Polynomial degrees must be integers of least 0 (constant)."
+errMsg <- "Polynomial degrees must be integers of least 0 (constant)."
 ## Polynomial
-expect_error(minimaxApprox(exp, 0, 1, 0.2), errMess, fixed = TRUE)
-expect_error(minimaxApprox(exp, 0, 1, -1L), errMess, fixed = TRUE)
-expect_error(minimaxApprox(exp, 0, 1, -2), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, 0.2), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, -1L), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, -2), errMsg, fixed = TRUE)
 ## Rational
-expect_error(minimaxApprox(exp, 0, 1, c(1, -2)), errMess, fixed = TRUE)
-expect_error(minimaxApprox(exp, 0, 1, c(1.2, 2)), errMess, fixed = TRUE)
-expect_error(minimaxApprox(exp, 0, 1, c(-1.2, 8.01)), errMess, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(1, -2)), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(1.2, 2)), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(-1.2, 8.01)), errMsg, fixed = TRUE)
 
 # Test trap for relErr
-errMess <- paste("Relative Error must be a logical value. Default FALSE",
+errMsg <- paste("Relative Error must be a logical value. Default FALSE",
                  "returns absolute error.")
 ## Polynomial
-expect_error(minimaxApprox(exp, -1, 1, 9L, "abs"), errMess)
+expect_error(minimaxApprox(exp, -1, 1, 9L, "abs"), errMsg)
 ## Rational
-expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), "abs"), errMess)
+expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), "abs"), errMsg)
 
 # Test showProgress; also tests passing miniter.
 ## Polynomial
@@ -146,11 +151,11 @@ if (Sys.info()["nodename"] == "HOME") {
 }
 
 # Test passing incorrect degree (at minimaxApprox level)
-errMess <- paste("Polynomial approximation takes one value for degree and",
+errMsg <- paste("Polynomial approximation takes one value for degree and",
                  "rational approximation takes a vector of two values for",
                  "numerator and denominator degrees. Any other inputs are",
                  "invalid.")
-expect_error(minimaxApprox(exp, -1, 1, 1:3), errMess)
+expect_error(minimaxApprox(exp, -1, 1, 1:3), errMsg)
 
 # Test passing xi
 ## Polynomial - Check that it is ignored
@@ -158,10 +163,10 @@ wrnMess <- paste("Polynomial approximation uses Chebyshev nodes for initial",
                  "guess. Any passed xi is ignored.")
 expect_message(minimaxApprox(exp, -1, 1, 10L, xi = 6), wrnMess)
 ## Rational - Check that proper length is passed
-errMess <- paste("Given the requested degrees for numerator and denominator,",
+errMsg <- paste("Given the requested degrees for numerator and denominator,",
                  "the x-vector needs to have 8 elements.")
 xi <- minimaxApprox:::chebNodes(5L, -1, 1)
-expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi), errMess)
+expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi), errMsg)
 # Test that passing proper size works for rational
 xi <- xi + 0.01
 expect_silent(minimaxApprox(exp, -1, 1, c(2L, 1L), xi = xi))
@@ -198,30 +203,30 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
 }
 
 ## Test unsuccessful restart due to two failures
-errMess <- paste("The algorithm neither converged when looking for a",
+errMsg <- paste("The algorithm neither converged when looking for a",
                  "polynomial of length 22 nor when looking for a polynomial of",
                  "degree 23.")
 
 ## Below case has failover to QR
-expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMess)
+expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMsg)
 
 # Test tailtol NULL
-errMess <- paste("The algorithm did not converge when looking for a",
+errMsg <- paste("The algorithm did not converge when looking for a",
                  "polynomial of degree 22 and NULL was passed to the tailtol",
                  "option.")
 expect_error(minimaxApprox(sin, 0, pi / 2, 22L, opts = list(tailtol = NULL)),
-             errMess)
+             errMsg)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
 ## sensitive to precision as it fails on some of github's test platforms, so
 ## only test on my machine and sacrifice the 100% coverage.
 ## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOME") {
-  errMess <- paste("The algorithm did not converge when looking for a",
+  errMsg <- paste("The algorithm did not converge when looking for a",
                    "polynomial of length 22 and when looking for a polynomial",
                    "of degree 23 the uppermost coefficient is not effectively",
                    "zero.")
-  expect_error(minimaxApprox(abs, -0.15, 0.15, 22L), errMess)
+  expect_error(minimaxApprox(abs, -0.15, 0.15, 22L), errMsg)
 }
 
 # Test ztol
@@ -238,20 +243,46 @@ expect_equal(PP2$Basis, PP1$Basis, tolerance = tol)
 # This should test RATIONAL failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, c(100L, 0L)))
 
-# Test evaluation function
+################################################################################
+# Test minimaxEval
 x <- seq(0.1, 0.4, 0.025)
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
-## Check error trap
-errMess <- "This function only works with 'minimaxApprox' objects."
-expect_error(minimaxEval(x, sin), errMess)
 
-# Test error function
+## Check error trap for mmA object
+errMsg <- "This function only works with 'minimaxApprox' objects."
+expect_error(minimaxEval(x, sin), errMsg)
+
+## Check not selecting proper basis
+errMsg <- "Select either the 'M'onomial or 'C'hebyshev basis."
+expect_error(minimaxEval(x, mmA, basis = "A"), errMsg)
+expect_error(minimaxEval(x, mmA, basis = 4), errMsg)
+
+## Check asking for Chebyshev when only monomial was run
+errMsg <- "Analysis was run using a monomial basis."
+expect_error(minimaxEval(x, mmA, basis = "Cheb"), errMsg)
+
+## Check asking for Chebyshev when Chebyshev was run
+mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L), basis = "c")
+expect_true(all(exp(x) - minimaxEval(x, mmA, basis = "c") <= mmA$ExpErr))
+
+## Check asking for monomial when Chebyshev was run
+expect_true(all(exp(x) - minimaxEval(x, mmA, basis = "m") <= mmA$ExpErr))
+
+################################################################################
+# Test minimaxErr
 x <- seq(0.1, 0.4, 0.025)
+## Absolute
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 expect_identical(minimaxEval(x, mmA) - exp(x), minimaxErr(x, mmA))
+
+## Relative
+mmA <- minimaxApprox(exp, 0, 0.5, 5L, TRUE, basis = "c")
+expect_equal((minimaxEval(x, mmA) - exp(x)) / exp(x), minimaxErr(x, mmA),
+             tolerance = tol)
+
 ## Check error trap
-errMess <- "This function only works with 'minimaxApprox' objects."
-expect_error(minimaxErr(x, sin), errMess)
+errMsg <- "This function only works with 'minimaxApprox' objects."
+expect_error(minimaxErr(x, sin), errMsg)
