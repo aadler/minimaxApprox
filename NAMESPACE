@@ -2,7 +2,7 @@ useDynLib(minimaxApprox, .registration = TRUE)
 
 # Imports
 importFrom("stats", "optimize", "uniroot")
-importFrom("graphics", "abline", "legend", "points")
+importFrom("graphics", "abline", "legend", "points", "title")
 
 # Exports
 export(minimaxApprox,
