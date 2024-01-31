@@ -42,7 +42,8 @@ findRoots <- function(x, R, fn, relErr, monoB) {
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
     root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no", R = R,
-                             fn = fn, relErr = relErr, monoB = monoB),
+                             fn = fn, relErr = relErr, monoB = monoB,
+                             tol = sqrt(.Machine$double.eps)),
                      error = function(cond) simpleError(trimws(cond$message)))
 
     # If there is no root in the interval, take the endpoint closest to zero.
@@ -65,6 +66,7 @@ switchX <- function(r, l, u, R, fn, relErr, monoB) {
   maximize <- sign(remErr(l, R, fn, relErr, monoB)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
+    # Tighter tolerances than the default lead to issues (AA: 2024-01-31).
     extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
                                 relErr = relErr, monoB = monoB,
                                 maximum = maximize),
