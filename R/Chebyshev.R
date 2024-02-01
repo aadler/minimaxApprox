@@ -2,19 +2,18 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Recursive function to calculate the kth Chebyshev polynomial T_k. Using the
-# cos/cosh based version instead of the recursive definition for speed.
+# cos/cosh based version instead of the recursive definition for speed. Ported
+# to C for speed since it and the outer call are the slowest elements.
 
 chebPoly <- function(x, k) {
-  k <- as.integer(k)
   stopifnot(exprs = {
     k >= 0
     is.numeric(x)
+    # Need k to be a real for C purposes (pow) but still should LOOK like an
+    # integer.
+    all.equal(k - floor(k), 0)
   })
-  suppressWarnings(ifelse(x <= -1,
-                          (-1) ^ k * cosh(k * acosh(-x)),
-                          ifelse(x <= 1L,
-                                 cos(k * acos(x)),
-                                 cosh(k * acosh(x)))))
+  .Call(chebPoly_c, as.double(x), floor(k))
 }
 
 # Create the equivalent of a Vandermonde matrix but using Chebyshev polynomials.
