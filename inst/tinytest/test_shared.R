@@ -149,6 +149,11 @@ fn <- function(x) -3
 expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, TRUE), c(0, 0),
                   tolerance = tol)
 
+## Test 0 value at function using relative error which isn't covered by other
+## cases
+fn <- function(x) x ^ 2 - 4
+expect_warning(minimaxApprox::minimaxApprox(fn, -3, -1, 3, TRUE, basis = "c"))
+
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)
 E <- 0.1

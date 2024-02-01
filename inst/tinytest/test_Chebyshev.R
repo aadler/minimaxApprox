@@ -4,7 +4,7 @@
 tol <- sqrt(.Machine$double.eps)
 
 # chebMat
-x <- c(-0.5, 0, 0.5)
+x <- c(-1.5, 0, 1.5)
 nx <- length(x)
 k <- 3
 control <- matrix(c(rep(1, nx), x, 2 * x ^ 2 - 1, 4 * x ^ 3 - 3 * x), ncol = 4L,
