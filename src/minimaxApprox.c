@@ -1,6 +1,15 @@
 // Copyright Avraham Adler (c) 2023
 // SPDX-License-Identifier: MPL-2.0+
 
+#ifndef  USE_FC_LEN_T
+# define USE_FC_LEN_T
+#endif
+#include <Rconfig.h>
+#include <R_ext/BLAS.h>
+#ifndef FCONE
+# define FCONE
+#endif
+
 #include <R.h>
 #include <Rinternals.h>
 #include <stdlib.h> // for NULL
@@ -87,31 +96,13 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   return(ret);
 }
 
-extern SEXP chebPoly_c(SEXP x, SEXP k) {
-  const int m = LENGTH(x);
-  double *px = REAL(x);
-  double kk = asReal(k);
-  const double monek = pow(-1.0, kk);
-  SEXP ret = PROTECT(allocVector(REALSXP, m));
-  double *pret = REAL(ret);
+/////////////////////////// Chebyshev Functions/////////////////////////////////
 
-  for (int i = 0; i < m; ++i) {
-    if (px[i] < -1.0) {
-      pret[i] = monek * cosh(kk * acosh(-px[i]));
-    } else if (px[i] < 1.0) {
-      pret[i] = cos(kk * acos(px[i]));
-    } else {
-      pret[i] = cosh(kk * acosh(px[i]));
-    }
-  }
-
-  UNPROTECT(1);
-  return(ret);
-}
+// chebPoly never used directly, so removed and folded into chebMat and chebCalc
 
 extern SEXP chebMat_c(SEXP x, SEXP k) {
   const int m = LENGTH(x);
-  int n = asInteger(k) + 1;
+  const int n = asInteger(k) + 1;
   double *px = REAL(x);
 
   SEXP ret = PROTECT(allocMatrix(REALSXP, m, n));
@@ -120,29 +111,73 @@ extern SEXP chebMat_c(SEXP x, SEXP k) {
   // Traverse across columns and calulate coefficient for fixed power 0 < j < k
   // for each x.
   for (int j = 0; j < n; j++) {
-    const double jj = j;
-    const double monej = pow(-1.0, jj);
+    int mj = m * j;
+    double jj = j;
+    double monej = pow(-1.0, jj);
     // Chebyshev Polynomial using cos/acos cosh/acosh for each x for fixed "j".
     for (int i = 0; i < m; ++i) {
       if (px[i] < -1.0) {
-        pret[i + j * m] = monej * cosh(jj * acosh(-px[i]));
+        pret[i + mj] = monej * cosh(jj * acosh(-px[i]));
       } else if (px[i] < 1.0) {
-        pret[i + j * m] = cos(jj * acos(px[i]));
+        pret[i + mj] = cos(jj * acos(px[i]));
       } else {
-        pret[i + j * m] = cosh(jj * acosh(px[i]));
+        pret[i + mj] = cosh(jj * acosh(px[i]));
       }
     }
   }
 
   UNPROTECT(1);
   return(ret);
+}
 
+extern SEXP chebCalc_c(SEXP x, SEXP a) {
+  const int m = LENGTH(x);
+  const int n = LENGTH(a);
+
+  double *px = REAL(x);
+  double *pa = REAL(a);
+
+  SEXP ret = PROTECT(allocVector(REALSXP, m));
+  double *pret = REAL(ret);
+
+  // R's own definitions in DGEMV require the "matrix" to be passed as a pointer
+  // to a one-dimensional array. So just like when using SEXP and passing back
+  // to R, the matrix is defined as an array and the "row + nrow * col"
+  //convention is used.
+  double cMat[m * n];
+
+  for (int j = 0; j < n; ++j) {
+    int mj = m * j;
+    double jj = j;
+    double monej = pow(-1.0, jj);
+    for (int i = 0; i < m; ++i) {
+      if (px[i] < -1.0) {
+        cMat[i + mj] = monej * cosh(jj * acosh(-px[i]));
+      } else if (px[i] < 1.0) {
+        cMat[i + mj] = cos(jj * acos(px[i]));
+      } else {
+        cMat[i + mj] = cosh(jj * acosh(px[i]));
+      }
+    }
+  }
+
+  // Variables needed to conform to R's call of "dgemv".
+  char *TR = "N";
+  double zero = 0.0;
+  double done = 1.0;
+  int ONE = 1;
+  double (*cM) = cMat;
+
+  F77_CALL(dgemv)(TR, &m, &n, &done, cM, &m, pa, &ONE, &zero, pret, &ONE FCONE);
+
+  UNPROTECT(1);
+  return(ret);
 }
 
 static const R_CallMethodDef CallEntries[] = {
   {"compHorner_c",    (DL_FUNC) &compHorner_c,  2},
-  {"chebPoly_c",      (DL_FUNC) &chebPoly_c,    2},
   {"chebMat_c",       (DL_FUNC) &chebMat_c,     2},
+  {"chebCalc_c",      (DL_FUNC) &chebCalc_c,    2},
   {NULL,              NULL,                     0}
 };
 
