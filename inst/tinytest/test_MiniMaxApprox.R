@@ -73,7 +73,7 @@ expect_error(minimaxApprox(exp, 0, 1, c(-1.2, 8.01)), errMsg, fixed = TRUE)
 
 # Test trap for relErr
 errMsg <- paste("Relative Error must be a logical value. Default FALSE",
-                 "returns absolute error.")
+                "returns absolute error.")
 ## Polynomial
 expect_error(minimaxApprox(exp, -1, 1, 9L, "abs"), errMsg)
 ## Rational
@@ -152,9 +152,9 @@ if (Sys.info()["nodename"] == "HOME") {
 
 # Test passing incorrect degree (at minimaxApprox level)
 errMsg <- paste("Polynomial approximation takes one value for degree and",
-                 "rational approximation takes a vector of two values for",
-                 "numerator and denominator degrees. Any other inputs are",
-                 "invalid.")
+                "rational approximation takes a vector of two values for",
+                "numerator and denominator degrees. Any other inputs are",
+                "invalid.")
 expect_error(minimaxApprox(exp, -1, 1, 1:3), errMsg)
 
 # Test passing xi
@@ -164,7 +164,7 @@ wrnMess <- paste("Polynomial approximation uses Chebyshev nodes for initial",
 expect_message(minimaxApprox(exp, -1, 1, 10L, xi = 6), wrnMess)
 ## Rational - Check that proper length is passed
 errMsg <- paste("Given the requested degrees for numerator and denominator,",
-                 "the x-vector needs to have 8 elements.")
+                "the x-vector needs to have 8 elements.")
 xi <- minimaxApprox:::chebNodes(5L, -1, 1)
 expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi), errMsg)
 # Test that passing proper size works for rational
@@ -204,16 +204,16 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
 
 ## Test unsuccessful restart due to two failures
 errMsg <- paste("The algorithm neither converged when looking for a",
-                 "polynomial of length 22 nor when looking for a polynomial of",
-                 "degree 23.")
+                "polynomial of length 22 nor when looking for a polynomial of",
+                "degree 23.")
 
 ## Below case has failover to QR
 expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMsg)
 
 # Test tailtol NULL
 errMsg <- paste("The algorithm did not converge when looking for a",
-                 "polynomial of degree 22 and NULL was passed to the tailtol",
-                 "option.")
+                "polynomial of degree 22 and NULL was passed to the tailtol",
+                "option.")
 expect_error(minimaxApprox(sin, 0, pi / 2, 22L, opts = list(tailtol = NULL)),
              errMsg)
 
@@ -223,9 +223,9 @@ expect_error(minimaxApprox(sin, 0, pi / 2, 22L, opts = list(tailtol = NULL)),
 ## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOME") {
   errMsg <- paste("The algorithm did not converge when looking for a",
-                   "polynomial of length 22 and when looking for a polynomial",
-                   "of degree 23 the uppermost coefficient is not effectively",
-                   "zero.")
+                  "polynomial of length 22 and when looking for a polynomial",
+                  "of degree 23 the uppermost coefficient is not effectively",
+                  "zero.")
   expect_error(minimaxApprox(abs, -0.15, 0.15, 22L), errMsg)
 }
 
