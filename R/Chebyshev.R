@@ -42,18 +42,21 @@ evalFuncCheb <- function(x, R) {
 
 cheb2mon <- function(a) {
   n <- length(a)
-  nm2 <- n - 2L
-  tp <- 1
-  for (j in 1:nm2) {
-    # Cannot vectorize next step since already adjusted "a"s affect downstream
-    # "a"s as part of the recursion.
-    for (i in nm2:j) {
-      a[i] <- a[i] - a[i + 2L]
+  # Chebyshev polynomials of order 0 and 1 ARE the monomials x^0 and x^1!
+  if (n > 2L) {
+    nm2 <- n - 2L
+    tp <- 1
+    for (j in seq_len(nm2)) {
+      # Cannot vectorize next step since already adjusted "a"s affect downstream
+      # "a"s as part of the recursion.
+      for (i in nm2:j) {
+        a[i] <- a[i] - a[i + 2L]
+      }
+      a[j + 1L] <- a[j + 1L] / 2
+      a[j] <- a[j] * tp
+      tp <- tp * 2
     }
-    a[j + 1L] <- a[j + 1L] / 2
-    a[j] <- a[j] * tp
-    tp <- tp * 2
+    a[c(n - 1L, n)] <- a[c(n - 1L, n)] * tp
   }
-  a[c(n - 1L, n)] <- a[c(n - 1L, n)] * tp
   a
 }
