@@ -100,7 +100,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
 
 /////////////////////////// Chebyshev Functions/////////////////////////////////
 
-// chebPoly never used directly, so removed and folded into chebMat and chebCalc
+// chebPoly never used directly, so removed and folded into chebMat.
 
 extern SEXP chebMat_c(SEXP x, SEXP k) {
   const int m = LENGTH(x);
@@ -110,8 +110,8 @@ extern SEXP chebMat_c(SEXP x, SEXP k) {
   SEXP ret = PROTECT(allocMatrix(REALSXP, m, n));
   double *pret = REAL(ret);
 
-  // Traverse across columns and calculate coefficient for fixed power 0 < j < k
-  // for each x.
+  // Traverse across columns and calculate coefficient for fixed power
+  // 0 <= j <= k for each x.
   for (int j = 0; j < n; j++) {
     int mj = m * j;
     double jj = j;
@@ -133,7 +133,7 @@ extern SEXP chebMat_c(SEXP x, SEXP k) {
 }
 
 // While more than 10% more efficient to use all-in-one than to pass back and
-// forth, it is not good coding practice to have two seperate functions doing
+// forth, it is not good coding practice to have two separate functions doing
 // the same thing, as that leads to bugs when a change is made to one and not
 // the other. Therefore, all cheb matricies will be made by chebMat_c and we
 // will just live with the overhead of passing them back and forth between C and
