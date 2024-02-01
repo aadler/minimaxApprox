@@ -87,8 +87,31 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   return(ret);
 }
 
+extern SEXP chebPoly_c(SEXP x, SEXP k) {
+  const int m = LENGTH(x);
+  double *px = REAL(x);
+  double kk = asReal(k);
+  const double monek = pow(-1.0, kk);
+  SEXP ret = PROTECT(allocVector(REALSXP, m));
+  double *pret = REAL(ret);
+
+  for (int i = 0; i < m; ++i) {
+    if (px[i] < -1.0) {
+      pret[i] = monek * cosh(kk * acosh(-px[i]));
+    } else if (px[i] < 1.0) {
+      pret[i] = cos(kk * acos(px[i]));
+    } else {
+      pret[i] = cosh(kk * acosh(px[i]));
+    }
+  }
+
+  UNPROTECT(1);
+  return(ret);
+}
+
 static const R_CallMethodDef CallEntries[] = {
   {"compHorner_c",    (DL_FUNC) &compHorner_c,  2},
+  {"chebPoly_c",      (DL_FUNC) &chebPoly_c,    2},
   {NULL,              NULL,                     0}
 };
 
