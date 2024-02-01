@@ -18,6 +18,7 @@ expect_equal(RR$aMono, controlA, tolerance = tol)
 expect_equal(RR$bMono, controlB, tolerance = tol)
 expect_true(RR$ExpErr <= controlE)
 expect_false(RR$Warning)
+
 ## Rational 2: Based on Cody (1968) pp 250--251. Using weaker tolerance since
 ## taking values printed on paper.
 controlA <- c(1.2655835, -0.65058499, 0.19786869)
@@ -32,7 +33,7 @@ expect_equal(RR$ExpErr, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
 
 ## Rational 3: Based on DLMF 3.11.19 https://dlmf.nist.gov/3.11#iii
-# Difference on Windows machine is roughly 8.13e-6
+# Difference on Windows machine is roughly 2.34e-6
 controlA <- c(0.99999998917854, -0.34038938209347, -0.18915483763222,
               0.06658319420166)
 controlB <- c(1, -0.34039052338838, 0.06086501629812, -0.01864476809090)

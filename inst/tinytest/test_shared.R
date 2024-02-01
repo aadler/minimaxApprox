@@ -30,6 +30,7 @@ expect_identical(minimaxApprox:::vanderMat(k, 6L), control)
 fn <- function(x) tan(x) - x ^ 3
 control <- tan(-0.4) - (-0.4) ^ 3
 expect_equal(minimaxApprox:::callFun(fn, -0.4), control, tolerance = tol)
+
 ## Test error trapping
 expect_error(minimaxApprox:::callFun("x ^ 2", -0.4),
              "Unable to parse function.")
@@ -37,6 +38,7 @@ expect_error(minimaxApprox:::callFun("x ^ 2", -0.4),
 # Test isOscil
 control <- c(-2, 1, -3, 4, -1, 6, -7)
 expect_true(minimaxApprox:::isOscil(control))
+
 control <- c(-2, 1, -3, 4, -1, -6)
 expect_false(minimaxApprox:::isOscil(control))
 
@@ -45,6 +47,7 @@ coeffs <-  c(2, 3.2, 4.6, -9.7, 0.1)
 controlF <- function(x) {
   2 + 3.2 * x + 4.6 * x ^ 2 - 9.7 * x ^ 3 + 0.1 * x ^ 4
 }
+
 ## Test scalar
 x <- 3
 expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
@@ -52,6 +55,7 @@ x <- 5
 expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
 x <- 1e-14
 expect_equal(minimaxApprox:::polyCalc(x, coeffs), controlF(x), tolerance = tol)
+
 ## Test vectorized
 expect_equal(minimaxApprox:::polyCalc(c(3, 5, 1e-14), coeffs),
              c(controlF(3), controlF(5), controlF(1e-14)), tolerance = tol)
@@ -59,9 +63,11 @@ expect_equal(minimaxApprox:::polyCalc(c(3, 5, 1e-14), coeffs),
 # Test evalFunc
 x <- c(-0.1, 0.2, 2)
 controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
+
 ## Polynomial
 P <- list(a = 1:4)
 expect_equal(minimaxApprox:::evalFunc(x, P, TRUE), controlN, tolerance = tol)
+
 ## Rational
 R <- list(a = 1:4, b = c(1, 2.2, 4.1))
 controlD <- 1 + 2.2 * x + 4.1 * x ^ 2
@@ -77,6 +83,7 @@ c <- (exp(1) - m * log(m)) / 2
 tstFn <- function(x) m * x + c
 x <- minimaxApprox:::chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
+
 ## Polynomial
 PP <- minimaxApprox:::remPoly(fn, 0, 1, 1, FALSE, TRUE, opts)
 expect_equal(minimaxApprox:::remErr(x, PP, fn, FALSE, TRUE), control,
@@ -90,6 +97,7 @@ expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE, TRUE), control,
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 fn <- function(x) exp(x) - 1
 x <- minimaxApprox:::chebNodes(3, 0, 1)
+
 ## Polynomial
 QQ <- minimaxApprox:::polyCoeffs(x, function(x) expm1(x), TRUE, 0, 1, TRUE,
                                  opts$ztol)
@@ -98,6 +106,7 @@ PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, 0, 1, TRUE, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, TRUE, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
+
 ## Rational
 QQ <- minimaxApprox:::ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE, 0, 1,
                                 TRUE, opts$ztol)
@@ -106,13 +115,13 @@ RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, 0, 1, TRUE, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, TRUE)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
+
 ## Test error trap with contrived example
 ## Polynomial
-# mmA <- minimaxApprox(exp, 1, 2, 4L)
 r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, TRUE)
 expect_identical(r, 1.2)
+
 ## Rational
-# mmA <- minimaxApprox(exp, 1, 2, c(2L, 2L))
 r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, TRUE)
 expect_identical(r, 1.2)
 
@@ -145,6 +154,7 @@ R <- list(a = 0, b = 1)
 fn <- function(x) 3
 expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, TRUE), c(0, 0),
                   tolerance = tol)
+
 fn <- function(x) -3
 expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, TRUE), c(0, 0),
                   tolerance = tol)

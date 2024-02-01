@@ -6,6 +6,7 @@ tol <- sqrt(.Machine$double.eps)
 opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
              showProgress = FALSE, convRatio = 1.000000001, tol = 1e-14,
              ztol = .Machine$double.eps)
+
 # Test ratMat
 x <- c(-0.4, 0.1, 0.3, 0.4)
 E <- 0.5
