@@ -41,12 +41,12 @@ expect_equal(minimaxApprox:::evalFuncCheb(x, R), control, tolerance = tol)
 # cheb2mon
 ## Polynomial
 A <- minimaxApprox(exp, 0, 1, 4L)
-B <- minimaxApprox(exp, 0, 1, 4L, basis = "c")
+B <- minimaxApprox(exp, 0, 1, 4L, basis = "m")
 
-expect_equal(B$aMono, A$a, tolerance = tol)
+expect_equal(A$aMono, B$a, tolerance = tol)
 ## Rational
 A <- minimaxApprox(function(x) gamma(x + 1), 1, 2, c(3L, 3L))
-B <- minimaxApprox(function(x) gamma(x + 1), 1, 2, c(3L, 3L), basis = "c")
+B <- minimaxApprox(function(x) gamma(x + 1), 1, 2, c(3L, 3L), basis = "m")
 
-expect_equal(B$aMono, A$a, tolerance = tol)
-expect_equal(B$bMono, A$b, tolerance = tol)
+expect_equal(A$aMono, B$a, tolerance = tol)
+expect_equal(A$bMono, B$b, tolerance = tol)

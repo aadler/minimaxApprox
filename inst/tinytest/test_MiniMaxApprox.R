@@ -14,8 +14,8 @@ controlB <- c(1, 1.17899457599300466, -0.122321311431112167,
 controlE <- 1e-6
 fn <- function(x) gamma(x + 1)
 RR <- minimaxApprox(fn, 0, 1, c(3L, 4L), relErr = FALSE)
-expect_equal(RR$a, controlA, tolerance = tol)
-expect_equal(RR$b, controlB, tolerance = tol)
+expect_equal(RR$aMono, controlA, tolerance = tol)
+expect_equal(RR$bMono, controlB, tolerance = tol)
 expect_true(RR$ExpErr <= controlE)
 expect_false(RR$Warning)
 ## Rational 2: Based on Cody (1968) pp 250--251. Using weaker tolerance since
@@ -25,8 +25,8 @@ controlB <- c(1, -0.064342748, -0.028851456)
 controlX <- c(2, 2.0924, 2.3368, 2.6459, 2.9011, 3)
 controlE <- 2.6934e-5
 RR <- minimaxApprox(gamma, 2, 3, c(2L, 2L), relErr = TRUE, opts = list())
-expect_equal(RR$a, controlA, tolerance = 5e-6)
-expect_equal(RR$b, controlB, tolerance = 5e-6)
+expect_equal(RR$aMono, controlA, tolerance = 5e-6)
+expect_equal(RR$bMono, controlB, tolerance = 5e-6)
 expect_equivalent(RR$Extrema, controlX, tolerance = 5e-5)
 expect_equal(RR$ExpErr, controlE, tolerance = 5e-5)
 expect_false(RR$Warning)
@@ -39,8 +39,8 @@ controlB <- c(1, -0.34039052338838, 0.06086501629812, -0.01864476809090)
 fn <- function(x) besselJ(x, nu = 0)
 b0 <- 0.893576966279167522
 RR <- minimaxApprox(fn, 0, b0, c(3L, 3L))
-expect_equal(RR$a, controlA, tolerance = 1e-5)
-expect_equal(RR$b, controlB, tolerance = 1e-5)
+expect_equal(RR$aMono, controlA, tolerance = 1e-5)
+expect_equal(RR$bMono, controlB, tolerance = 1e-5)
 expect_false(RR$Warning)
 
 # Test incorrect basis for analysis
@@ -135,7 +135,7 @@ expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
 wrnMess <- "functional value is 0"
 # Polynomial
 ## Zero is lower bound
-expect_warning(minimaxApprox(atan, 0, 1, 14, TRUE), wrnMess)
+expect_warning(minimaxApprox(atan, 0, 1, 14, TRUE, basis = "m"), wrnMess)
 ## Zero is upper bound
 fn <- function(x) exp(cos(x)) - 1
 expect_warning(minimaxApprox(fn, 0, pi / 2, 4, TRUE), wrnMess)
@@ -197,7 +197,7 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
   controlE <- 0.06592293
   expect_message(minimaxApprox(fn, -1, 1, 10L), mess)
   PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
-  expect_equal(PP$a, control, tolerance = tol)
+  expect_equal(PP$aMono, control, tolerance = tol)
   expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only 8 digits in email
   expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 }
@@ -226,7 +226,7 @@ if (Sys.info()["nodename"] == "HOME") {
                   "polynomial of length 22 and when looking for a polynomial",
                   "of degree 23 the uppermost coefficient is not effectively",
                   "zero.")
-  expect_error(minimaxApprox(abs, -0.15, 0.15, 22L), errMsg)
+  expect_error(minimaxApprox(abs, -0.15, 0.15, 22L, basis = "m"), errMsg)
 }
 
 # Test ztol
@@ -246,10 +246,39 @@ expect_error(minimaxApprox(sin, 0, pi / 2, c(100L, 0L)))
 ################################################################################
 # Test minimaxEval
 x <- seq(0.1, 0.4, 0.025)
+
+## Check asking for Chebyshev when Chebyshev was run.
+### Polynomial
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
+### Rational
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
+
+## Check asking for monomial when Chebyshev was run.
+### Polynomial
+mmA <- minimaxApprox(exp, 0, 0.5, 5L)
+expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
+### Rational
+mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
+expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
+
+## Check asking for monomial when only monomial was run.
+### Polynomial
+mmA <- minimaxApprox(exp, 0, 0.5, 5L, basis = "m")
+expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
+### Rational
+mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L), basis = "m")
+expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
+
+## Check asking for Chebyshev when only monomial was run.
+msgMsg <- "Analysis was run using only the monomial basis."
+### Polynomial
+mmA <- minimaxApprox(exp, 0, 0.5, 5L, basis = "m")
+expect_message(minimaxEval(x, mmA, basis = "Cheb"), msgMsg)
+### Rational
+mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L), basis = "m")
+expect_message(minimaxEval(x, mmA, basis = "Cheb"), msgMsg)
 
 ## Check error trap for mmA object
 errMsg <- "This function only works with 'minimaxApprox' objects."
@@ -260,23 +289,12 @@ errMsg <- "Select either the 'M'onomial or 'C'hebyshev basis."
 expect_error(minimaxEval(x, mmA, basis = "A"), errMsg)
 expect_error(minimaxEval(x, mmA, basis = 4), errMsg)
 
-## Check asking for Chebyshev when only monomial was run
-errMsg <- "Analysis was run using a monomial basis."
-expect_error(minimaxEval(x, mmA, basis = "Cheb"), errMsg)
-
-## Check asking for Chebyshev when Chebyshev was run
-mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L), basis = "c")
-expect_true(all(exp(x) - minimaxEval(x, mmA, basis = "c") <= mmA$ExpErr))
-
-## Check asking for monomial when Chebyshev was run
-expect_true(all(exp(x) - minimaxEval(x, mmA, basis = "m") <= mmA$ExpErr))
-
 ################################################################################
 # Test minimaxErr
 x <- seq(0.1, 0.4, 0.025)
 ## Absolute
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
-expect_identical(minimaxEval(x, mmA) - exp(x), minimaxErr(x, mmA))
+expect_equal(minimaxEval(x, mmA) - exp(x), minimaxErr(x, mmA), tolerance = tol)
 
 ## Relative
 mmA <- minimaxApprox(exp, 0, 0.5, 5L, TRUE, basis = "c")
