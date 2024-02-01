@@ -108,7 +108,8 @@ test.
 \subsection{Polynomial Evaluation}{
 Monomial polynomials are evaluated using the Compensated Horner Scheme of
 Langlois et al. (2006) to enhance both stability and precision. Chebyshev
-polynomials are evaluated normally.
+polynomials are evaluated normally. There may be cases where the algorithm will
+fail using the default monomial basis but succeed using Chebyshev polynomials.
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
