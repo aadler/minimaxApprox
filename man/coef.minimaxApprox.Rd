@@ -9,7 +9,8 @@
 
 \description{
 Extracts the numerator and denominator vectors from a \code{"minimaxApprox"}
-object.
+object. For objects with both Chebyshev and monomial coefficients, it will
+extract both.
 }
 
 \usage{
@@ -29,6 +30,12 @@ object.
     coefficients.}
     \item{b}{The rational denominator coefficients. Missing for polynomial
     approximation.}
+    \item{aMono}{The polynomial coefficients or the rational numerator
+    coefficients for the monomial basis when the approximation was done using
+    Chebyshev polynomials. Missing if only the monomial basis was used.}
+    \item{bMono}{The rational denominator coefficients for the monomial basis
+    when the approximation was done using Chebyshev polynomials. Missing if
+    either only the monomial basis was used or for polynomial approximation.}
 }
 
 \author{
@@ -42,8 +49,9 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 \examples{
 PP <- minimaxApprox(exp, 0, 1, 5)
 coef(PP)
-identical(unlist(coef(PP), use.names = FALSE), PP$a)
-RR <- minimaxApprox(exp, 0, 1, c(2, 3))
+identical(unlist(coef(PP), use.names = FALSE), c(PP$a, PP$aMono))
+
+RR <- minimaxApprox(exp, 0, 1, c(2, 3), basis = "m")
 coef(RR)
 identical(coef(RR), list(a = RR$a, b = RR$b))
 }

@@ -36,7 +36,7 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 }
 
 \examples{
-PP <- minimaxApprox(exp, 0, 1, 5)
+PP <- minimaxApprox(sin, 0, 1, 8)
 PP
 print(PP, digits = 2L)
 print.default(PP)

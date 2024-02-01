@@ -9,7 +9,7 @@
 
 \description{
 Produces a plot of the error of the \code{"minimaxApprox"} object, highlighting
-the basis points and the error bounds.
+the error extrema and bounds.
 }
 
 \usage{\method{plot}{minimaxApprox}(x, y, \dots)}
