@@ -7,17 +7,27 @@
 # not work properly. But once the entirety of the matrix build was moved to C,
 # and chebPoly removed completely, it became moot.
 
-chebMat <- function(x, n) {
-  .Call(chebMat_c, as.double(x), as.double(n))
+chebMat <- function(x, k) {
+  .Call(chebMat_c, as.double(x), as.double(k))
 }
 
 # Function to evaluate Chebyshev polynomials and their coefficient. Originally
 # was drop(chebMat(x, length(a) - 1L) %*% a). Ported to C and combines all three
 # functions: chebPoly, chebMat, and chebCalc into one routine using DGEMV. This
-# is 15%–25% faster than the ported chebMat and %*%.
+# is 15%–25% faster than the ported chebMat and %*%. (AA: 2024-01-31)
+#
+# However, it is not good coding practice to have two seperate functions doing
+# the same thing as that can introduce bugs if one is updated and one isn't, so
+# while it bother me to calculate the matrix in C, pass it back to R, and pass
+# it BACK to c for chebCalc, since chebMat has to live on its own for the matrix
+# creation in polyMat and ratMat, it will be used for chebCalc as well. It
+# remains 10%–15% faster than the %*% invocation, but not 15%–25% of the
+# self-contained function. (AA: 2021-02-01)
 
 chebCalc <- function(x, a) {
- .Call(chebCalc_c, as.double(x), as.double(a))
+  .Call(chebCalc_c,
+        .Call(chebMat_c, as.double(x), as.double(length(a) - 1)),
+        as.double(a))
 }
 
 evalFuncCheb <- function(x, R) {
