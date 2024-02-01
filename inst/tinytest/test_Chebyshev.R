@@ -36,7 +36,8 @@ expect_equal(minimaxApprox:::chebPoly(x, 6),
 ## Error trapping
 expect_error(minimaxApprox:::chebPoly("A", 3))
 expect_error(minimaxApprox:::chebPoly(3, -1))
-expect_error(minimaxApprox:::chebPoly(3, 1.1))
+expect_equal(minimaxApprox:::chebPoly(3, 1.1), minimaxApprox:::chebPoly(3, 1),
+             tolerance = tol)
 
 # chebMat
 x <- c(-0.5, 0, 0.5)

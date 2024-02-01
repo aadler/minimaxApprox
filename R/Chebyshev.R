@@ -9,9 +9,6 @@ chebPoly <- function(x, k) {
   stopifnot(exprs = {
     k >= 0
     is.numeric(x)
-    # Need k to be a real for C purposes (pow) but still should LOOK like an
-    # integer.
-    all.equal(k - floor(k), 0)
   })
   .Call(chebPoly_c, as.double(x), floor(k))
 }
