@@ -42,6 +42,13 @@ coef.minimaxApprox <- function(object, ...) {
     coef <- list(a = object$a, b = object$b)
   }
 
+  if (attr(object, "basis") == "Chebyshev") {
+    coef <- c(coef, list(aMono = object$aMono))
+    if (attr(object, "type") == "Rational") {
+      coef <- c(coef, list(bMono = object$bMono))
+    }
+  }
+
   coef
 }
 
