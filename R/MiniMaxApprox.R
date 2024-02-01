@@ -6,10 +6,10 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
                           basis = "monomial", xi = NULL, opts = list()) {
 
   basis <- tolower(substr(basis, 1L, 1L))
-  if (!(basis %in% c("c", "m"))) {
-    stop("Must select either 'Cheb'yshev or 'mono'mial basis for analysis.")
-  } else {
+  if (basis %in% c("c", "m")) {
     monoB <- (basis == "m")
+  } else {
+    stop("Must select either 'Cheb'yshev or 'mono'mial basis for analysis.")
   }
 
   # Handle configuration options
@@ -61,7 +61,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     stop("Polynomial degrees must be integers of least 0 (constant).")
   }
 
-    if (length(degree) == 2L) {       # Rational approximation requested
+  if (length(degree) == 2L) {       # Rational approximation requested
     numerd <- as.integer(degree[1L])
     denomd <- as.integer(degree[2L])
     ratApprox <- TRUE
@@ -93,8 +93,8 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   # resulting degree n and message appropriately.
 
   if (!ratApprox && inherits(mmA, "simpleError")) {
-    if (grepl("singular", mmA$message, fixed = TRUE)) { # May be different error
-      if (!is.null(opts$tailtol)) {
+    if (grepl("singular", mmA$message, fixed = TRUE)) { # nolint unnecessary_nested_if_linter
+      if (!is.null(opts$tailtol)) { # May be different error
         mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
                                 relErr, monoB, opts),
                         error = function(e) simpleError(trimws(e$message)))
@@ -173,10 +173,10 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   if (monoB) {
     monomialEq <- NULL
-    PolynomalBasis <- "Monomial"
+    polynomalBasis <- "Monomial"
   } else {
     monomialEq <- list(aMono = cheb2mon(mmA$a))
-    PolynomalBasis <- "Chebyshev"
+    polynomalBasis <- "Chebyshev"
     if (ratApprox) {
       monomialEq <- c(monomialEq, list(bMono = cheb2mon(mmA$b)))
       monomialEq <- mapply(`/`, monomialEq, monomialEq$bMono[1L],
@@ -188,7 +188,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
                       Extrema = mmA$x, Warning = gotWarning)
   ret <- c(coefficients, monomialEq, diagnostics)
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
-  attr(ret, "basis") <- PolynomalBasis
+  attr(ret, "basis") <- polynomalBasis
   attr(ret, "func") <- fn
   attr(ret, "range") <- c(lower, upper)
   attr(ret, "relErr") <- relErr
