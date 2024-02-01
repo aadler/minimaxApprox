@@ -3,7 +3,7 @@
 
 # Master user-exposed function
 minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
-                          basis = "monomial", xi = NULL, opts = list()) {
+                          basis = "Chebyshev", xi = NULL, opts = list()) {
 
   basis <- tolower(substr(basis, 1L, 1L))
   if (basis %in% c("c", "m")) {
@@ -201,28 +201,30 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
 # Evaluation convenience function. Identical to evalFunc but tests for
 # inheritance from minimaxApprox.
-minimaxEval <- function(x, mmA, basis = "monomial") {
+minimaxEval <- function(x, mmA, basis = "Chebyshev") {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")
   }
+  onlyMono <- attr(mmA, "basis") == "Monomial"
   basis <- tolower(substr(basis, 1L, 1L))
   if (!(basis %in% c("c", "m"))) {
     stop("Select either the 'M'onomial or 'C'hebyshev basis.")
   }
   if (basis == "c") {
-    if ((attr(mmA, "basis") == "Chebyshev")) {
-      evalFuncCheb(x, mmA)
+    if (onlyMono) {
+      message("Analysis was run using only the monomial basis. Calculating ",
+              "errors using monomials.")
+      evalFuncMono(x, mmA)
     } else {
-      stop("Analysis was run using a monomial basis. No coefficients were ",
-           "calculated for Chebyshev polynomials.")
+      evalFuncCheb(x, mmA)
     }
   } else {
-    if ((attr(mmA, "basis") == "Chebyshev")) {
+    if (onlyMono) {
+      evalFuncMono(x, mmA)
+    } else {
       RR <- list(a = mmA$aMono)
       if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
       evalFuncMono(x, RR)
-    } else {
-      evalFuncMono(x, mmA)
     }
   }
 }
