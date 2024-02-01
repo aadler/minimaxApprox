@@ -18,7 +18,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   }
 
   if (!("miniter" %in% names(opts))) {
-    opts$miniter <- if (monoB) 10L else 5L
+    opts$miniter <- 10L
   }
 
   if ("conviter" %in% names(opts)) {

@@ -46,8 +46,7 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="monomial",
             \item \code{maxiter}: integer; The maximum number of iterations to
             attempt convergence. Defaults to 100.
             \item \code{miniter}:  integer; The minimum number of iterations
-            before allowing convergence. Defaults to 10 for monomials and 5 for
-            Chebyshev polynomials.
+            before allowing convergence. Defaults to 10.
             \item \code{conviter}: integer; The number of successive iterations
             with the same results allowed before assuming no further convergence
             is possible. Defaults to 10. Will overwrite \code{maxiter} if
