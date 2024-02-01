@@ -19,7 +19,7 @@ minimaxEval(x, mmA, basis = "monomial")
   \item{basis}{character; Which polynomial basis to use in to evaluate the
   function; see \code{\link{minimaxApprox}} for more details. If Chebyshev is
   asked for but the analysis used monomials, an error will be returned. The
-  default is "monomial", and the parameter is sase-insensitive and may be
+  default is "monomial", and the parameter is case-insensitive and may be
   abbreviated.}
 }
 \details{
