@@ -18,8 +18,9 @@
 \section{Version 0.3.0.9000 (2025-01-25)}{
   \subsection{Added}{
     \itemize{
-      \item \strong{Breaking:} Analysis can now use Chebyshev polynomials,
-      \eqn{T_k}, as the basis instead of monomials, \eqn{x^k}.
+      \item \strong{Breaking:} Analysis now uses Chebyshev polynomials,
+      \eqn{T_k}, as the default basis instead of monomials, \eqn{x^k}. Monomials
+      can still be used by passing the appropriate \code{basis} parameter.
       \item The internal functions underlying the Chebyshev polynomial
       calculations were ported to C for speed.
     }
@@ -32,7 +33,7 @@
       \item \strong{Breaking:} User-facing functions now have \code{basis}
       parameter to determine which basis to use; see appropriate help files.
       Parameter positions have thus changed.
-      \item Print and plot methods updated for basis selection.
+      \item Print, plot, coef methods were updated for basis selection.
       \item Internal tolerances were tightened.
       \item Updated documentation for new functionality.
     }
