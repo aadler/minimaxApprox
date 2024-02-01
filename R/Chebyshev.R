@@ -3,7 +3,10 @@
 
 # Recursive function to calculate the kth Chebyshev polynomial T_k. Using the
 # cos/cosh based version instead of the recursive definition for speed. Ported
-# to C for speed since it and the outer call are the slowest elements.
+# to C for speed since it and the outer call are the slowest elements. However,
+# it is never used on its own, and once chebMat was ported to C, it is
+# technically irrelevant. Leaving in for now but may remove in the future
+# without warning since it is not part of the API.
 
 chebPoly <- function(x, k) {
   stopifnot(exprs = {
@@ -14,9 +17,12 @@ chebPoly <- function(x, k) {
 }
 
 # Create the equivalent of a Vandermonde matrix but using Chebyshev polynomials.
+# As above, the "outer" call on the old ChebPoly was ported to C to a nested
+# loop. For some reason, calling outer on the C version did not work properly.
+# But once the entirety of the matrix build was moved to C, it became moot.
 
 chebMat <- function(x, n) {
-  outer(x, 0:n, chebPoly)
+  .Call(chebMat_c, as.double(x), as.double(n))
 }
 
 # Function to evaluate Chebyshev polynomials and their coefficient. May port

@@ -20,6 +20,8 @@
     \itemize{
       \item \strong{Breaking:} Analysis can now use Chebyshev polynomials,
       \eqn{T_k}, as the basis instead of monomials, \eqn{x^k}.
+      \item The internal functions underlying the Chebyshev polynomial
+      calculations were ported to C for speed.
     }
   }
   \subsection{Changed}{

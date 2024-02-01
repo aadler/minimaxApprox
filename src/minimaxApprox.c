@@ -109,9 +109,40 @@ extern SEXP chebPoly_c(SEXP x, SEXP k) {
   return(ret);
 }
 
+extern SEXP chebMat_c(SEXP x, SEXP k) {
+  const int m = LENGTH(x);
+  int n = asInteger(k) + 1;
+  double *px = REAL(x);
+
+  SEXP ret = PROTECT(allocMatrix(REALSXP, m, n));
+  double *pret = REAL(ret);
+
+  // Traverse across columns and calulate coefficient for fixed power 0 < j < k
+  // for each x.
+  for (int j = 0; j < n; j++) {
+    const double jj = j;
+    const double monej = pow(-1.0, jj);
+    // Chebyshev Polynomial using cos/acos cosh/acosh for each x for fixed "j".
+    for (int i = 0; i < m; ++i) {
+      if (px[i] < -1.0) {
+        pret[i + j * m] = monej * cosh(jj * acosh(-px[i]));
+      } else if (px[i] < 1.0) {
+        pret[i + j * m] = cos(jj * acos(px[i]));
+      } else {
+        pret[i + j * m] = cosh(jj * acosh(px[i]));
+      }
+    }
+  }
+
+  UNPROTECT(1);
+  return(ret);
+
+}
+
 static const R_CallMethodDef CallEntries[] = {
   {"compHorner_c",    (DL_FUNC) &compHorner_c,  2},
   {"chebPoly_c",      (DL_FUNC) &chebPoly_c,    2},
+  {"chebMat_c",       (DL_FUNC) &chebMat_c,     2},
   {NULL,              NULL,                     0}
 };
 
