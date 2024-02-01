@@ -8,3 +8,6 @@ all:
 	@rm -f *.mod *.o
 
 $(SHLIB): $(C_OBJS)
+
+clean:
+	@rm -f *.mod *.o
