@@ -26,8 +26,7 @@ chebMat <- function(x, k) {
 
 chebCalc <- function(x, a) {
   .Call(chebCalc_c,
-        .Call(chebMat_c, as.double(x), as.double(length(a) - 1)),
-        as.double(a))
+        .Call(chebMat_c, as.double(x), as.double(length(a) - 1)), as.double(a))
 }
 
 evalFuncCheb <- function(x, R) {
