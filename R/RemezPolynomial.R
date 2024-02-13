@@ -33,10 +33,8 @@ remPoly <- function(fn, lower, upper, degree, relErr, monoB, opts) {
   # Initial Polynomial Guess
   PP <- polyCoeffs(x, fn, relErr, monoB, lower, upper, opts$ztol)
   errs_last <- remErr(x, PP, fn, relErr, monoB)
-  converged <- FALSE
-  unchanged <- FALSE
-  unchanging_i <- 0L
-  i <- 0L
+  converged <- unchanged <- FALSE
+  unchanging_i <- i <- 0L
   repeat {
     # Check for maxiter
     if (i >= opts$maxiter) break

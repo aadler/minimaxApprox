@@ -69,10 +69,8 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, monoB, xi, opts) {
 
   RR <- convergeErr(x)
   errs_last <- remErr(x, RR, fn, relErr, monoB)
-  converged <- FALSE
-  unchanged <- FALSE
-  unchanging_i <- 0L
-  i <- 0L
+  converged <- unchanged <- FALSE
+  unchanging_i <- i <- 0L
   repeat {
     if (i >= opts$maxiter) break
     i <- i + 1L
