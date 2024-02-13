@@ -36,6 +36,7 @@
       \item Print, plot, coef methods were updated for basis selection.
       \item Internal tolerances were tightened.
       \item Updated documentation for new functionality.
+      \item \acronym{C} files split for simplicity.
     }
   }
   \subsection{Fixed}{
