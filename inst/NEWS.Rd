@@ -15,12 +15,13 @@
   }
 }
 
-\section{Version 0.3.0.9000 (2025-01-25)}{
+\section{Version 0.4.0 (2024-02-26)}{
   \subsection{Added}{
     \itemize{
-      \item \strong{Breaking:} Analysis now uses Chebyshev polynomials,
-      \eqn{T_k}, as the default basis instead of monomials, \eqn{x^k}. Monomials
-      can still be used by passing the appropriate \code{basis} parameter.
+      \item \strong{Breaking:} Analysis now uses the Chebyshev polynomials of
+      the first kind, \eqn{T_k}, as the default basis instead of the monomials,
+      \eqn{x^k}. Monomials can still be used by passing the appropriate
+      \code{basis} parameter.
       \item The internal functions underlying the Chebyshev polynomial
       calculations were ported to C for speed.
     }
@@ -33,15 +34,18 @@
       \item \strong{Breaking:} User-facing functions now have \code{basis}
       parameter to determine which basis to use; see appropriate help files.
       Parameter positions have thus changed.
-      \item Print, plot, coef methods were updated for basis selection.
+      \item The \code{print}, \code{plot}, and \code{coef} methods were updated
+      to recognize or allow basis selection.
       \item Internal tolerances were tightened.
       \item Updated documentation for new functionality.
-      \item \acronym{C} files split for simplicity.
+      \item The \acronym{C} files were split and header files created to keep
+      Chebyshev and Horner code seperate from each other.
     }
   }
   \subsection{Fixed}{
     \itemize{
-      \item Incorrect \file{NEWS} entries fixed.
+      \item Fixed outdated parameter name in documentation.
+      \item Fixed incorrect \file{NEWS} entries.
     }
   }
 }
