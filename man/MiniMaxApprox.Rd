@@ -10,8 +10,9 @@
 \description{
 Calculates minimax approximations to functions. Polynomial approximation uses
 the Remez (1962) algorithm. Rational approximation uses the Cody-Fraser-Hart
-(Cody et al., 1968) version of the algorithm. Monomial evaluation uses the
-Compensated Horner Scheme of Langlois et al. (2006).
+(Cody et al., 1968) version of the algorithm. When using monomials as the
+polynomial basis, the Compensated Horner Scheme of Langlois et al. (2006) is
+used.
 }
 
 \usage{
@@ -54,7 +55,7 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
             \code{maxiter}.
             \item \code{showProgress}: logical; If \code{TRUE} will print error
             values at each iteration.
-            \item \code{convRatio}: numeric; The convergence ratio tolerance.
+            \item \code{convrat}: numeric; The convergence ratio tolerance.
             Defaults to \eqn{1 + 1 \times 10^{-9}}{1+1e-9}. See \strong{Details}.
             \item \code{tol}: numeric; The absolute difference tolerance.
             Defaults to \eqn{1 \times 10^{-14}}{1e-14}. See \strong{Details}.
@@ -93,7 +94,7 @@ three of the following criteria are met:
         \item \strong{Difference}: The difference between the absolute
         magnitudes is less than or equal to \code{tol}.
         \item \strong{Ratio}: The ratio between the absolute magnitudes of the
-        larger and smaller is less than or equal to \code{convRatio}.
+        larger and smaller is less than or equal to \code{convrat}.
     }
 
 For efficiency, the \strong{Distance Test} is taken between the absolute value
@@ -101,8 +102,8 @@ of the largest observed error and the absolute value of the expected error.
 Similarly, the \strong{Magnitude Test} is taken between the absolute value of
 the largest observed error and the absolute value of the smallest observed
 error. Both tests can be passed by \strong{either} being within \code{tol} or
-\code{convRatio} as described above. However, when the \strong{Difference} test
-returns values less than machine precision it is ignored in favor of the
+\code{convrat} as described above. However, when the \strong{Difference} test
+returns values less than machine precision, it is ignored in favor of the
 \strong{Ratio} test.
 }
 \subsection{Polynomial Evaluation}{
@@ -133,7 +134,7 @@ coefficient to the total sum (as measured in the above section) is compared to
 the \code{ztol} option. When less than or equal to \code{ztol}, that coefficient
 is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely. For
 intervals near or containing zero, setting this option to anything other than
-\code{NULL} may result in either non-convergence or poorer results. It is
+\code{NULL} may result in either non-convergence or poor results. It is
 recommended to keep it as \code{NULL}.
 }
 }
@@ -148,12 +149,11 @@ methods.
 An object of class \code{"minimaxApprox"} is a list containing the following
 components:
 
-    \item{a}{The polynomial coefficients or the rational numerator
-    coefficients. When using Chebyshev polynomials, these are the coefficients
-    for \eqn{T_k}.}
-    \item{b}{The rational denominator coefficients. Missing for polynomial
-    approximation. When using Chebyshev polynomials, these are the coefficients
-    for \eqn{T_k}.}
+    \item{a}{The polynomial or rational numerator coefficients. When using
+    Chebyshev polynomials, these are the coefficients for \eqn{T_k}.}
+    \item{b}{The rational denominator coefficients. When using Chebyshev
+    polynomials, these are the coefficients for \eqn{T_k}. Missing for
+    polynomial approximation.}
     \item{aMono}{When using Chebyshev polynomials, these are the polynomial or
     rational numerator coefficients for monomial expansion in \eqn{x^k}. Missing
     for monomial-based approximation.}
@@ -163,11 +163,11 @@ components:
     \item{ExpErr}{The absolute value of the expected error as calculated by the
     Remez algorithms.}
     \item{ObsErr}{The absolute value of largest observed error between the
-    function and the approximation at the extremal basis points.}
+    function and the approximation at the extremal points.}
     \item{iterations}{The number of iterations of the algorithm. This does not
     include any iterations required to converge the error value in rational
     approximation.}
-    \item{Extrema}{The basis points at which the minimax error was achieved.}
+    \item{Extrema}{The extrema at which the minimax error was achieved.}
     \item{Warning}{A logical flag indicating if any warnings were thrown.}
 
 The object also contains the following attributes:
