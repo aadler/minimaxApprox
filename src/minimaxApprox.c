@@ -33,7 +33,7 @@ void chebPoly(double *ret, double *x, int m, int n) {
     double monej = pow(-1.0, jj);
     for (int i = 0; i < m; ++i) {
       if (x[i] < -1.0) {
-        ret[i + mj] = monej * cosh(jj * acosh(-(x[i])));
+        ret[i + mj] = monej * cosh(jj * acosh(-x[i]));
       } else if (x[i] <= 1.0) {
         ret[i + mj] = cos(jj * acos(x[i]));
       } else {
