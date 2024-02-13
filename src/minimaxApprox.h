@@ -10,5 +10,4 @@
 extern SEXP chebMat_c(SEXP x, SEXP k);
 extern SEXP chebCalc_c(SEXP x, SEXP a);
 
-
 #endif

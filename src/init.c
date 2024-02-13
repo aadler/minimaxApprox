@@ -1,10 +1,7 @@
 // Copyright Avraham Adler (c) 2023
 // SPDX-License-Identifier: MPL-2.0+
 
-#include <R.h>
-#include <Rinternals.h>
 #include <stdlib.h> // for NULL
-#include <Rmath.h>
 #include <R_ext/Rdynload.h>
 
 #include "compHorner.h"

@@ -1,12 +1,9 @@
 // Copyright Avraham Adler (c) 2023
 // SPDX-License-Identifier: MPL-2.0+
 
-#include "compHorner.h"
-
-#include <stdlib.h> // for NULL
 #include <Rmath.h>
 
-/////////////////////////// Compensated Horner /////////////////////////////////
+#include "compHorner.h"
 
 // Based on Langlois et al. (2006)
 // https://drops.dagstuhl.de/opus/volltexte/2006/442/

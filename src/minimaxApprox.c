@@ -10,12 +10,9 @@
 # define FCONE
 #endif
 
-#include <stdlib.h> // for NULL
 #include <Rmath.h>
 
 #include "minimaxApprox.h"
-
-/////////////////////////// Chebyshev Functions/////////////////////////////////
 
 // chebPoly never used directly, so removed and folded into chebMat.
 
