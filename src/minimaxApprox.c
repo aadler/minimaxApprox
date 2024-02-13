@@ -14,20 +14,31 @@
 
 #include "minimaxApprox.h"
 
-// Scalar function for Chebyshev polynomial. Makes chebMat a hair slower since
-// there may be multiple calls to pow but makes chebCalc faster since it's
-// called directly from C. Worth the tradeoff and maintains single-location of
-// the Chebyshev calculations for programming safety. This version is faster
-// than checking for fabs(x) <= 1 and then a ternary operator to split the else
-// branch. (AA: 2024-02-13)
+// Function to create a matrix of Chebyshev polynomials of order k where k goes
+// from 0 to (n-1) for each one of the m entries in the vector x. This  Makes
+// chebCalc faster since it's called directly from C instead of Calling chebMat
+// inside chebCalc as in earlier development versions. It also maintains the
+// single-location of the Chebyshev calculations for programming safety. This
+// version is faster than checking for fabs(x) <= 1 and then a ternary operator
+// to split the else branch. It also is vectorized internally for a bit of a
+// speed up from the prior scalar version. Needs to be passed a pointer to both
+// "x" and "ret" which will be the value returned to the functions called from
+// R. It is void, because it doesn't return but modifies the ret object in
+// place. (AA: 2024-02-13)
 
-double chebPoly(double x, double k) {
-  if (x < -1.0) {
-    return(pow(-1.0, k) * cosh(k * acosh(-x)));
-  } else if (x <= 1.0) {
-    return(cos(k * acos(x)));
-  } else {
-    return(cosh(k * acosh(x)));
+void chebPoly(double *ret, double *x, int m, int n) {
+  for (int j = 0; j < n; ++j) {
+    int mj = m * j;
+    double jj = j;
+    for (int i = 0; i < m; ++i) {
+      if (x[i] < -1.0) {
+        ret[i + mj] = pow(-1.0, jj) * cosh(jj * acosh(-(x[i])));
+      } else if (x[i] <= 1.0) {
+        ret[i + mj] = cos(jj * acos(x[i]));
+      } else {
+        ret[i + mj] = cosh(jj * acosh(x[i]));
+      }
+    }
   }
 }
 
@@ -39,13 +50,7 @@ extern SEXP chebMat_c(SEXP x, SEXP k) {
   SEXP ret = PROTECT(allocMatrix(REALSXP, m, n));
   double *pret = REAL(ret);
 
-  for (int j = 0; j < n; ++j) {
-    int mj = m * j;
-    double jj = j;
-    for (int i = 0; i < m; ++i) {
-      pret[i + mj] = chebPoly(px[i], jj);
-    }
-  }
+  chebPoly(pret, px, m, n);
 
   UNPROTECT(1);
   return(ret);
@@ -66,21 +71,16 @@ extern SEXP chebCalc_c(SEXP x, SEXP a) {
   // passing back to R, the matrix is defined as an array and the
   // "row + nrow * col" convention is used.
   double cMat[m * n];
+  // Need the pointer to cMat for both chebPoly and DGEMV.
+  double (*cM) = cMat;
 
-  for (int j = 0; j < n; ++j) {
-    int mj = m * j;
-    double jj = j;
-    for (int i = 0; i < m; ++i) {
-      cMat[i + mj] = chebPoly(px[i], jj);
-    }
-  }
+  chebPoly(cM, px, m, n);
 
-  // Variables needed to conform to R's call of "dgemv".
+  // Remaining variables needed to conform to R's call of "dgemv".
   char *TR = "N";
   double zero = 0.0;
   double done = 1.0;
   int ONE = 1;
-  double (*cM) = cMat;
 
   F77_CALL(dgemv)(TR, &m, &n, &done, cM, &m, pa, &ONE, &zero, pret, &ONE FCONE);
 
