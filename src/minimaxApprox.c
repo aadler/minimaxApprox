@@ -15,7 +15,7 @@
 #include "minimaxApprox.h"
 
 // Function to create a matrix of Chebyshev polynomials of order k where k goes
-// from 0 to (n-1) for each one of the m entries in the vector x. This  Makes
+// from 0 to (n-1) for each one of the m entries in the vector x. This makes
 // chebCalc faster since it's called directly from C instead of Calling chebMat
 // inside chebCalc as in earlier development versions. It also maintains the
 // single-location of the Chebyshev calculations for programming safety. This
@@ -23,10 +23,10 @@
 // to split the else branch. It also is vectorized internally for a bit of a
 // speed up from the prior scalar version. Needs to be passed a pointer to both
 // "x" and "ret" which will be the value returned to the functions called from
-// R. It is void, because it doesn't return but modifies the ret object in
-// place. (AA: 2024-02-13)
+// R. It is void because it doesn't return but modifies the ret object in place.
+// (AA: 2024-02-13)
 
-void chebPoly(double *ret, double *x, int m, int n) {
+void chebPolys(double *ret, double *x, int m, int n) {
   for (int j = 0; j < n; ++j) {
     int mj = m * j;
     double jj = j;
@@ -51,7 +51,7 @@ extern SEXP chebMat_c(SEXP x, SEXP k) {
   SEXP ret = PROTECT(allocMatrix(REALSXP, m, n));
   double *pret = REAL(ret);
 
-  chebPoly(pret, px, m, n);
+  chebPolys(pret, px, m, n);
 
   UNPROTECT(1);
   return(ret);
@@ -60,30 +60,22 @@ extern SEXP chebMat_c(SEXP x, SEXP k) {
 extern SEXP chebCalc_c(SEXP x, SEXP a) {
   const int m = LENGTH(x);
   const int n = LENGTH(a);
-
   double *px = REAL(x);
   double *pa = REAL(a);
 
+  double cMat[m * n];
+  double (*pcM) = cMat;
+
+  chebPolys(pcM, px, m, n);
+
   SEXP ret = PROTECT(allocVector(REALSXP, m));
   double *pret = REAL(ret);
-
-  // R's own definitions in DGEMV require the "matrix" to be passed as a
-  // pointer to a one-dimensional array. So just like when using SEXP and
-  // passing back to R, the matrix is defined as an array and the
-  // "row + nrow * col" convention is used.
-  double cMat[m * n];
-  // Need the pointer to cMat for both chebPoly and DGEMV.
-  double (*cM) = cMat;
-
-  chebPoly(cM, px, m, n);
-
-  // Remaining variables needed to conform to R's call of "dgemv".
   char *TR = "N";
-  double zero = 0.0;
-  double done = 1.0;
-  int ONE = 1;
+  double d0 = 0.0;
+  double d1 = 1.0;
+  int i1 = 1;
 
-  F77_CALL(dgemv)(TR, &m, &n, &done, cM, &m, pa, &ONE, &zero, pret, &ONE FCONE);
+  F77_CALL(dgemv)(TR, &m, &n, &d1, pcM, &m, pa, &i1, &d0, pret, &i1 FCONE);
 
   UNPROTECT(1);
   return(ret);

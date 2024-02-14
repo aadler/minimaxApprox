@@ -32,7 +32,7 @@ evalFuncCheb <- function(x, R) {
 
 cheb2mon <- function(a) {
   n <- length(a)
-  # Chebyshev polynomials of order 0 and 1 ARE the monomials x^0 and x^1!
+  # The Chebyshev polynomials of order 0 and 1 ARE the monomials x^0 and x^1!
   if (n > 2L) {
     nm2 <- n - 2L
     tp <- 1

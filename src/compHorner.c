@@ -60,22 +60,20 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   if (n > 1) {
     double Ax;
     double pi;
-    double sig;
+    double sigma;
     double correction;
 
-    // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
-    // et al. (2006).
     for (int i = 0; i < m; ++i) {
       correction = 0.0;
       for (int j = nm1; j-- > 0; ) {
-        // EFT
+        // Error-Free-Transformation (EFT) Horner
         Ax = pret[i] * px[i];
         pi = twoProdFMAy(pret[i], px[i]);
         pret[i] = Ax + pa[j];
-        sig = twoSumy(Ax, pa[j]);
+        sigma = twoSumy(Ax, pa[j]);
         // Horner Sum correction
         correction *= px[i];
-        correction += pi + sig;
+        correction += pi + sigma;
       }
       pret[i] += correction;
     }
