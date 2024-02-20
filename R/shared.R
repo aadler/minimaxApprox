@@ -21,28 +21,30 @@ callFun <- function(fn, x) {
 # Check that the values passed are oscillating in sign
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
-evalFunc <- function(x, R, monoB) {
-  if (monoB) evalFuncMono(x, R) else evalFuncCheb(x, R)
+evalFunc <- function(x, R, basis) {
+  switch(EXPR = basis,
+         "m" = evalFuncMono(x, R),
+         evalFuncCheb(x, R))
 }
 
 # Function to calculate error between known and calculated values.
-remErr <- function(x, R, fn, relErr, monoB) {
+remErr <- function(x, R, fn, relErr, basis) {
   if (relErr) {
     y <- callFun(fn, x)
-    (evalFunc(x, R, monoB) - y) / y
+    (evalFunc(x, R, basis) - y) / y
   } else {
-    evalFunc(x, R, monoB) - callFun(fn, x)
+    evalFunc(x, R, basis) - callFun(fn, x)
   }
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima.
-findRoots <- function(x, R, fn, relErr, monoB) {
+findRoots <- function(x, R, fn, relErr, basis) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
     root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no", R = R,
-                             fn = fn, relErr = relErr, monoB = monoB,
+                             fn = fn, relErr = relErr, basis = basis,
                              tol = sqrt(.Machine$double.eps)),
                      error = function(cond) simpleError(trimws(cond$message)))
 
@@ -58,24 +60,24 @@ findRoots <- function(x, R, fn, relErr, monoB) {
 
 # Function to identify new x positions. This algorithm uses the multi-switch
 # paradigm, not the single switch.
-switchX <- function(r, l, u, R, fn, relErr, monoB) {
+switchX <- function(r, l, u, R, fn, relErr, basis) {
   bottoms <- c(l, r)
   tops <- c(r, u)
   x <- double(length(bottoms))
   attr(x, "ZeroBasis") <- FALSE
-  maximize <- sign(remErr(l, R, fn, relErr, monoB)) == 1
+  maximize <- sign(remErr(l, R, fn, relErr, basis)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
     # Tighter tolerances than the default lead to issues (AA: 2024-01-31).
     extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
-                                relErr = relErr, monoB = monoB,
+                                relErr = relErr, basis = basis,
                                 maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
     # If no extremum then the take endpoint with "better" value depending if we
     # are maximizing or minimizing.
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, R, fn, relErr, monoB)
+      endPtErr <- remErr(intv, R, fn, relErr, basis)
       if (maximize) {
         x[i] <- intv[which.max(endPtErr)]
       } else {
@@ -87,7 +89,7 @@ switchX <- function(r, l, u, R, fn, relErr, monoB) {
 
     # Test endpoints for max/min even if an extremum was found.
     p <- c(bottoms[i], x[i], tops[i])
-    E <- remErr(p, R, fn, relErr, monoB)
+    E <- remErr(p, R, fn, relErr, basis)
 
     if (maximize) {
       x[i] <- p[which.max(E)]
@@ -140,8 +142,8 @@ isConverged <- function(errs, expe, convrat, tol) {
 }
 
 # Check denominator polynomial for zero in the requested range.
-checkDenom <- function(a, l, u, monoB) {
-  calcFn <- if (monoB) polyCalc else chebCalc
+checkDenom <- function(a, l, u, basis) {
+  calcFn <- if (basis == "m") polyCalc else chebCalc
   dngrRt <- tryCatch(uniroot(calcFn, c(l, u), extendInt = "no", a = a,
                              tol = .Machine$double.eps),
                      error = function(cond) simpleError(trimws(cond$message)))

@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix for polynomial approximation.
-polyMat <- function(x, y, relErr, monoB) {
+polyMat <- function(x, y, relErr, basis) {
   n <- length(x)
-  A <- if (monoB) vanderMat(x, n - 2L) else chebMat(x, n - 2L)
+  A <- if (basis == "m") vanderMat(x, n - 2L) else chebMat(x, n - 2L)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x).
   if (relErr) altSgn <- altSgn * y
@@ -12,9 +12,9 @@ polyMat <- function(x, y, relErr, monoB) {
 }
 
 # Function to calculate coefficients given matrix and known values.
-polyCoeffs <- function(x, fn, relErr, monoB, l, u, zt) {
+polyCoeffs <- function(x, fn, relErr, basis, l, u, zt) {
   y <- callFun(fn, x)
-  P <- polyMat(x, y, relErr, monoB)
+  P <- polyMat(x, y, relErr, basis)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-14)
@@ -22,7 +22,7 @@ polyCoeffs <- function(x, fn, relErr, monoB, l, u, zt) {
 }
 
 # Main function to calculate and return the minimax polynomial approximation.
-remPoly <- function(fn, lower, upper, degree, relErr, monoB, opts) {
+remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
 
   # Set ZeroBasis relErr flag
   relErrZeroBasis <- FALSE
@@ -31,19 +31,19 @@ remPoly <- function(fn, lower, upper, degree, relErr, monoB, opts) {
   x <- chebNodes(degree + 2L, lower, upper)
 
   # Initial Polynomial Guess
-  PP <- polyCoeffs(x, fn, relErr, monoB, lower, upper, opts$ztol)
-  errs_last <- remErr(x, PP, fn, relErr, monoB)
+  PP <- polyCoeffs(x, fn, relErr, basis, lower, upper, opts$ztol)
+  errs_last <- remErr(x, PP, fn, relErr, basis)
   converged <- unchanged <- FALSE
   unchanging_i <- i <- 0L
   repeat {
     # Check for maxiter
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- findRoots(x, PP, fn, relErr, monoB)
-    x <- switchX(r, lower, upper, PP, fn, relErr, monoB)
+    r <- findRoots(x, PP, fn, relErr, basis)
+    x <- switchX(r, lower, upper, PP, fn, relErr, basis)
     relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
-    PP <- polyCoeffs(x, fn, relErr, monoB, lower, upper, opts$ztol)
-    errs <- remErr(x, PP, fn, relErr, monoB)
+    PP <- polyCoeffs(x, fn, relErr, basis, lower, upper, opts$ztol)
+    errs <- remErr(x, PP, fn, relErr, basis)
     mxae <- max(abs(errs))
     expe <- abs(PP$E)
 

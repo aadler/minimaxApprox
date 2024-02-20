@@ -132,9 +132,9 @@ control <- c(-1, 0.10264791208519766, 0.33735881337846646, 0.62760501759598053,
              0.88066205512236839, 1)
 fn <- function(x) sin(x) + cos(x)
 x <- minimaxApprox:::chebNodes(6, 0, 1)
-PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, TRUE, 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, PP, fn, FALSE, TRUE)
-x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE, TRUE)
+PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, "m", 0, 1, opts$ztol)
+r <- minimaxApprox:::findRoots(x, PP, fn, FALSE, "m")
+x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE, "m")
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
@@ -143,20 +143,20 @@ control <- c(-1, -0.6706726462230721, -2.8931353340360859e-14,
              0.67067262060160282, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- minimaxApprox:::chebNodes(5, -1, 1)
-RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, -1, 1, TRUE, opts$ztol)
-r <- minimaxApprox:::findRoots(x, RR, fn, FALSE, TRUE)
-x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE, TRUE)
+RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, "m", -1, 1, opts$ztol)
+r <- minimaxApprox:::findRoots(x, RR, fn, FALSE, "m")
+x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE, "m")
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
 ## Contrive no extremum examples for maximization and minimization
 R <- list(a = 0, b = 1)
 fn <- function(x) 3
-expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, TRUE), c(0, 0),
+expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, "m"), c(0, 0),
                   tolerance = tol)
 
 fn <- function(x) -3
-expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, TRUE), c(0, 0),
+expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, "m"), c(0, 0),
                   tolerance = tol)
 
 ## Test 0 value at function using relative error which isn't covered by other

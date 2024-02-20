@@ -7,7 +7,6 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   basis <- tolower(substr(basis, 1L, 1L))
   if (basis %in% c("c", "m")) {
-    monoB <- (basis == "m")
   } else {
     stop("Must select either 'Cheb'yshev or 'mono'mial basis for analysis.")
   }
@@ -80,9 +79,9 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   # Call Calculation Functions
   mmA <- if (ratApprox) {
-    remRat(fn, lower, upper, numerd, denomd, relErr, monoB, xi, opts)
+    remRat(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts)
   } else {
-    tryCatch(remPoly(fn, lower, upper, as.integer(degree), relErr, monoB, opts),
+    tryCatch(remPoly(fn, lower, upper, as.integer(degree), relErr, basis, opts),
              error = function(e) simpleError(trimws(e$message)))
   }
 
@@ -96,7 +95,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     if (grepl("singular", mmA$message, fixed = TRUE)) { # nolint unnecessary_nested_if_linter
       if (!is.null(opts$tailtol)) { # May be different error
         mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
-                                relErr, monoB, opts),
+                                relErr, basis, opts),
                         error = function(e) simpleError(trimws(e$message)))
         if (inherits(mmA, "simpleError")) {
           stop("The algorithm neither converged when looking for a polynomial",
@@ -171,7 +170,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     list(a = mmA$a)
   }
 
-  if (monoB) {
+  if (basis == "m") {
     monomialEq <- NULL
     polynomalBasis <- "Monomial"
   } else {
@@ -236,7 +235,7 @@ minimaxErr <- function(x, mmA) {
     stop("This function only works with 'minimaxApprox' objects.")
   }
   y <- callFun(attr(mmA, "func"), x)
-  ret <- evalFunc(x, mmA, attr(mmA, "basis") == "Monomial") - y
+  ret <- evalFunc(x, mmA, tolower(substr(attr(mmA, "basis"), 1L, 1L))) - y
   if (attr(mmA, "relErr")) ret <- ret / y
 
   ret

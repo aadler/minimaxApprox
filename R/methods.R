@@ -61,11 +61,11 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
   args <- list(...)
   rng <- attr(x, "range")
   fn <- attr(x, "func")
-  monoB <- attr(x, "basis") == "Monomial"
+  basis <- tolower(substr(attr(x, "basis"), 1L, 1L))
   relErr <- attr(x, "relErr")
   z <- seq(rng[1], rng[2], length.out = 1001L)
-  zz <- remErr(z, x, fn, relErr, monoB)
-  y <- remErr(x$Extrema, x, fn, relErr, monoB)
+  zz <- remErr(z, x, fn, relErr, basis)
+  y <- remErr(x$Extrema, x, fn, relErr, basis)
 
   # Default y-axis label
   ylab <- if (relErr) "Relative Error" else "Absolute Error"
