@@ -12,7 +12,7 @@
 
 #include <Rmath.h>
 
-#include "minimaxApprox.h"
+#include "Chebyshev.h"
 
 // Function to create a matrix of Chebyshev polynomials of order k where k goes
 // from 0 to (n-1) for each one of the m entries in the vector x. This makes

@@ -5,7 +5,7 @@
 #include <R_ext/Rdynload.h>
 
 #include "compHorner.h"
-#include "minimaxApprox.h"
+#include "Chebyshev.h"
 
 static const R_CallMethodDef CallEntries[] = {
   {"compHorner_c",    (DL_FUNC) &compHorner_c,  2},
