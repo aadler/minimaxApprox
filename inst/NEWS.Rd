@@ -15,7 +15,64 @@
   }
 }
 
-\section{Version 0.2.0 (2023-09-01)}{
+\section{Version 0.3.0 (2024-01-25)}{
+  \subsection{Changed}{
+    \itemize{
+      \item \strong{Breaking:} More descriptive names in return object. See the
+      \strong{Value} section of \code{help("minimaxApprox")} for details.
+      \item \strong{Breaking:} When using relative error for convergence and one
+      of the basis points is 0, instead of stopping with an error, the algorithm
+      will perturb that basis point by \code{1e-12} in the appropriate direction
+      and proceed with a warning.
+      \item \strong{Breaking:} Forced convergence to look \emph{only} at the
+      ratio if the difference between tested values is \eqn{\le}{<=}
+      \code{.Machine$double.eps}.
+      \item \strong{Breaking:} Increased default for \code{conviter} from 10 to
+      30 as tests on some values now need more iterations to acheive ratio
+      convergence given a distance \eqn{\le}{<=} \code{.Machine$double.eps}.
+    }
+  }
+  \subsection{Added}{
+    \itemize{
+      \item Added unit tests for additional functionality.
+    }
+  }
+  \subsection{Fixed}{
+    \itemize{
+      \item Fixed a misnamed option value in some unit tests.
+    }
+  }
+}
+
+\section{Version 0.2.2 (2023-10-12)}{
+  \subsection{Changed}{
+    \itemize{
+      \item Refactored \file{README} to split out security and contributions
+      wordings to their own respective files and link the citation to the file
+      on \acronym{CRAN}.
+      \item Changed some tests to be more acceptable for \acronym{CRAN}.
+    }
+  }
+  \subsection{Added}{
+    \itemize{
+      \item Added \code{LTO_OPT} to \file{Makevars} and \code{UseLTO} to
+      \file{DESCRIPTION}.
+    }
+  }
+}
+
+\section{Version 0.2.1 (2023-09-04)}{
+  \subsection{Changed}{
+    \itemize{
+      \item Test for calculating polynomial of degree \code{n + 1} when one of
+      degree \code{n} fails, while passing both R \acronym{Mac} Builder and
+      Github's \acronym{Mac} platform, failed on \acronym{CRAN}'s testbed.
+      So test is no longer run for \acronym{Mac} on \acronym{CRAN}.
+    }
+  }
+}
+
+\section{Version 0.2.0 (2023-09-04)}{
   \subsection{Added}{
     \itemize{
       \item When the polynomial algorithm fails with a singular matrix error

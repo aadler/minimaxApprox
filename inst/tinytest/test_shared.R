@@ -4,7 +4,7 @@
 tol <- sqrt(.Machine$double.eps)
 
 opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
-             showProgress = FALSE, convRatio = 1.000000001, tol = 1e-14,
+             showProgress = FALSE, convrat = 1.000000001, tol = 1e-14,
              ztol = .Machine$double.eps)
 
 # Test fC
@@ -124,7 +124,7 @@ PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE)
 # Need weaker tolerance here due to different build platforms
-expect_equal(x, control, tolerance = 3.5e-5)
+expect_equivalent(x, control, tolerance = 3.5e-5)
 
 ## Rational
 control <- c(-1, -0.6706726462230721, -2.8931353340360859e-14,
@@ -135,16 +135,16 @@ RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, -1, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, FALSE)
 x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE)
 # Need weaker tolerance here due to different build platforms
-expect_equal(x, control, tolerance = 3.5e-5)
+expect_equivalent(x, control, tolerance = 3.5e-5)
 
 ## Contrive no extremum examples for maximization and minimization
 R <- list(a = 0, b = 1)
 fn <- function(x) 3
-expect_equal(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
-             tolerance = tol)
+expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
+                  tolerance = tol)
 fn <- function(x) -3
-expect_equal(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
-             tolerance = tol)
+expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE), c(0, 0),
+                  tolerance = tol)
 
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)

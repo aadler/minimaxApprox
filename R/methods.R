@@ -10,10 +10,10 @@ print.minimaxApprox <- function(x, digits = 6L, ...) {
   }
 
   digits <- as.integer(digits)
-  diagnostics <- list(x$EE,
-                      x$OE,
-                      Ratio = round(x$OE / x$EE, digits),
-                      Difference = abs(x$OE - x$EE),
+  diagnostics <- list(x$ExpErr,
+                      x$ObsErr,
+                      Ratio = round(x$ObsErr / x$ExpErr, digits),
+                      Difference = abs(x$ObsErr - x$ExpErr),
                       Warnings = x$Warning)
 
   names(diagnostics)[1:2] <- if (attr(x, "relErr")) {
@@ -47,7 +47,7 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
   relErr <- attr(x, "relErr")
   z <- seq(rng[1], rng[2], length.out = 1001L)
   zz <- remErr(z, x, fn, relErr)
-  y <- remErr(x$x, x, fn, relErr)
+  y <- remErr(x$Basis, x, fn, relErr)
 
   # Default y-axis label
   ylab <- if (relErr) "Relative Error" else "Absolute Error"
@@ -56,15 +56,15 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
   ylim <- if ("ylim" %in% names(args)) { # nolint
     args$ylim
   } else {
-    ybnd <- max(x$EE, x$OE)
+    ybnd <- max(x$ExpErr, x$ObsErr)
     c(-ybnd, ybnd)
   }
 
   plot(z, zz, type = "l", xlab = "x", ylab = ylab, ...)
   abline(h = 0)
-  points(x$x, y, col = "red", pch = 16L)
-  abline(h = c(-x$OE, x$OE), lty = 2L, col = "blue")
-  abline(h = c(-x$EE, x$EE), lty = 3L, col = "red")
+  points(x$Basis, y, col = "red", pch = 16L)
+  abline(h = c(-x$ObsErr, x$ObsErr), lty = 2L, col = "blue")
+  abline(h = c(-x$ExpErr, x$ExpErr), lty = 3L, col = "red")
   legend(x = "bottomleft", inset = c(0.35, 1), col = c("red", "red", "blue"),
          lty = c(NA, 3L, 2L), legend = c("Basis", "Exp Err", "Obs Err"),
          pch = c(16L, NA, NA), bg = "transparent", xpd = TRUE)

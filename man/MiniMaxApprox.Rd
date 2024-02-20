@@ -34,9 +34,9 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     \emph{absolute} error.}
     \item{xi}{numeric; For rational approximation, a vector of initial points of
     the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
-    missing, approximation will use the appropriate Chebyshev nodes. Polynomial
-    approximation \strong{always} uses Chebyshev nodes and will ignore \code{xi}
-    with a message.}
+    missing, the approximation will use the appropriate Chebyshev nodes.
+    Polynomial approximation \strong{always} uses Chebyshev nodes and will
+    ignore \code{xi} with a message.}
     \item{opts}{\link{list}; Configuration options including:
         \itemize{
             \item \code{maxiter}: integer; The maximum number of iterations to
@@ -51,21 +51,22 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             \item \code{showProgress}: logical; If \code{TRUE} will print error
             values at each iteration.
             \item \code{convRatio}: numeric; The convergence ratio tolerance.
-            Defaults to \code{1+1e-9}. See \strong{Details}.
+            Defaults to \eqn{1 + 1 \times 10^{-9}}{1+1e-9}. See \strong{Details}.
             \item \code{tol}: numeric; The absolute difference tolerance.
-            Defaults to \code{1e-14}. See \strong{Details}.
+            Defaults to \eqn{1 \times 10^{-14}}{1e-14}. See \strong{Details}.
             \item \code{tailtol}: numeric; The tolerance of the coefficient of
             the largest power of \code{x} to be ignored when performing the
             polynomial approximation a second time. Defaults to the smaller of
-            \code{1e-10} or the \eqn{1\times 10^{-6}\cdot(textrm{upper} -
-            \textrm{lower}}{1e-6 * (upper - lower)}. Set to \code{NULL} to skip
-            the \code{degree + 1} check completely. See \strong{Details}.
+            \eqn{1 \times 10^{-10}}{1e-10} or
+            \eqn{\frac{\code{upper} - \code{lower}}{10^6}}{(\code{upper} -
+            \code{upper}) / 1e6}. Set to \code{NULL} to skip the
+            \code{degree + 1} check completely. See \strong{Details}.
             \item \code{ztol}: numeric; The tolerance for each polynomial or
             rational numerator or denominator coefficient's contribution to
             \strong{not} to be set to 0. Similar to polynomial \code{tailtol}
             but applied at each step of the algorithm. Defaults to
             \code{NULL} which leaves all coefficients as they are regardless
-            of magnitude.
+            of magnitude. See \strong{Details}.
         }
     }
 }
@@ -85,10 +86,10 @@ three of the following criteria are met:
     }
 \dQuote{Within tolerance} can be met in one of two ways:
     \enumerate{
-        \item The difference between the absolute magnitudes is less than or
-        equal to \code{tol}.
-        \item The ratio between the absolute magnitudes of the larger and
-        smaller is less than or equal to \code{convRatio}.
+        \item \strong{Difference}: The difference between the absolute
+        magnitudes is less than or equal to \code{tol}.
+        \item \strong{Ratio}: The ratio between the absolute magnitudes of the
+        larger and smaller is less than or equal to \code{convRatio}.
     }
 
 For efficiency, the \strong{Distance Test} is taken between the absolute value
@@ -96,7 +97,9 @@ of the largest observed error and the absolute value of the expected error.
 Similarly, the \strong{Magnitude Test} is taken between the absolute value of
 the largest observed error and the absolute value of the smallest observed
 error. Both tests can be passed by \strong{either} being within \code{tol} or
-\code{convRatio} as described above.
+\code{convRatio} as described above. When the \strong{Difference} test returns
+values less than machine precision it is ignored in favor of the \strong{Ratio}
+test.
 }
 \subsection{Polynomial Evaluation}{
 The polynomials are evaluated using the Compensated Horner Scheme of Langlois et
@@ -121,7 +124,9 @@ completely.
 For each step of the algorithms' iterations, the contribution of the found
 coefficient to the total sum (as measured in the above section) is compared to
 the \code{ztol} option. When less than or equal to \code{ztol}, that coefficient
-is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely.
+is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely. For
+intervals near or containing zero, setting this option to anything other than
+\code{NULL} may result in either non-convergence or poorer results.
 }
 }
 \value{
@@ -139,14 +144,14 @@ components:
     coefficients.}
     \item{b}{The rational denominator coefficients. Missing for polynomial
     approximation.}
-    \item{EE}{The absolute value of the expected error as calculated by the
+    \item{ExpErr}{The absolute value of the expected error as calculated by the
     Remez algorithms.}
-    \item{OE}{The absolute value of largest observed error between the function
+    \item{ObsErr}{The absolute value of largest observed error between the function
     and the approximation at the extremal basis points.}
     \item{iterations}{The number of iterations of the algorithm. This does not
     include any iterations required to converge the error value in rational
     approximation.}
-    \item{x}{The basis points at which the minimax error was achieved.}
+    \item{Basis}{The basis points at which the minimax error was achieved.}
     \item{Warning}{A logical flag indicating if any warnings were thrown.}
 }
 
@@ -179,11 +184,6 @@ means that the approximations are at best slightly worse. Research proceeds on
 more precise, stable, and efficient implementations. So long as the package
 remains in an experimental state---noted by a 0 major version---the API may
 change at any time.
-
-\subsection{Future Development Ideas}{
-Future developments may include possible use of arbitrary-precision math or
-using barycentric representations instead of monomials.
-}
 }
 
 \seealso{\code{\link{minimaxEval}}, \code{\link{minimaxErr}}}

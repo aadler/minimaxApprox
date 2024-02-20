@@ -2,7 +2,10 @@
 ^\.Rproj\.user$
 ^\.github$
 ^CITATION\.cff$
-^CodeofConduct.md$
-LICENSE
+<<<<<<< HEAD
+^CODE_OF_CONDUCT.md$
+^SECURITY.md$
+^CONTRIBUTING.md$
+^LICENSE$
 ^\.pdf$
 ^\.tex$

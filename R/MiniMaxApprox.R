@@ -14,11 +14,11 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     opts$miniter <- 10L
   }
 
-  if (!("conviter" %in% names(opts))) {
-    opts$conviter <- 10L
-  } else {
-    # If actually passed then overwrite maxiter if conviter > maxiter
+  if ("conviter" %in% names(opts)) {
+    # If actually passed then overwrite maxiter if conviter > maxiter.
     opts$maxiter <- max(opts$maxiter, opts$conviter)
+  } else {
+    opts$conviter <- 30L
   }
 
   if (!("showProgress" %in% names(opts))) {
@@ -91,7 +91,11 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
         mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
                                 relErr, opts),
                         error = function(e) simpleError(trimws(e$message)))
-        if (!inherits(mmA, "simpleError")) {
+        if (inherits(mmA, "simpleError")) {
+          stop("The algorithm neither converged when looking for a polynomial",
+               " of length ", degree, " nor when looking for a polynomial of",
+               " degree ", degree + 1L, ".")
+        } else {
           xmax <- max(abs(lower), abs(upper))
           n <- length(mmA$a)
           if ((mmA$a[n] * xmax ^ (n - 1L)) <= opts$tailtol) {
@@ -99,10 +103,10 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                           "of degree", degree, "but successfully completed",
                           "when looking for a polynomial of degree",
                           degree + 1L, "with the largest coefficient's",
-                          "contribution to the approximation <=",
-                          paste0(opts$tailtol, ":"), "the tailtol option. The",
-                          "result is a polynomial of length", degree, "as the",
-                          "uppermost coefficient is effectively 0.")
+                          "contribution to the approximation <= the tailtol",
+                          "option. The result is a polynomial of length",
+                          degree, "as the uppermost coefficient is effectively",
+                          "0.")
             mmA$a <- mmA$a[-length(mmA$a)]
             message(mess)
           } else {
@@ -111,10 +115,6 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
                  " degree ", degree + 1L, " the uppermost coefficient is not",
                  " effectively zero.")
           }
-        } else {
-          stop("The algorithm neither converged when looking for a polynomial",
-               " of length ", degree, " nor when looking for a polynomial of",
-               " degree ", degree + 1L, ".")
         }
       } else {
         stop("The algorithm did not converge when looking for a polynomial of ",
@@ -125,7 +125,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     }
   }
 
-  # Handle all warnings centrally
+  # Handle all warnings centrally.
   gotWarning <- FALSE
 
   if (mmA$i >= opts$maxiter && !mmA$converged) {
@@ -140,7 +140,8 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     warning("Convergence to requested ratio and tolerance not achieved in ",
             mmA$i, " iterations.\n", mmA$unchanging_i, " successive ",
             "calculated errors were too close to each other to warrant ",
-            "further iterations.\nThe ratio is ", fC(mmA$mxae / mmA$expe),
+            "further iterations.\nThe ratio is ",
+            fC(mmA$mxae / mmA$expe, d = 14L),
             " times expected and the difference is ",
             fC(abs(mmA$mxae - mmA$expe)), " from the expected.")
     gotWarning <- TRUE
@@ -152,9 +153,16 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     gotWarning <- TRUE
   }
 
+  if (mmA$zeroBasisError) {
+    warning("During convergence, the algorithm chose basis point(s) where the ",
+            "functional value is 0. The basis point was perturbed by 1e-12, ",
+            "but consider approximating using absolute---not relative---error.")
+    gotWarning <- TRUE
+  }
+
   coefficients <- if (ratApprox) list(a = mmA$a, b = mmA$b) else list(a = mmA$a)
-  diagnostics <- list(EE = mmA$expe, OE = mmA$mxae, iterations = mmA$i,
-                      x = mmA$x, Warning = gotWarning)
+  diagnostics <- list(ExpErr = mmA$expe, ObsErr = mmA$mxae, iterations = mmA$i,
+                      Basis = mmA$x, Warning = gotWarning)
   ret <- c(coefficients, diagnostics)
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
   attr(ret, "func") <- fn
@@ -178,7 +186,6 @@ minimaxEval <- function(x, mmA) {
 
 # Minimax approximation error convenience function. Based on remErr but takes a
 # completed mmA object.
-
 minimaxErr <- function(x, mmA) {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")
