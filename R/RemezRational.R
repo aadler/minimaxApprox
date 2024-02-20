@@ -10,13 +10,12 @@ ratMat <- function(x, E, y, nD, dD, relErr, basis) {
   altE <- altSgn * E
   yvctr <- -(y + altE)
 
-  if (basis == "m") {
-    aMat <- vanderMat(x, nD)
-    bMat <- vanderMat(x, dD)[, -1L] * yvctr
-  } else {
-    aMat <- chebMat(x, nD)
-    bMat <- chebMat(x, dD)[, -1L] * yvctr
-  }
+  matFunc <- switch(EXPR = basis,
+                    "m" = vanderMat,
+                    chebMat)
+
+  aMat <- matFunc(x, nD)
+  bMat <- matFunc(x, dD)[, -1L] * yvctr
 
   cbind(aMat, bMat, -altSgn, deparse.level = 0L)
 }
