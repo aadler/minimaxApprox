@@ -10,13 +10,30 @@
 \description{Internal minimaxApprox functions}
 \details{These are not to be called directly by the user.}
 
+% In Chebyshev.R
+\alias{chebMat}
+\alias{chebCalc}
+\alias{cheb2mon}
+
+% In monomial.R
+\alias{vanderMat}
+\alias{polyCalc}
+
+% In RemezPolynomial.R
+\alias{polyMat}
+\alias{polyCoeffs}
+\alias{remPoly}
+
+% In RemezRational.R
+\alias{ratMat}
+\alias{ratCoeffs}
+\alias{remRat}
+
+%In shared.R
 \alias{fC}
 \alias{chebNodes}
-\alias{vanderMat}
 \alias{callFun}
 \alias{isOscil}
-\alias{polyCalc}
-\alias{evalFuncMono}
 \alias{evalFunc}
 \alias{remErr}
 \alias{findRoots}
@@ -24,15 +41,5 @@
 \alias{isConverged}
 \alias{checkDenom}
 \alias{checkIrrelevant}
-\alias{polyMat}
-\alias{polyCoeffs}
-\alias{remPoly}
-\alias{ratMat}
-\alias{ratCoeffs}
-\alias{remRat}
-\alias{chebMat}
-\alias{chebCalc}
-\alias{evalFuncCheb}
-\alias{cheb2mon}
 
 \keyword{internal}

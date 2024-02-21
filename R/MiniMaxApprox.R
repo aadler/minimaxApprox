@@ -213,17 +213,17 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
     if (onlyMono) {
       message("Analysis was run using only the monomial basis. Calculating ",
               "errors using monomials.")
-      evalFuncMono(x, mmA)
+      evalFunc(x, mmA, "m")
     } else {
-      evalFuncCheb(x, mmA)
+      evalFunc(x, mmA, "c")
     }
   } else {
     if (onlyMono) {
-      evalFuncMono(x, mmA)
+      evalFunc(x, mmA, "m")
     } else {
       RR <- list(a = mmA$aMono)
       if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
-      evalFuncMono(x, RR)
+      evalFunc(x, RR, "m")
     }
   }
 }

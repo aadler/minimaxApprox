@@ -38,6 +38,7 @@ control <- c(-2, 1, -3, 4, -1, -6)
 expect_false(minimaxApprox:::isOscil(control))
 
 # Test evalFunc
+# Tests using Chebyshev polynomials are currently in test_Chebyshev.R
 x <- c(-0.1, 0.2, 2)
 controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
 

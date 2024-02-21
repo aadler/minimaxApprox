@@ -11,25 +11,15 @@ chebMat <- function(x, k) {
   .Call(chebMat_c, as.double(x), as.double(k))
 }
 
-# Function to evaluate Chebyshev polynomials and their coefficient. Originally
-# was drop(chebMat(x, length(a) - 1L) %*% a). Ported to C and combines all three
-# functions: chebPoly, chebMat, and chebCalc into one routine using DGEMV. This
-# is 15%–25% faster than the ported chebMat and %*%. (AA: 2024-01-31)
+# Function to evaluate Chebyshev polynomials and their coefficients. Originally
+# was drop(chebMat(x, length(a) - 1L) %*% a). Ported to C and uses DGEMV. This
+# is 15%–25% faster than the ported chebMat and %*%.
 
 chebCalc <- function(x, a) {
   .Call(chebCalc_c, as.double(x), as.double(a))
 }
 
-evalFuncCheb <- function(x, R) {
-  ret <- chebCalc(x, R$a)
-  if ("b" %in% names(R)) {
-    ret <- ret / chebCalc(x, R$b)
-  }
-  ret
-}
-
-# Based on open-source Netlib function "dconcm" in mathc90.
-
+# Below based on open-source Netlib function "dconcm" in mathc90.
 cheb2mon <- function(a) {
   n <- length(a)
   # The Chebyshev polynomials of order 0 and 1 ARE the monomials x^0 and x^1!

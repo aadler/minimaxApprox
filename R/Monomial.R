@@ -13,12 +13,3 @@ vanderMat <- function(x, n) {
 polyCalc <- function(x, a) {
   .Call(compHorner_c, as.double(x), as.double(a))
 }
-
-# Function to calculate value of minimax approximation at x given a & b.
-evalFuncMono <- function(x, R) {
-  ret <- polyCalc(x, R$a)
-  if ("b" %in% names(R)) {
-    ret <- ret / polyCalc(x, R$b)
-  }
-  ret
-}

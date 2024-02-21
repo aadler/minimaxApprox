@@ -22,9 +22,13 @@ callFun <- function(fn, x) {
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
 evalFunc <- function(x, R, basis) {
-  switch(EXPR = basis,
-         "m" = evalFuncMono(x, R),
-         evalFuncCheb(x, R))
+  calcFunc <- switch(EXPR = basis, "m" = polyCalc, chebCalc)
+  ret <- calcFunc(x, R$a)
+  if ("b" %in% names(R)) {
+    ret <- ret / calcFunc(x, R$b)
+  }
+
+  ret
 }
 
 # Function to calculate error between known and calculated values.
@@ -162,5 +166,6 @@ checkIrrelevant <- function(a, l, u, zt) {
       if (abs(a[i] * xmax ^ (i - 1L)) <= zt) a[i] <- 0
     }
   }
+
   a
 }
