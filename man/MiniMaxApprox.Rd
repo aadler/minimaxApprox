@@ -110,8 +110,8 @@ returns values less than machine precision, it is ignored in favor of the
 Monomial polynomials are evaluated using the Compensated Horner Scheme of
 Langlois et al. (2006) to enhance both stability and precision. Chebyshev
 polynomials are evaluated normally. There may be cases where the algorithm will
-fail using the monomial basis but succeed using Chebyshev polynomials. The
-default is to use the Chebyshev polynomials.
+fail using the monomial basis but succeed using Chebyshev polynomials and vice
+versa. The default is to use the Chebyshev polynomials.
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
@@ -150,10 +150,12 @@ An object of class \code{"minimaxApprox"} is a list containing the following
 components:
 
     \item{a}{The polynomial or rational numerator coefficients. When using
-    Chebyshev polynomials, these are the coefficients for \eqn{T_k}.}
+    Chebyshev polynomials, these are the coefficients for \eqn{T_k}. When using
+    monomials, these are the coefficients for \eqn{x^k}.}
     \item{b}{The rational denominator coefficients. When using Chebyshev
-    polynomials, these are the coefficients for \eqn{T_k}. Missing for
-    polynomial approximation.}
+    polynomials, these are the coefficients for \eqn{T_k}. When using monomials,
+    these are the coefficients for \eqn{x^k}. Missing for polynomial
+    approximation.}
     \item{aMono}{When using Chebyshev polynomials, these are the polynomial or
     rational numerator coefficients for monomial expansion in \eqn{x^k}. Missing
     for monomial-based approximation.}
