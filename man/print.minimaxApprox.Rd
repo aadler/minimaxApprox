@@ -12,7 +12,7 @@ Provides a more human-readable output of a \code{"minimaxApprox"} object.
 }
 
 \usage{
-\method{print}{minimaxApprox}(x, digits = 6L, \dots)
+\method{print}{minimaxApprox}(x, digits = 14L, \dots)
 }
 
 \arguments{

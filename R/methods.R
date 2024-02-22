@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Print method (hide i and basis/x but leave in list and not in attribute)
-print.minimaxApprox <- function(x, digits = 6L, ...) {
+print.minimaxApprox <- function(x, digits = 14L, ...) {
   basis <- list(`Polynomial Basis` = attr(x, "basis"))
   if (attr(x, "type") == "Polynomial") {
     coefficients <- list(a = x$a)
