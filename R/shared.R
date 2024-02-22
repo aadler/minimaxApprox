@@ -22,7 +22,7 @@ callFun <- function(fn, x) {
 isOscil <- function(x) all(abs(diff(sign(x))) == 2)
 
 evalFunc <- function(x, R, basis) {
-  calcFunc <- switch(EXPR = basis, "m" = polyCalc, chebCalc)
+  calcFunc <- switch(EXPR = basis, m = polyCalc, chebCalc)
   ret <- calcFunc(x, R$a)
   if ("b" %in% names(R)) {
     ret <- ret / calcFunc(x, R$b)

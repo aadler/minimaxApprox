@@ -87,7 +87,7 @@ expect_equal(r, control, tolerance = 1e-7)
 
 ## Rational
 QQ <- minimaxApprox:::ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE, "m",
-                                0, 1,opts$ztol)
+                                0, 1, opts$ztol)
 control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, "m")
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, "m", 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, "m")

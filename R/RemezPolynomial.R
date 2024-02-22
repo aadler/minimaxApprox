@@ -4,7 +4,7 @@
 # Function to create augmented Vandermonde matrix for polynomial approximation.
 polyMat <- function(x, y, relErr, basis) {
   n <- length(x)
-  matFunc <- switch(EXPR = basis, "m" = vanderMat, chebMat)
+  matFunc <- switch(EXPR = basis, m = vanderMat, chebMat)
   A <- matFunc(x, n - 2L)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x).
