@@ -124,6 +124,7 @@ switchX <- function(r, l, u, R, fn, relErr, basis) {
     # Flip maximize.
     maximize <- !maximize
   }
+
   x
 }
 
@@ -145,6 +146,12 @@ isConverged <- function(errs, expe, convrat, tol) {
 
   # Converged if magnitude and distance are close and error oscillates in sign.
   isOscil(errs) && errDistance && errMagnitude
+}
+
+isUnchanging <- function(errs, errs_last, convrat, tol) {
+  errDiff <- abs(errs - errs_last)
+  all(errs / errs_last <= convrat) ||
+    (all(errDiff <= tol) && all(errDiff > .Machine$double.eps))
 }
 
 # Check denominator polynomial for zero in the requested range.

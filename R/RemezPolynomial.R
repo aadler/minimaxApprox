@@ -60,16 +60,14 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will not help.
-    errDiff <- abs(errs - errs_last)
-    if (all(errs / errs_last <= opts$convrat) ||
-          (all(errDiff <= opts$tol) &&
-           all(errDiff > .Machine$double.eps))) {
+    if (isUnchanging(errs, errs_last, opts$convrat, opts$tol)) {
       unchanging_i <- unchanging_i + 1L
       if (unchanging_i >= opts$conviter) {
         unchanged <- TRUE
         break
       }
     }
+
     errs_last <- errs
   }
 

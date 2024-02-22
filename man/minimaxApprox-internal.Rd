@@ -39,6 +39,7 @@
 \alias{findRoots}
 \alias{switchX}
 \alias{isConverged}
+\alias{isUnchanging}
 \alias{checkDenom}
 \alias{checkIrrelevant}
 
