@@ -207,11 +207,11 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
 errMsg <- "The algorithm neither converged when looking for a"
 
 ## Below case has failover to QR
-expect_error(minimaxApprox(sin, 0, pi / 2, 15L), errMsg)
+expect_error(minimaxApprox(cos, 0, pi / 2, 15L), errMsg)
 
 # Test tailtol NULL
 errMsg <- "The algorithm did not converge when looking for a"
-expect_error(minimaxApprox(sin, 0, pi / 2, 15L, opts = list(tailtol = NULL)),
+expect_error(minimaxApprox(cos, 0, pi / 2, 15L, opts = list(tailtol = NULL)),
              errMsg)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
