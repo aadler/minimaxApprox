@@ -61,6 +61,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
     }
+
     RR
   }
 

@@ -38,5 +38,6 @@ cheb2mon <- function(a) {
     }
     a[c(n - 1L, n)] <- a[c(n - 1L, n)] * tp
   }
+
   a
 }

@@ -59,7 +59,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     stop("Polynomial degrees must be integers of least 0 (constant).")
   }
 
-  if (length(degree) == 2L) {       # Rational approximation requested
+  if (length(degree) == 2L) {         # Rational approximation requested
     numerd <- as.integer(degree[1L])
     denomd <- as.integer(degree[2L])
     ratApprox <- TRUE

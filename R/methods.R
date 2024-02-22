@@ -52,7 +52,7 @@ coef.minimaxApprox <- function(object, ...) {
   coef
 }
 
-# Plot method for errors and basis points
+# Plot method for errors and extremal points
 plot.minimaxApprox <- function(x, y = NULL, ...) {
   if (!is.null(y)) {
     message("The y values are taken from the minimaxApprox object. ",
@@ -63,7 +63,7 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
   fn <- attr(x, "func")
   basis <- tolower(substr(attr(x, "basis"), 1L, 1L))
   relErr <- attr(x, "relErr")
-  z <- seq(rng[1], rng[2], length.out = 1001L)
+  z <- seq(rng[1L], rng[2L], length.out = 1001L)
   zz <- remErr(z, x, fn, relErr, basis)
   y <- remErr(x$Extrema, x, fn, relErr, basis)
 
