@@ -122,15 +122,15 @@ expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
 # (AA: 2023-09-01)
 
 # Test consecutive unchanging check and message
-fn <- function(x) exp(x) - 1
+fn <- function(x) exp(cos(x))
 i <- 1L
 opts <- list(conviter = i)
-wrnMess <- paste(i, "successive calculated errors were too close to each other",
-                 "to warrant further iterations.\n")
+wrnMess <- paste(i, "successive calculated solutions were too close to each",
+                 "other to warrant further iterations.\n")
 ## Polynomial
-expect_warning(minimaxApprox(fn, -1, 1, 12L, opts = opts), wrnMess)
+expect_warning(minimaxApprox(fn, -1, 1, 7L, opts = opts), wrnMess)
 ## Rational
-expect_warning(minimaxApprox(fn, -1, 1, c(3L, 3L), opts = opts), wrnMess)
+expect_warning(minimaxApprox(fn, -pi, pi, c(4L, 5L), opts = opts), wrnMess)
 
 # Test function choosing basis x as 0 trap
 wrnMess <- "functional value is 0"
@@ -207,11 +207,11 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
 errMsg <- "The algorithm neither converged when looking for a"
 
 ## Below case has failover to QR
-expect_error(minimaxApprox(cos, 0, pi / 2, 15L), errMsg)
+expect_error(minimaxApprox(sin, 0.25, 0.75, 15L), errMsg)
 
 # Test tailtol NULL
 errMsg <- "The algorithm did not converge when looking for a"
-expect_error(minimaxApprox(cos, 0, pi / 2, 15L, opts = list(tailtol = NULL)),
+expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, opts = list(tailtol = NULL)),
              errMsg)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
