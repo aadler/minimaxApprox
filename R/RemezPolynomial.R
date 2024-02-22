@@ -29,7 +29,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
   relErrZeroBasis <- FALSE
 
   # Initial x's
-  x <- x_last <- chebNodes(degree + 2L, lower, upper)
+  x <- chebNodes(degree + 2L, lower, upper)
 
   # Initial Polynomial Guess
   PP <- polyCoeffs(x, fn, relErr, basis, lower, upper, opts$ztol)
@@ -60,7 +60,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will not help.
-    if (isUnchanging(x, x_last, opts$convrat, opts$tol)) {
+    if (isUnchanging(errs, errs_last, opts$convrat, opts$tol)) {
       unchanging_i <- unchanging_i + 1L
       if (unchanging_i >= opts$conviter) {
         unchanged <- TRUE
@@ -68,7 +68,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
       }
     }
 
-    x_last <- x
+    errs_last <- errs
   }
 
   list(a = PP$a, expe = expe, mxae = mxae, i = i, x = x, converged = converged,

@@ -46,8 +46,6 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
     }
   }
 
-  x_last <- x
-
   # Since E is initially a guess, we need to iterate solving the system of
   # equations until E converges. This function remains *inside* of remRat;
   # therefore, Everything but "x" is previously defined and constant inside the
@@ -103,7 +101,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will not help.
-    if (isUnchanging(x, x_last, opts$convrat, opts$tol)) {
+    if (isUnchanging(errs, errs_last, opts$convrat, opts$tol)) {
       unchanging_i <- unchanging_i + 1L
       if (unchanging_i >= opts$conviter) {
         unchanged <- TRUE
@@ -111,7 +109,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
       }
     }
 
-    x_last <- x
+    errs_last <- errs
   }
 
   list(a = RR$a, b = RR$b, expe = expe, mxae = mxae, i = i, x = x,

@@ -130,7 +130,7 @@ switchX <- function(r, l, u, R, fn, relErr, basis) {
 
 # Check Remez iterations for convergence.
 # So far, this test doesn't seem to suffer from denominator 0 issues the way
-# the convergence test in the solution did. (AA: 2024-02-22)
+# the convergence test does. (AA: 2024-02-22)
 isConverged <- function(errs, expe, convrat, tol) {
   aerrs <- abs(errs)
   mxae <- max(aerrs)
@@ -150,17 +150,17 @@ isConverged <- function(errs, expe, convrat, tol) {
   isOscil(errs) && errDistance && errMagnitude
 }
 
-isUnchanging <- function(x, x_last, convrat, tol) {
-  denomProblem <- which(x_last == 0)
+isUnchanging <- function(errs, errs_last, convrat, tol) {
+  denomProblem <- which(errs_last == 0)
   # If any are actually 0, then perturb them by 1e-12. Ratio becomes 1 and
   # difference remains 0.
   if (length(denomProblem) > 0L) {
-    x[denomProblem] <- x[denomProblem] + 1e-12
-    x_last[denomProblem] <- x_last[denomProblem] + 1e-12
+    errs[denomProblem] <- errs[denomProblem] + 1e-12
+    errs_last[denomProblem] <- errs_last[denomProblem] + 1e-12
   }
-  xDiff <- abs(x - x_last)
-  all(abs(x / x_last) <= convrat) ||
-    (all(xDiff <= tol) && all(xDiff > .Machine$double.eps))
+  errsDiff <- abs(errs - errs_last)
+  all(abs(errs / errs_last) <= convrat) ||
+    (all(errsDiff <= tol) && all(errsDiff > .Machine$double.eps))
 }
 
 # Check denominator polynomial for zero in the requested range.
