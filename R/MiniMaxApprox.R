@@ -6,8 +6,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
                           basis = "Chebyshev", xi = NULL, opts = list()) {
 
   basis <- tolower(substr(basis, 1L, 1L))
-  if (basis %in% c("c", "m")) {
-  } else {
+  if (!(basis %in% c("c", "m"))) {
     stop("Must select either 'Cheb'yshev or 'mono'mial basis for analysis.")
   }
 
