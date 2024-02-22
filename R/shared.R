@@ -59,6 +59,7 @@ findRoots <- function(x, R, fn, relErr, basis) {
       r[i] <- root$root
     }
   }
+
   r
 }
 
@@ -104,12 +105,13 @@ switchX <- function(r, l, u, R, fn, relErr, basis) {
     # Test for 0 value at function if relative error
     if (relErr && callFun(fn, x[i]) == 0) {
       attr(x, "ZeroBasis") <- TRUE
+      peturb <- 1e-12
       if (x[i] == l) {
-        x[i] <- x[i] + 1e-12
+        x[i] <- x[i] + peturb
       } else if (x[i] == u) {
-        x[i] <- x[i] - 1e-12
+        x[i] <- x[i] - peturb
       } else {
-        xreplace <- c(x[i] - 1e-12, x[i] + 1e-12)
+        xreplace <- c(x[i] - peturb, x[i] + peturb)
         fnreplace <- callFun(fn, xreplace)
         if (maximize) {
           x[i] <- xreplace[which.max(fnreplace)]
