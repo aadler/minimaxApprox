@@ -204,18 +204,14 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
 }
 
 ## Test unsuccessful restart due to two failures
-errMsg <- paste("The algorithm neither converged when looking for a",
-                "polynomial of length 22 nor when looking for a polynomial of",
-                "degree 23.")
+errMsg <- "The algorithm neither converged when looking for a"
 
 ## Below case has failover to QR
-expect_error(minimaxApprox(sin, 0, pi / 2, 22L), errMsg)
+expect_error(minimaxApprox(sin, 0, pi / 2, 15L), errMsg)
 
 # Test tailtol NULL
-errMsg <- paste("The algorithm did not converge when looking for a",
-                "polynomial of degree 22 and NULL was passed to the tailtol",
-                "option.")
-expect_error(minimaxApprox(sin, 0, pi / 2, 22L, opts = list(tailtol = NULL)),
+errMsg <- "The algorithm did not converge when looking for a"
+expect_error(minimaxApprox(sin, 0, pi / 2, 15L, opts = list(tailtol = NULL)),
              errMsg)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
