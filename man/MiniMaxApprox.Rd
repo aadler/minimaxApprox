@@ -105,6 +105,10 @@ error. Both tests can be passed by \strong{either} being within \code{tol} or
 \code{convrat} as described above. However, when the \strong{Difference} test
 returns values less than machine precision, it is ignored in favor of the
 \strong{Ratio} test.
+
+When the error values remain within tolerance of each other over \code{conviter}
+iterations, the algorithm will stop, as it is expected that no further precision
+will be gained by continued iterations.
 }
 \subsection{Polynomial Evaluation}{
 Monomial polynomials are evaluated using the Compensated Horner Scheme of

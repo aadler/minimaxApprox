@@ -46,6 +46,8 @@
   }
   \subsection{Fixed}{
     \itemize{
+      \item Fixed potential division-by-zero problem in the \dQuote{unchanging}
+      test.
       \item Fixed outdated parameter name in documentation.
       \item Fixed incorrect \file{NEWS} entries.
     }
