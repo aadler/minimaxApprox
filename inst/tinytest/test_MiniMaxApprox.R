@@ -207,7 +207,7 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
 errMsg <- "The algorithm neither converged when looking for a"
 
 ## Below case has failover to QR
-expect_error(minimaxApprox(sin, 0.25, 0.75, 16L), errMsg)
+expect_error(minimaxApprox(sin, 0.25, 0.75, 16L, basis = "m"), errMsg)
 
 # Test tailtol NULL
 errMsg <- "The algorithm did not converge when looking for a"
