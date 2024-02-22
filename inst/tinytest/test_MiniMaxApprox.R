@@ -123,7 +123,7 @@ expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
 
 # Test consecutive unchanging check and message
 fn <- function(x) exp(x) - 1
-i <- 5L
+i <- 1L
 opts <- list(conviter = i)
 wrnMess <- paste(i, "successive calculated errors were too close to each other",
                  "to warrant further iterations.\n")
