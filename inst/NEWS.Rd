@@ -36,7 +36,9 @@
       Parameter positions have thus changed.
       \item The \code{print}, \code{plot}, and \code{coef} methods were updated
       to recognize or allow basis selection.
-      \item Internal tolerances were tightened.
+      \item The \code{print} method now shows 14 digits for the convergence
+      ratio by default.
+      \item Internal code was streamlined and tolerances were tightened.
       \item Updated documentation for new functionality.
       \item The \acronym{C} files were split and header files created to keep
       Chebyshev and Horner code seperate from each other.
