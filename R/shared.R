@@ -176,11 +176,10 @@ checkDenom <- function(a, l, u, basis) {
 
 # Check for coefficient irrelevancy.
 checkIrrelevant <- function(a, l, u, zt) {
-  if (!is.null(zt) && length(a) > 0) {
+  n <- length(a)
+  if (!is.null(zt) && n > 0) {
     xmax <- max(abs(l), abs(u))
-    for (i in seq_along(a)) {
-      if (abs(a[i] * xmax ^ (i - 1L)) <= zt) a[i] <- 0
-    }
+    a <- ifelse(abs(a * xmax^(seq_len(n) - 1L)) <= zt, 0, a)
   }
 
   a
