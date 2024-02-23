@@ -11,42 +11,43 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   }
 
   # Handle configuration options
-  if (!("maxiter" %in% names(opts))) {
+  nopts <- names(opts)
+  if (!("maxiter" %in% nopts)) {
     opts$maxiter <- 100L
   }
 
-  if (!("miniter" %in% names(opts))) {
+  if (!("miniter" %in% nopts)) {
     opts$miniter <- 10L
   }
 
-  if ("conviter" %in% names(opts)) {
+  if ("conviter" %in% nopts) {
     # If actually passed then overwrite maxiter if conviter > maxiter.
     opts$maxiter <- max(opts$maxiter, opts$conviter)
   } else {
     opts$conviter <- 30L
   }
 
-  if (!("showProgress" %in% names(opts))) {
+  if (!("showProgress" %in% nopts)) {
     opts$showProgress <- FALSE
   }
 
-  if (!("convrat" %in% names(opts))) {
+  if (!("convrat" %in% nopts)) {
     # Using 1 + 1e-9 - See Cody (1968) page 250. Can reasonably expect between
     # 9 & 12 significant figures.
     opts$convrat <- 1.000000001
   }
 
-  if (!("tol" %in% names(opts))) {
+  if (!("tol" %in% nopts)) {
     opts$tol <- 1e-14
   }
 
   # Used for cases where we check polynomial degree n + 1.
   # See issue 2 https://github.com/aadler/minimaxApprox/issues/2
-  if (!("tailtol" %in% names(opts))) {
+  if (!("tailtol" %in% nopts)) {
     opts$tailtol <- min(1e-10, (upper - lower) / 1e6)
   }
 
-  if (!("ztol" %in% names(opts))) {
+  if (!("ztol" %in% nopts)) {
     opts$ztol <- NULL
   }
 
@@ -112,7 +113,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
                           "option. The result is a polynomial of length",
                           degree, "as the uppermost coefficient is effectively",
                           "0.")
-            mmA$a <- mmA$a[-length(mmA$a)]
+            mmA$a <- mmA$a[-n]
             message(mess)
           } else {
             stop("The algorithm did not converge when looking for a polynomial",
