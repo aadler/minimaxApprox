@@ -6,7 +6,7 @@ ratMat <- function(x, E, y, nD, dD, relErr, basis) {
   n <- length(x)
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x).
-  if (relErr)  altSgn <- altSgn * y
+  if (relErr) altSgn <- altSgn * y
   altE <- altSgn * E
   yvctr <- -(y + altE)
   matFunc <- switch(EXPR = basis, m = vanderMat, chebMat)
@@ -39,8 +39,9 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
   if (is.null(xi)) {
     x <- chebNodes(nodeCount, lower, upper)
   } else {
-    x <- xi
-    if (length(xi) != nodeCount) {
+    if (length(xi) == nodeCount) {
+      x <- xi
+    } else {
       stop("Given the requested degrees for numerator and denominator, ",
            "the x-vector needs to have ", nodeCount, " elements.")
     }
