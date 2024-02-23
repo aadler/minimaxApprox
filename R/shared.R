@@ -129,8 +129,6 @@ switchX <- function(r, l, u, R, fn, relErr, basis) {
 }
 
 # Check Remez iterations for convergence.
-# So far, this test doesn't seem to suffer from denominator 0 issues the way
-# the convergence test does. (AA: 2024-02-22)
 isConverged <- function(errs, expe, convrat, tol) {
   aerrs <- abs(errs)
   mxae <- max(aerrs)
