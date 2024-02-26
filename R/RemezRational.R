@@ -3,8 +3,7 @@
 
 # Function to create augmented Vandermonde matrix for rational approximation.
 ratMat <- function(x, E, y, nD, dD, relErr, basis) {
-  n <- length(x)
-  altSgn <- (-1) ^ (seq_len(n) - 1L)
+  altSgn <- (-1) ^ (seq_along(x) - 1L)
   # For relative error, need to weight the E by f(x).
   if (relErr) altSgn <- altSgn * y
   altE <- altSgn * E
