@@ -204,12 +204,12 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
   if (!inherits(mmA, "minimaxApprox")) {
     stop("This function only works with 'minimaxApprox' objects.")
   }
+  requestedbasis <- tolower(substr(basis, 1L, 1L))
   onlyMono <- attr(mmA, "basis") == "Monomial"
-  basis <- tolower(substr(basis, 1L, 1L))
-  if (!(basis %in% c("c", "m"))) {
+  if (!(requestedbasis %in% c("c", "m"))) {
     stop("Select either the 'M'onomial or 'C'hebyshev basis.")
   }
-  if (basis == "c") {
+  if (requestedbasis == "c") {
     if (onlyMono) {
       message("Analysis was run using only the monomial basis. Calculating ",
               "errors using monomials.")
