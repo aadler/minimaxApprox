@@ -213,11 +213,10 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 
 \note{
 At present, the algorithms are implemented using machine double precision, which
-means that the approximations are at best slightly worse. Using long doubles for
-internal calculations for both monomials and Chebyshev polynomials did not
-result in any material gains. Research proceeds on more precise, stable, and
-efficient implementations. So long as the package remains in an experimental
-state---noted by a 0 major version---the API may change at any time.
+means that the approximations are at best slightly worse. Research proceeds on
+more precise, stable, and efficient implementations. So long as the package
+remains in an experimental state---noted by a 0 major version---the API may
+change at any time.
 }
 
 \seealso{\code{\link{minimaxEval}}, \code{\link{minimaxErr}}}
