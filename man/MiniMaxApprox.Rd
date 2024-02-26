@@ -139,7 +139,8 @@ the \code{ztol} option. When less than or equal to \code{ztol}, that coefficient
 is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely. For
 intervals near or containing zero, setting this option to anything other than
 \code{NULL} may result in either non-convergence or poor results. It is
-recommended to keep it as \code{NULL}.
+recommended to keep it as \code{NULL}, although there are edge cases where
+it may allow convergence where a standard call may fail.
 }
 }
 \value{
