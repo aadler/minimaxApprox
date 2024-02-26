@@ -45,7 +45,7 @@ expect_equal(RR$bMono, controlB, tolerance = 1e-5)
 expect_false(RR$Warning)
 
 # Test incorrect basis for analysis
-errMsg <- "Must select either 'Cheb'yshev or 'mono'mial basis for analysis."
+errMsg <- "Must select either 'C'hebyshev or 'm'onomial basis for analysis."
 expect_error(minimaxApprox(exp, 0, 1, 0, basis = "x"), errMsg)
 expect_error(minimaxApprox(exp, 0, 1, 0, basis = 4), errMsg)
 
