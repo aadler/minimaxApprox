@@ -15,15 +15,54 @@
   }
 }
 
+\section{Version 0.4.0 (2024-02-26)}{
+  \subsection{Added}{
+    \itemize{
+      \item \strong{Breaking:} Analysis now uses the Chebyshev polynomials of
+      the first kind, \eqn{T_k}, as the default basis instead of the monomials,
+      \eqn{x^k}. Monomials can still be used by passing the appropriate
+      \code{basis} parameter.
+      \item The internal functions underlying the Chebyshev polynomial
+      calculations were ported to C for speed.
+    }
+  }
+  \subsection{Changed}{
+    \itemize{
+      \item \strong{Breaking:} Changed names in return object. What was
+      \code{Basis} is now \code{Extrema}. The \code{basis} parameter is now used
+      to capture whether monomials or Chebyshev polynomials should be/were used.
+      \item \strong{Breaking:} User-facing functions now have \code{basis}
+      parameter to determine which basis to use; see appropriate help files.
+      Parameter positions have thus changed.
+      \item The \code{print}, \code{plot}, and \code{coef} methods were updated
+      to recognize or allow basis selection.
+      \item The \code{print} method now shows 14 digits for the convergence
+      ratio by default.
+      \item Internal code was streamlined and tolerances were tightened.
+      \item Updated documentation for new functionality.
+      \item The \acronym{C} files were split and header files created to keep
+      Chebyshev and Horner code seperate from each other.
+    }
+  }
+  \subsection{Fixed}{
+    \itemize{
+      \item Fixed potential division-by-zero problem in the \dQuote{unchanging}
+      test.
+      \item Fixed outdated parameter name in documentation.
+      \item Fixed incorrect \file{NEWS} entries.
+    }
+  }
+}
+
 \section{Version 0.3.0 (2024-01-25)}{
   \subsection{Changed}{
     \itemize{
       \item \strong{Breaking:} More descriptive names in return object. See the
       \strong{Value} section of \code{help("minimaxApprox")} for details.
       \item \strong{Breaking:} When using relative error for convergence and one
-      of the basis points is 0, instead of stopping with an error, the algorithm
-      will perturb that basis point by \code{1e-12} in the appropriate direction
-      and proceed with a warning.
+      of the basis points has a functional value of 0, instead of stopping with
+      an error, the algorithm will perturb that basis point by \code{1e-12} in
+      the appropriate direction and proceed with a warning.
       \item \strong{Breaking:} Forced convergence to look \emph{only} at the
       ratio if the difference between tested values is \eqn{\le}{<=}
       \code{.Machine$double.eps}.

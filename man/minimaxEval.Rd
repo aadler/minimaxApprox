@@ -11,11 +11,16 @@ Evaluates the rational or polynomial approximation stored in \code{mmA} at
 \code{x}.
 }
 \usage{
-minimaxEval(x, mmA)
+minimaxEval(x, mmA, basis = "Chebyshev")
 }
 \arguments{
   \item{x}{a numeric vector}
   \item{mmA}{a \code{"minimaxApprox"} return object}
+  \item{basis}{character; Which polynomial basis to use in to evaluate the
+  function; see \code{\link{minimaxApprox}} for more details. If Chebyshev is
+  requested but the analysis used only monomials, the calculation will proceed
+  using the monomials with a message. The default is "Chebyshev", and the
+  parameter is case-insensitive and may be abbreviated.}
 }
 \details{
 This is a convenience function to evaluate the approximation at \code{x}.
@@ -33,8 +38,8 @@ apErr <- abs(exp(x) - minimaxEval(x, mmA))
 all.equal(max(apErr), mmA$ExpErr)
 
 # Plot results
-curve(exp, 0.0, 0.5)
-curve(minimaxEval(x, mmA), 0.0, 0.5, add = TRUE, col = "red", lty = 2L)
+curve(exp, 0.0, 0.5, lwd = 2)
+curve(minimaxEval(x, mmA), 0.0, 0.5, add = TRUE, col = "red", lty = 2L, lwd = 2)
 }
 
 \keyword{NumericalMathematics}

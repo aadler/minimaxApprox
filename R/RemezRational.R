@@ -2,32 +2,33 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Function to create augmented Vandermonde matrix for rational approximation.
-ratMat <- function(x, E, y, nD, dD, relErr) {
-  n <- length(x)
-  altSgn <- (-1) ^ (seq_len(n) - 1L)
+ratMat <- function(x, E, y, nD, dD, relErr, basis) {
+  altSgn <- (-1) ^ (seq_along(x) - 1L)
   # For relative error, need to weight the E by f(x).
-  if (relErr)  altSgn <- altSgn * y
+  if (relErr) altSgn <- altSgn * y
   altE <- altSgn * E
   yvctr <- -(y + altE)
-  aMat <- vanderMat(x, nD)
-  bMat <- vanderMat(x, dD)[, -1L] * yvctr
+  matFunc <- switch(EXPR = basis, m = vanderMat, chebMat)
+  aMat <- matFunc(x, nD)
+  bMat <- matFunc(x, dD)[, -1L] * yvctr
   cbind(aMat, bMat, -altSgn, deparse.level = 0L)
 }
 
 # Function to calculate coefficients given matrix and known values.
-ratCoeffs <- function(x, E, fn, nD, dD, relErr, l, u, zt) {
+ratCoeffs <- function(x, E, fn, nD, dD, relErr, basis, l, u, zt) {
   y <- callFun(fn, x)
-  P <- ratMat(x, E, y, nD, dD, relErr)
+  P <- ratMat(x, E, y, nD, dD, relErr, basis)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
-  if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-14)
+  if (inherits(PP, "simpleError")) PP <- qr.solve(P, y,
+                                                  tol = .Machine$double.eps)
   list(a = checkIrrelevant(PP[seq_len(nD + 1L)], l, u, zt),
        b = checkIrrelevant(c(1, PP[seq_len(dD) + nD + 1L]), l, u, zt),
        E = PP[length(PP)])
 }
 
 # Main function to calculate and return the minimax rational approximation.
-remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
+remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
 
   # Set ZeroBasis relErr flag
   relErrZeroBasis <- FALSE
@@ -37,8 +38,9 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
   if (is.null(xi)) {
     x <- chebNodes(nodeCount, lower, upper)
   } else {
-    x <- xi
-    if (length(xi) != nodeCount) {
+    if (length(xi) == nodeCount) {
+      x <- xi
+    } else {
       stop("Given the requested degrees for numerator and denominator, ",
            "the x-vector needs to have ", nodeCount, " elements.")
     }
@@ -54,27 +56,27 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     repeat {
       if (j >= opts$maxiter) break
       j <- j + 1L
-      RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr, lower, upper, opts$ztol)
+      RR <- ratCoeffs(x, E, fn, numerd, denomd, relErr, basis, lower, upper,
+                      opts$ztol)
       if (abs(RR$E - E) <= opts$tol) break
       E <- (RR$E + E) / 2
     }
+
     RR
   }
 
   RR <- convergeErr(x)
-  errs_last <- remErr(x, RR, fn, relErr)
-  converged <- FALSE
-  unchanged <- FALSE
-  unchanging_i <- 0L
-  i <- 0L
+  errs_last <- remErr(x, RR, fn, relErr, basis)
+  converged <- unchanged <- FALSE
+  unchanging_i <- i <- 0L
   repeat {
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- findRoots(x, RR, fn, relErr)
-    x <- switchX(r, lower, upper, RR, fn, relErr)
+    r <- findRoots(x, RR, fn, relErr, basis)
+    x <- switchX(r, lower, upper, RR, fn, relErr, basis)
     relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     RR <- convergeErr(x)
-    dngr <- checkDenom(RR$b, lower, upper)
+    dngr <- checkDenom(RR$b, lower, upper, basis)
     if (!is.null(dngr)) {
       stop("The ", denomd, " degree polynomial in the denominator has a zero ",
            "at ", fC(dngr), " which makes rational approximation perilous ",
@@ -82,7 +84,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
            "the numerator or denominator degree by 1 sometimes allows ",
            "convergence.")
     }
-    errs <- remErr(x, RR, fn, relErr)
+    errs <- remErr(x, RR, fn, relErr, basis)
     mxae <- max(abs(errs))
     expe <- abs(RR$E)
 
@@ -99,14 +101,14 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will not help.
-    if (all(errs / errs_last <= opts$convrat) ||
-          all(abs(errs - errs_last) <= opts$tol)) {
+    if (isUnchanging(errs, errs_last, opts$convrat, opts$tol)) {
       unchanging_i <- unchanging_i + 1L
       if (unchanging_i >= opts$conviter) {
         unchanged <- TRUE
         break
       }
     }
+
     errs_last <- errs
   }
 

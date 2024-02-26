@@ -10,13 +10,14 @@
 \description{
 Calculates minimax approximations to functions. Polynomial approximation uses
 the Remez (1962) algorithm. Rational approximation uses the Cody-Fraser-Hart
-(Cody et al., 1968) version of the algorithm. Polynomial evaluation uses the
-Compensated Horner Scheme of Langlois et al. (2006).
+(Cody et al., 1968) version of the algorithm. When using monomials as the
+polynomial basis, the Compensated Horner Scheme of Langlois et al. (2006) is
+used.
 }
 
 \usage{
-minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
-              opts = list())
+minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
+              xi = NULL, opts = list())
 }
 
 \arguments{
@@ -32,6 +33,10 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
     \item{relErr}{logical; If \code{TRUE}, calculate the minimax approximation
     using \emph{relative} error. The default is \code{FALSE} which uses
     \emph{absolute} error.}
+    \item{basis}{character; Which polynomial basis to use in the analysis.
+    "Monomial" uses the standard \eqn{x^k} basis. "Chebyshev" uses the Chebyshev
+    polynomials of the first kind, \eqn{T_k}. The default is "Chebyshev", and
+    the parameter is case-insensitive and may be abbreviated.}
     \item{xi}{numeric; For rational approximation, a vector of initial points of
     the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
     missing, the approximation will use the appropriate Chebyshev nodes.
@@ -45,12 +50,12 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, xi = NULL,
             before allowing convergence. Defaults to 10.
             \item \code{conviter}: integer; The number of successive iterations
             with the same results allowed before assuming no further convergence
-            is possible. Defaults to 10. Will overwrite \code{maxiter} if
+            is possible. Defaults to 30. Will overwrite \code{maxiter} if
             \code{conviter} is explicitly passed and is larger than
             \code{maxiter}.
             \item \code{showProgress}: logical; If \code{TRUE} will print error
             values at each iteration.
-            \item \code{convRatio}: numeric; The convergence ratio tolerance.
+            \item \code{convrat}: numeric; The convergence ratio tolerance.
             Defaults to \eqn{1 + 1 \times 10^{-9}}{1+1e-9}. See \strong{Details}.
             \item \code{tol}: numeric; The absolute difference tolerance.
             Defaults to \eqn{1 \times 10^{-14}}{1e-14}. See \strong{Details}.
@@ -89,7 +94,7 @@ three of the following criteria are met:
         \item \strong{Difference}: The difference between the absolute
         magnitudes is less than or equal to \code{tol}.
         \item \strong{Ratio}: The ratio between the absolute magnitudes of the
-        larger and smaller is less than or equal to \code{convRatio}.
+        larger and smaller is less than or equal to \code{convrat}.
     }
 
 For efficiency, the \strong{Distance Test} is taken between the absolute value
@@ -97,28 +102,35 @@ of the largest observed error and the absolute value of the expected error.
 Similarly, the \strong{Magnitude Test} is taken between the absolute value of
 the largest observed error and the absolute value of the smallest observed
 error. Both tests can be passed by \strong{either} being within \code{tol} or
-\code{convRatio} as described above. When the \strong{Difference} test returns
-values less than machine precision it is ignored in favor of the \strong{Ratio}
-test.
+\code{convrat} as described above. However, when the \strong{Difference} test
+returns values less than machine precision, it is ignored in favor of the
+\strong{Ratio} test.
+
+When the error values remain within tolerance of each other over \code{conviter}
+iterations, the algorithm will stop, as it is expected that no further precision
+will be gained by continued iterations.
 }
 \subsection{Polynomial Evaluation}{
-The polynomials are evaluated using the Compensated Horner Scheme of Langlois et
-al. (2006) to enhance both stability and precision.
+Monomial polynomials are evaluated using the Compensated Horner Scheme of
+Langlois et al. (2006) to enhance both stability and precision. Chebyshev
+polynomials are evaluated normally. There may be cases where the algorithm will
+fail using the monomial basis but succeed using Chebyshev polynomials and vice
+versa. The default is to use the Chebyshev polynomials.
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
-often fails with a singular matrix error. In this case, for the polynomial
-version, the algorithm will try looking for an approximation of degree
-\code{n + 1}. If it finds one, \strong{and} the contribution of that coefficient
-to the approximation is \eqn{\le} \code{tailtol}, it will ignore that
-coefficient and return the resulting degree \code{n} polynomial, as the largest
-coefficient is effectively 0. The contribution is measured by multiplying that
-coefficient by the endpoint with the larger absolute magnitude raised to the
-\code{n + 1} power. This is done to prevent errors in cases where a very small
-coefficient is found on a range with very large absolute values and the
-resulting contribution to the approximation is \strong{not} \emph{de minimis}.
-Setting \code{tailtol} to \code{NULL} will skip the \code{n + 1} test
-completely.
+often fails with a singular matrix error. In this case, for the
+\emph{polynomial} version, the algorithm will try looking for an approximation
+of degree \code{n + 1}. If it finds one, \strong{and} the contribution of that
+coefficient to the approximation is \eqn{\le} \code{tailtol}, it will ignore
+that coefficient and return the resulting degree \code{n} polynomial, as the
+largest coefficient is effectively 0. The contribution is measured by
+multiplying that coefficient by the endpoint with the larger absolute magnitude
+raised to the \code{n + 1} power. This is done to prevent errors in cases where
+a very small coefficient is found on a range with very large absolute values and
+the resulting contribution to the approximation is \strong{not}
+\emph{de minimis}. Setting \code{tailtol} to \code{NULL} will skip the
+\code{n + 1} test completely.
 }
 \subsection{Close-to-Zero Tolerance}{
 For each step of the algorithms' iterations, the contribution of the found
@@ -126,7 +138,9 @@ coefficient to the total sum (as measured in the above section) is compared to
 the \code{ztol} option. When less than or equal to \code{ztol}, that coefficient
 is set to 0. Setting \code{ztol} to \code{NULL} skips the test completely. For
 intervals near or containing zero, setting this option to anything other than
-\code{NULL} may result in either non-convergence or poorer results.
+\code{NULL} may result in either non-convergence or poor results. It is
+recommended to keep it as \code{NULL}, although there are edge cases where
+it may allow convergence where a standard call may fail.
 }
 }
 \value{
@@ -140,19 +154,39 @@ methods.
 An object of class \code{"minimaxApprox"} is a list containing the following
 components:
 
-    \item{a}{The polynomial coefficients or the rational numerator
-    coefficients.}
-    \item{b}{The rational denominator coefficients. Missing for polynomial
+    \item{a}{The polynomial or rational numerator coefficients. When using
+    Chebyshev polynomials, these are the coefficients for \eqn{T_k}. When using
+    monomials, these are the coefficients for \eqn{x^k}.}
+    \item{b}{The rational denominator coefficients. When using Chebyshev
+    polynomials, these are the coefficients for \eqn{T_k}. When using monomials,
+    these are the coefficients for \eqn{x^k}. Missing for polynomial
     approximation.}
+    \item{aMono}{When using Chebyshev polynomials, these are the polynomial or
+    rational numerator coefficients for monomial expansion in \eqn{x^k}. Missing
+    for monomial-based approximation.}
+    \item{bMono}{When using Chebyshev polynomials, these are the rational
+    denominator coefficients for monomial expansion in \eqn{x^k}. Missing for
+    both polynomial and monomial-based rational approximation.}
     \item{ExpErr}{The absolute value of the expected error as calculated by the
     Remez algorithms.}
-    \item{ObsErr}{The absolute value of largest observed error between the function
-    and the approximation at the extremal basis points.}
+    \item{ObsErr}{The absolute value of largest observed error between the
+    function and the approximation at the extremal points.}
     \item{iterations}{The number of iterations of the algorithm. This does not
     include any iterations required to converge the error value in rational
     approximation.}
-    \item{Basis}{The basis points at which the minimax error was achieved.}
+    \item{Extrema}{The extrema at which the minimax error was achieved.}
     \item{Warning}{A logical flag indicating if any warnings were thrown.}
+
+The object also contains the following attributes:
+
+    \item{type}{"Rational" or "Polynomial".}
+    \item{basis}{"Monomial" or "Chebyshev".}
+    \item{func}{The function being approximated.}
+    \item{range}{The range on which the function is being approximated.}
+    \item{relErr}{A logical indicating that relative error was used. If
+    \code{FALSE}, then absolute error was used.}
+    \item{tol}{The tolerance used for the \strong{Distance Test}.}
+    \item{convrat}{The tolerance used for the \strong{Magnitude Test}.}
 }
 
 \references{
@@ -192,7 +226,7 @@ change at any time.
 minimaxApprox(exp, 0, 1, 5)                              # Built-in & polynomial
 
 fn <- function(x) sin(x) ^ 2 + cosh(x)                   # Pre-defined
-minimaxApprox(fn, 0, 1, c(2, 3))                         # Rational
+minimaxApprox(fn, 0, 1, c(2, 3), basis = "m")            # Rational
 
 minimaxApprox(function(x) x ^ 3 / sin(x), 0.7, 1.6, 6L)  # Anonymous
 

@@ -12,7 +12,7 @@ Provides a more human-readable output of a \code{"minimaxApprox"} object.
 }
 
 \usage{
-\method{print}{minimaxApprox}(x, digits = 6L, \dots)
+\method{print}{minimaxApprox}(x, digits = 14L, \dots)
 }
 
 \arguments{
@@ -36,7 +36,7 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 }
 
 \examples{
-PP <- minimaxApprox(exp, 0, 1, 5)
+PP <- minimaxApprox(sin, 0, 1, 8)
 PP
 print(PP, digits = 2L)
 print.default(PP)

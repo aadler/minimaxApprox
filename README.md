@@ -21,22 +21,18 @@ title: Package minimaxApprox
 If you use the package, please cite it as per
 [CITATION](https://CRAN.R-project.org/package=minimaxApprox/citation.html).
 
-## Acknowledgements
+## Acknowledgments
 The author is grateful to [Martin Maechler](https://stat.ethz.ch/~maechler/) for
-suggestions which helped the author with minimax approximation.
+suggestions which helped the author's introduction to minimax approximation.
 
 ## Roadmap
 ### Major
 
- * Research if the "n + 1" check implemented for polynomial approximation can be
- applied to numerator and denominator of rational approximation.
  * Research
  [barycentric representations](https://www.chebfun.org/publications/remez.pdf)
  to consider if possible to implement in R.
  * Alternatively, research if possible to use [Rmpfr](https://CRAN.R-project.org/package=Rmpfr)
  package for increased precision.
- * Alternatively, consider using Chebyshev polynomials instead of monomials as
- basis for linear equation solutions.
 
 ### Minor
 

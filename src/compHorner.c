@@ -1,11 +1,9 @@
 // Copyright Avraham Adler (c) 2023
 // SPDX-License-Identifier: MPL-2.0+
 
-#include <R.h>
-#include <Rinternals.h>
-#include <stdlib.h> // for NULL
 #include <Rmath.h>
-#include <R_ext/Rdynload.h>
+
+#include "compHorner.h"
 
 // Based on Langlois et al. (2006)
 // https://drops.dagstuhl.de/opus/volltexte/2006/442/
@@ -62,22 +60,20 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   if (n > 1) {
     double Ax;
     double pi;
-    double sig;
+    double sigma;
     double correction;
 
-    // Error-Free-Transformation (EFT) Horner AND Horner Sum portion of Langlois
-    // et al. (2006).
     for (int i = 0; i < m; ++i) {
       correction = 0.0;
       for (int j = nm1; j-- > 0; ) {
-        // EFT
+        // Error-Free-Transformation (EFT) Horner
         Ax = pret[i] * px[i];
         pi = twoProdFMAy(pret[i], px[i]);
         pret[i] = Ax + pa[j];
-        sig = twoSumy(Ax, pa[j]);
+        sigma = twoSumy(Ax, pa[j]);
         // Horner Sum correction
         correction *= px[i];
-        correction += pi + sig;
+        correction += pi + sigma;
       }
       pret[i] += correction;
     }
@@ -85,15 +81,4 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
 
   UNPROTECT(1);
   return(ret);
-}
-
-static const R_CallMethodDef CallEntries[] = {
-  {"compHorner_c",    (DL_FUNC) &compHorner_c,  2},
-  {NULL,              NULL,                     0}
-};
-
-void R_init_minimaxApprox(DllInfo *dll) {
-  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-  R_useDynamicSymbols(dll, FALSE);
-  R_forceSymbols(dll, TRUE);
 }
