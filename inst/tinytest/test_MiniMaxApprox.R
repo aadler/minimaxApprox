@@ -62,7 +62,7 @@ expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$a,
 expect_identical(minimaxApprox(exp, 0, 1, c(3, 0))$b, 1)
 
 # Test negative and integer trap
-errMsg <- "Polynomial degrees must be integers of least 0 (constant)."
+errMsg <- "Degrees must be integers of least 0 (constant)."
 ## Polynomial
 expect_error(minimaxApprox(exp, 0, 1, 0.2), errMsg, fixed = TRUE)
 expect_error(minimaxApprox(exp, 0, 1, -1L), errMsg, fixed = TRUE)
