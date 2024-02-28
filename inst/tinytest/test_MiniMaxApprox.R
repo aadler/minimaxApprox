@@ -211,8 +211,8 @@ expect_error(minimaxApprox(sin, 0.25, 0.75, 16L, basis = "m"), errMsg)
 
 # Test tailtol NULL
 errMsg <- "The algorithm did not converge when looking for a"
-expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, opts = list(tailtol = NULL)),
-             errMsg)
+expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
+                           opts = list(tailtol = NULL)), errMsg)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
 ## sensitive to precision as it fails on some of github's test platforms, so
