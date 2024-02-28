@@ -15,6 +15,17 @@
   }
 }
 
+\section{Version 0.4.1 (2024-02-28)}{
+  \subsection{Changed}{
+    \itemize{
+      \item One unit test adjusted to pass on Professor Ripley's OpenBLAS test
+      machine which has different tolerances than the standard twelve on
+      \acronym{CRAN}, six on Github, three on \R Win Builder, and the one on \R
+      Mac Builder.
+    }
+  }
+}
+
 \section{Version 0.4.0 (2024-02-26)}{
   \subsection{Added}{
     \itemize{
