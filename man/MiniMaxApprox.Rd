@@ -34,9 +34,10 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
     using \emph{relative} error. The default is \code{FALSE} which uses
     \emph{absolute} error.}
     \item{basis}{character; Which polynomial basis to use in the analysis.
-    "Monomial" uses the standard \eqn{x^k} basis. "Chebyshev" uses the Chebyshev
-    polynomials of the first kind, \eqn{T_k}. The default is "Chebyshev", and
-    the parameter is case-insensitive and may be abbreviated.}
+    \code{"Monomial"} uses the standard \eqn{x^k} basis. \code{"Chebyshev"} uses
+    the Chebyshev polynomials of the first kind, \eqn{T_k}. The default is
+    \code{"Chebyshev"}, and the parameter is case-insensitive and may be
+    abbreviated.}
     \item{xi}{numeric; For rational approximation, a vector of initial points of
     the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
     missing, the approximation will use the appropriate Chebyshev nodes.
