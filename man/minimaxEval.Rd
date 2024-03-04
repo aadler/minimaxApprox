@@ -19,7 +19,7 @@ minimaxEval(x, mmA, basis = "Chebyshev")
   \item{basis}{character; Which polynomial basis to use in to evaluate the
   function; see \code{\link{minimaxApprox}} for more details. If Chebyshev is
   requested but the analysis used only monomials, the calculation will proceed
-  using the monomials with a message. The default is "Chebyshev", and the
+  using the monomials with a message. The default is \code{"Chebyshev"}, and the
   parameter is case-insensitive and may be abbreviated.}
 }
 \details{
