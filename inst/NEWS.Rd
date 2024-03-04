@@ -15,6 +15,14 @@
   }
 }
 
+\section{Version 0.4.1.9000 (2024-03-28)}{
+  \subsection{Changed}{
+    \itemize{
+      \item Made documentation more consistent.
+    }
+  }
+}
+
 \section{Version 0.4.1 (2024-02-28)}{
   \subsection{Changed}{
     \itemize{
