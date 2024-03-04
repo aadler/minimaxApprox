@@ -18,6 +18,8 @@
 \section{Version 0.4.1.9000 (2024-03-28)}{
   \subsection{Changed}{
     \itemize{
+      \item If an explicitly passed \code{conviter} is larger than
+      \code{miniter}, then \code{miniter} is set to \code{conviter}.
       \item Made documentation more consistent.
     }
   }

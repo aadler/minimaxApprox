@@ -51,9 +51,9 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
             before allowing convergence. Defaults to 10.
             \item \code{conviter}: integer; The number of successive iterations
             with the same results allowed before assuming no further convergence
-            is possible. Defaults to 30. Will overwrite \code{maxiter} if
-            \code{conviter} is explicitly passed and is larger than
-            \code{maxiter}.
+            is possible. Defaults to 30. Will overwrite \code{maxiter} and
+            \code{miniter} if \code{conviter} is explicitly passed and is larger
+            than either one.
             \item \code{showProgress}: logical; If \code{TRUE} will print error
             values at each iteration.
             \item \code{convrat}: numeric; The convergence ratio tolerance.
