@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0+
 
 #ifndef  USE_FC_LEN_T
-# define USE_FC_LEN_T
+#define  USE_FC_LEN_T
 #endif
 #include <Rconfig.h>
 #include <R_ext/BLAS.h>
 #ifndef FCONE
-# define FCONE
+#define FCONE
 #endif
 
 #include <Rmath.h>
@@ -16,7 +16,7 @@
 
 // Function to create a matrix of Chebyshev polynomials of order k where k goes
 // from 0 to (n-1) for each one of the m entries in the vector x. This makes
-// chebCalc faster since it's called directly from C instead of Calling chebMat
+// chebCalc faster since it's called directly from C instead of calling chebMat
 // inside chebCalc as in earlier development versions. It also maintains the
 // single-location of the Chebyshev calculations for programming safety. This
 // version is faster than checking for fabs(x) <= 1 and then a ternary operator
