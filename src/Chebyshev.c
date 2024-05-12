@@ -30,7 +30,7 @@ void chebPolys(double *ret, double *x, int m, int n) {
   for (int j = 0; j < n; ++j) {
     int mj = m * j;
     double jj = j;
-    double monej = pow(-1.0, jj);
+    double monej = R_pow_di(jj, -1);
     for (int i = 0; i < m; ++i) {
       if (x[i] < -1.0) {
         ret[i + mj] = monej * cosh(jj * acosh(-x[i]));
