@@ -1,7 +1,8 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Function to create augmented Vandermonde matrix for polynomial approximation.
+# Function to create augmented Vandermonde or Chebyshev matrix for polynomial
+# approximation.
 polyMat <- function(x, y, relErr, basis) {
   n <- length(x)
   matFunc <- switch(EXPR = basis, m = vanderMat, chebMat)

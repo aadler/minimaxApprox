@@ -1,7 +1,8 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Function to create augmented Vandermonde matrix for rational approximation.
+# Function to create augmented Vandermonde or Chebyshev matrix for rational
+# approximation.
 ratMat <- function(x, E, y, nD, dD, relErr, basis) {
   altSgn <- (-1) ^ (seq_along(x) - 1L)
   # For relative error, need to weight the E by f(x).
