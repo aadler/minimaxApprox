@@ -32,7 +32,7 @@ void chebPolys(double *ret, double *x, int m, int n) {
     double jj = j;
     for (int i = 0; i < m; ++i) {
       if (x[i] < -1.0) {
-        ret[i + mj] = pow(-1.0, jj) * cosh(jj * acosh(-x[i]));
+        ret[i + mj] = R_pow_di(-1.0, j) * cosh(jj * acosh(-x[i]));
       } else if (x[i] <= 1.0) {
         ret[i + mj] = cos(jj * acos(x[i]));
       } else {
