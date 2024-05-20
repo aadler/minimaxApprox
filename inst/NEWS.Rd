@@ -21,6 +21,9 @@
       \item If an explicitly passed \code{conviter} is larger than
       \code{miniter}, then \code{miniter} is set to \code{conviter}.
       \item Documentation made more consistent.
+      \item C code tweaked for clarity and efficiency.
+      \item Updated unit tests.
+      \item Set up Github workflow for testing with \pkg{rhub}.
     }
   }
 }
