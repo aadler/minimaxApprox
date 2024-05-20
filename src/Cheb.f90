@@ -35,15 +35,13 @@ contains
   real(kind = c_double), intent(out), dimension(m, n)      :: mat
   integer(kind = c_int)                                    :: i
 
-    do i = 0, n
-      mat(:, i) = chebPoly(x, i)
+    do i = 1, n
+      mat(:, i) = chebPoly(x, i - 1)
     end do
 
   end subroutine ChebMat
 
   subroutine ChebCalc(x, m, a, n, ret) bind(C, name = "chebC_f_")
-
-  external dgemv
 
   integer(kind = c_int), intent(in), value                 :: m, n
   real(kind = c_double), intent(in), dimension(m)          :: x
@@ -52,9 +50,11 @@ contains
   real(kind = c_double), dimension(m, n)                   :: mat
   integer(kind = c_int)                                    :: i
 
-    do i = 0, n
-      mat(:, i) = chebPoly(x, i)
+    do i = 1, n
+      mat(:, i) = chebPoly(x, i - 1)
     end do
+
+    ret = ZERO
 
     call dgemv('N', m, n, ONE, mat, m, a, 1, ZERO, ret, 1)
 

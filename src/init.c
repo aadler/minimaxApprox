@@ -30,12 +30,12 @@ extern SEXP chebCalc_fc(SEXP x, SEXP a) {
 }
 
 static const R_CallMethodDef CallEntries[] = {
-  {"compHorner_c",    (DL_FUNC) &compHorner_c,  2},
-  {"chebMat_c",       (DL_FUNC) &chebMat_c,     2},
-  {"chebCalc_c",      (DL_FUNC) &chebCalc_c,    2},
-  {"chebMat_fc",       (DL_FUNC) &chebMat_fc,     2},
+  {"compHorner_c",      (DL_FUNC) &compHorner_c,    2},
+  {"chebMat_c",         (DL_FUNC) &chebMat_c,       2},
+  {"chebCalc_c",        (DL_FUNC) &chebCalc_c,      2},
+  {"chebMat_fc",        (DL_FUNC) &chebMat_fc,      2},
   {"chebCalc_fc",       (DL_FUNC) &chebCalc_fc,     2},
-  {NULL,              NULL,                     0}
+  {NULL,                NULL,                       0}
 };
 
 void R_init_minimaxApprox(DllInfo *dll) {
