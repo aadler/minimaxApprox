@@ -29,14 +29,13 @@
 void chebPolys(double *ret, double *x, int m, int n) {
   for (int j = 0; j < n; ++j) {
     int mj = m * j;
-    double jj = j;
     for (int i = 0; i < m; ++i) {
       if (x[i] < -1.0) {
-        ret[i + mj] = R_pow_di(-1.0, j) * cosh(jj * acosh(-x[i]));
+        ret[i + mj] = R_pow_di(-1.0, j) * cosh(j * acosh(-x[i]));
       } else if (x[i] <= 1.0) {
-        ret[i + mj] = cos(jj * acos(x[i]));
+        ret[i + mj] = cos(j * acos(x[i]));
       } else {
-        ret[i + mj] = cosh(jj * acosh(x[i]));
+        ret[i + mj] = cosh(j * acosh(x[i]));
       }
     }
   }
