@@ -25,6 +25,10 @@
 // "x" and "ret" which will be the value returned to the functions called from
 // R. It is void because it doesn't return but modifies the ret object in place.
 // (AA: 2024-02-13)
+//
+// Enough analysis has shown that moving these functions to Fortran does not
+// result in enough of a speedup to warrant the added complexity. Stay with C.
+// (AA: 2024-05-20)
 
 void chebPolys(double *ret, double *x, int m, int n) {
   for (int j = 0; j < n; ++j) {
