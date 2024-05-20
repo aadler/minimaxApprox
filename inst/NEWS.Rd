@@ -15,7 +15,7 @@
   }
 }
 
-\section{Version 0.4.1.9000 (2024-03-28)}{
+\section{Version 0.4.2 (2024-05-20)}{
   \subsection{Changed}{
     \itemize{
       \item If an explicitly passed \code{conviter} is larger than
