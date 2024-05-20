@@ -12,8 +12,8 @@ chebMat <- function(x, k) {
 }
 
 # Function to evaluate Chebyshev polynomials and their coefficients. Originally
-# was drop(chebMat(x, length(a) - 1L) %*% a). Ported to C and uses DGEMV. This
-# is 15%–25% faster than the ported chebMat and %*%.
+# was drop(chebMat(x, length(a) - 1L) %*% a). Ported to C and uses R's C
+# interface to DGEMV. This is 15%–25% faster than the ported chebMat and %*%.
 
 chebCalc <- function(x, a) {
   .Call(chebCalc_c, as.double(x), as.double(a))
