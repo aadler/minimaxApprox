@@ -79,3 +79,21 @@ extern SEXP chebCalc_c(SEXP x, SEXP a) {
   UNPROTECT(1);
   return(ret);
 }
+
+extern SEXP chebMat_fc(SEXP x, SEXP k) {
+  const int m = LENGTH(x);
+  const int n = asInteger(k) + 1;
+  SEXP ret = PROTECT(allocMatrix(REALSXP, m, n));
+  F77_CALL(chebM_f)(REAL(x), m, n, REAL(ret));
+  UNPROTECT(1);
+  return(ret);
+}
+
+extern SEXP chebCalc_fc(SEXP x, SEXP a) {
+  const int m = LENGTH(x);
+  const int n = LENGTH(a);
+  SEXP ret = PROTECT(allocVector(REALSXP, m));
+  F77_CALL(chebC_f)(REAL(x), m, REAL(a), n, REAL(ret));
+  UNPROTECT(1);
+  return(ret);
+}
