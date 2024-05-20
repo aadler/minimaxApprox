@@ -11,7 +11,5 @@ all:
 
 $(SHLIB): $(F_OBJS) $(C_OBJS)
 
-init.o: Cheb.o
-
 clean:
 	@rm -f *.mod *.o
