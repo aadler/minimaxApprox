@@ -7,11 +7,11 @@
 # not work properly. But once the entirety of the matrix build was moved to C,
 # and chebPoly removed completely, it became moot.
 
-chebMat <- function(x, k) {
+chebMatc <- function(x, k) {
   .Call(chebMat_c, as.double(x), as.double(k))
 }
 
-chebMatf <- function(x, k) {
+chebMat <- function(x, k) {
   .Call(chebMat_fc, as.double(x), as.integer(k))
 }
 
@@ -19,11 +19,11 @@ chebMatf <- function(x, k) {
 # was drop(chebMat(x, length(a) - 1L) %*% a). Ported to C and uses DGEMV. This
 # is 15%–25% faster than the ported chebMat and %*%.
 
-chebCalc <- function(x, a) {
+chebCalcc <- function(x, a) {
   .Call(chebCalc_c, as.double(x), as.double(a))
 }
 
-chebCalcf <- function(x, a) {
+chebCalc <- function(x, a) {
   .Call(chebCalc_fc, as.double(x), as.double(a))
 }
 
