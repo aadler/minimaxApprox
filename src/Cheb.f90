@@ -19,7 +19,7 @@ contains
   real(kind = c_double)                  :: cP
 
     if (x < -ONE) then
-      cP = -ONE ** j * cosh(j * acosh(-x))
+      cP = (-ONE) ** j * cosh(j * acosh(-x))
     else if (x <= ONE) then
       cP = cos(j * acos(x))
     else
@@ -28,15 +28,15 @@ contains
 
   end function ChebPoly
 
-  pure subroutine ChebMat(x, m, n, mat) bind(C, name = "chebM_f_")
+  pure subroutine ChebMat(x, m, n, ret) bind(C, name = "chebM_f_")
 
   integer(kind = c_int), intent(in), value                 :: m, n
   real(kind = c_double), intent(in), dimension(m)          :: x
-  real(kind = c_double), intent(out), dimension(m, n)      :: mat
+  real(kind = c_double), intent(out), dimension(m, n)      :: ret
   integer(kind = c_int)                                    :: i
 
     do i = 1, n
-      mat(:, i) = chebPoly(x, i - 1)
+      ret(:, i) = chebPoly(x, i - 1)
     end do
 
   end subroutine ChebMat
@@ -53,8 +53,6 @@ contains
     do i = 1, n
       mat(:, i) = chebPoly(x, i - 1)
     end do
-
-    ret = ZERO
 
     call dgemv('N', m, n, ONE, mat, m, a, 1, ZERO, ret, 1)
 

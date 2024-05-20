@@ -7,7 +7,7 @@
 #include "compHorner.h"
 #include "Chebyshev.h"
 
-void F77_NAME(chebM_f)(double *x, int m, int n, double *mat);
+void F77_NAME(chebM_f)(double *x, int m, int n, double *ret);
 
 extern SEXP chebMat_fc(SEXP x, SEXP k) {
   const int m = LENGTH(x);
