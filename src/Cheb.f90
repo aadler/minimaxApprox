@@ -1,7 +1,6 @@
 module Chebyshev
 
   use, intrinsic :: iso_c_binding
-  use, intrinsic :: ieee_arithmetic
 
   implicit none
   private
