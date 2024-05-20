@@ -11,6 +11,10 @@ chebMat <- function(x, k) {
   .Call(chebMat_c, as.double(x), as.double(k))
 }
 
+chebMatf <- function(x, k) {
+  .Call(chebMat_fc, as.double(x), as.integer(k))
+}
+
 # Function to evaluate Chebyshev polynomials and their coefficients. Originally
 # was drop(chebMat(x, length(a) - 1L) %*% a). Ported to C and uses DGEMV. This
 # is 15%–25% faster than the ported chebMat and %*%.
@@ -18,6 +22,11 @@ chebMat <- function(x, k) {
 chebCalc <- function(x, a) {
   .Call(chebCalc_c, as.double(x), as.double(a))
 }
+
+chebCalcf <- function(x, a) {
+  .Call(chebCalc_fc, as.double(x), as.double(a))
+}
+
 
 # Below based on open-source Netlib function "dconcm" in mathc90.
 cheb2mon <- function(a) {
