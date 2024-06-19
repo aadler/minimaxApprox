@@ -15,6 +15,15 @@
   }
 }
 
+\section{Version 0.4.3 (2024-06-20)}{
+  \subsection{Changed}{
+    \itemize{
+      \item Efficiency tweaks to C code.
+      \item Use native \acronym{CRAN} \acronym{DOI} and update \file{README}.
+    }
+  }
+}
+
 \section{Version 0.4.2 (2024-05-20)}{
   \subsection{Changed}{
     \itemize{
