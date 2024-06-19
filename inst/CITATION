@@ -9,6 +9,6 @@ bibentry(bibtype     = "Manual",
          title        = "minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational Function Approximation",
          year         = "2023",
          url          = "https://CRAN.R-project.org/package=minimaxApprox",
-         doi          = "10.5281/zenodo.8158855",
-         note         = "R package version 0.4.2"
+         doi          = "10.32614/CRAN.package.minimaxApprox",
+         note         = "R package version 0.4.3"
 )
