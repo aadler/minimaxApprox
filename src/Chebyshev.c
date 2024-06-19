@@ -31,17 +31,22 @@
 // (AA: 2024-05-20)
 
 void chebPolys(double *ret, double *x, int m, int n) {
+  // Instead of calling R_pow_di on -1 and j, realize that it's 1 when j = 0 mod
+  // 2 and -1 otherwise. As j starts at 0, start with "1" and just keep flipping
+  // its sign right before j loops. A bit faster, roughly 1.5%, and elegant.
+  int s = 1;
   for (int j = 0; j < n; ++j) {
     int mj = m * j;
     for (int i = 0; i < m; ++i) {
       if (x[i] < -1.0) {
-        ret[i + mj] = R_pow_di(-1.0, j) * cosh(j * acosh(-x[i]));
+        ret[i + mj] = s * cosh(j * acosh(-x[i]));
       } else if (x[i] <= 1.0) {
         ret[i + mj] = cos(j * acos(x[i]));
       } else {
         ret[i + mj] = cosh(j * acosh(x[i]));
       }
     }
+    s *= -1;
   }
 }
 
