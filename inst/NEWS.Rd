@@ -20,6 +20,7 @@
     \itemize{
       \item Efficiency tweaks to C code.
       \item Use native \acronym{CRAN} \acronym{DOI} and update \file{README}.
+      \item Expanded package metadata testing.
     }
   }
 }
