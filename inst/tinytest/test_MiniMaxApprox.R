@@ -218,7 +218,7 @@ expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
 ## sensitive to precision as it fails on some of github's test platforms, so
 ## only test on my machine and sacrifice the 100% coverage.
 ## Below case has failover to QR
-if (Sys.info()["nodename"] == "HOME") {
+if (Sys.info()["nodename"] == "HOMEDESKTOP") {
   errMsg <- paste("The algorithm did not converge when looking for a",
                   "polynomial of length 22 and when looking for a polynomial",
                   "of degree 23 the uppermost coefficient is not effectively",
