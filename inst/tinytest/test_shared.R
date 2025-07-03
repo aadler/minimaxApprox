@@ -140,7 +140,7 @@ expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, "m"), c(0, 0),
 ## Test 0 value at function using relative error which isn't covered by other
 ## cases. However, this is one that fails on Github (BLAS, I guess) so run only
 ## at home.
-if (Sys.info()["nodename"] == "HOME") {
+if (Sys.info()["nodename"] == "HOMEDESKTOP") {
   fn <- function(x) x ^ 2 - 4
   expect_warning(minimaxApprox::minimaxApprox(fn, -3, -1, 3, TRUE))
 }
