@@ -38,13 +38,11 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
   nodeCount <- numerd + denomd + 2L
   if (is.null(xi)) {
     x <- chebNodes(nodeCount, lower, upper)
+  } else if (length(xi) == nodeCount) {
+    x <- xi
   } else {
-    if (length(xi) == nodeCount) {
-      x <- xi
-    } else {
-      stop("Given the requested degrees for numerator and denominator, ",
-           "the x-vector needs to have ", nodeCount, " elements.")
-    }
+    stop("Given the requested degrees for numerator and denominator, the ",
+         "x-vector needs to have ", nodeCount, " elements.")
   }
 
   # Since E is initially a guess, we need to iterate solving the system of

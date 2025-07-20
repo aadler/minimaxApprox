@@ -219,14 +219,12 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
     } else {
       evalFunc(x, mmA, "c")
     }
-  } else {
-    if (onlyMono) {
+  } else if (onlyMono) {
       evalFunc(x, mmA, "m")
-    } else {
-      RR <- list(a = mmA$aMono)
-      if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
-      evalFunc(x, RR, "m")
-    }
+  } else {
+    RR <- list(a = mmA$aMono)
+    if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
+    evalFunc(x, RR, "m")
   }
 }
 
