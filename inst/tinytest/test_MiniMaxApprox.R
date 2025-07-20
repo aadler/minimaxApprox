@@ -92,8 +92,10 @@ expect_message(minimaxApprox(fn, -1, 1, c(2L, 1L), opts = opts), "i: 1 E: ")
 # overwrite.
 fn <- function(x) exp(x) - 1
 opts <- list(maxiter = 25L, convrat = 1.01, tol = 1e-12, conviter = 50L)
+
 ## Polynomial
 expect_silent(minimaxApprox(fn, -0.15, 0.15, 4L, opts = opts))
+
 ## Rational
 expect_silent(minimaxApprox(fn, -0.15, 0.15, c(2L, 2L), opts = opts))
 
@@ -101,9 +103,11 @@ expect_silent(minimaxApprox(fn, -0.15, 0.15, c(2L, 2L), opts = opts))
 opts <- list(maxiter = 2L)
 wrnMess <- paste("Convergence to requested ratio and tolerance not achieved in",
                  "2 iterations.\nThe ratio is ")
+
 ## Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 9L, opts = opts), wrnMess)
 expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, 9L, opts = opts)$Warning))
+
 ## Rational
 dg <- c(2L, 2L)
 expect_warning(minimaxApprox(fn, -1, 1, dg, opts = opts), wrnMess)
@@ -115,6 +119,7 @@ wrnMess <- paste("All errors very near machine double precision. The solution",
 ## Polynomial
 fn <- function(x) sin(x) + cos(x)
 expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
+
 ## Rational
 # The various CRAN and Github testbeds are diverse enough that I cannot find a
 # rational minimax approximation example "close enough" to machine precision to
@@ -129,19 +134,24 @@ wrnMess <- paste(i, "successive calculated solutions were too close to each",
                  "other to warrant further iterations.\n")
 ## Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 21L, opts = opts), wrnMess)
+
 ## Rational
 expect_warning(minimaxApprox(fn, -pi, pi, c(14L, 13L), opts = opts), wrnMess)
 
 # Test function choosing basis x as 0 trap
 wrnMess <- "functional value is 0"
+
 # Polynomial
 ## Zero is lower bound
 expect_warning(minimaxApprox(atan, 0, 1, 14, TRUE, basis = "m"), wrnMess)
+
 ## Zero is upper bound
 fn <- function(x) exp(cos(x)) - 1
 expect_warning(minimaxApprox(fn, 0, pi / 2, 4, TRUE), wrnMess)
+
 # Rational
 expect_warning(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), wrnMess)
+
 ## Zero is in the middle. Cheat by using rational where we can pass a known 0.
 ## For some reason, Github's Mac dies with an error and the Ubuntu/Windows
 ## servers do not get the Zero basis error. Probably BLAS related, so I will
@@ -163,11 +173,13 @@ expect_error(minimaxApprox(exp, -1, 1, 1:3), errMsg)
 wrnMess <- paste("Polynomial approximation uses Chebyshev nodes for initial",
                  "guess. Any passed xi is ignored.")
 expect_message(minimaxApprox(exp, -1, 1, 10L, xi = 6), wrnMess)
+
 ## Rational - Check that proper length is passed
 errMsg <- paste("Given the requested degrees for numerator and denominator,",
                 "the x-vector needs to have 8 elements.")
 xi <- minimaxApprox:::chebNodes(5L, -1, 1)
 expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi), errMsg)
+
 # Test that passing proper size works for rational
 xi <- xi + 0.01
 expect_silent(minimaxApprox(exp, -1, 1, c(2L, 1L), xi = xi))
@@ -230,7 +242,6 @@ if (Sys.info()["nodename"] == "HOMEDESKTOP") {
 ## Polynomial
 PP1 <- minimaxApprox(sin, -1, 1, 4L)
 PP2 <- minimaxApprox(sin, -1, 1, 4L, opts = list(ztol = 1e-12))
-
 expect_equal(PP2$a[c(2L, 4L)], PP1$a[c(2L, 4L)], tolerance = tol)
 expect_identical(PP2$a[c(1L, 3L)], c(0, 0))
 expect_equal(PP2$ExpErr, PP1$ExpErr, tolerance = tol)
@@ -248,6 +259,7 @@ x <- seq(0.1, 0.4, 0.025)
 ### Polynomial
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
+
 ### Rational
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
 expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
@@ -256,6 +268,7 @@ expect_true(all(exp(x) - minimaxEval(x, mmA) <= mmA$ExpErr))
 ### Polynomial
 mmA <- minimaxApprox(exp, 0, 0.5, 5L)
 expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
+
 ### Rational
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L))
 expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
@@ -264,15 +277,18 @@ expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
 ### Polynomial
 mmA <- minimaxApprox(exp, 0, 0.5, 5L, basis = "m")
 expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
+
 ### Rational
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L), basis = "m")
 expect_true(all(exp(x) - minimaxEval(x, mmA, "m") <= mmA$ExpErr))
 
 ## Check asking for Chebyshev when only monomial was run.
 msgMsg <- "Analysis was run using only the monomial basis."
+
 ### Polynomial
 mmA <- minimaxApprox(exp, 0, 0.5, 5L, basis = "m")
 expect_message(minimaxEval(x, mmA, basis = "Cheb"), msgMsg)
+
 ### Rational
 mmA <- minimaxApprox(exp, 0, 0.5, c(2L, 3L), basis = "m")
 expect_message(minimaxEval(x, mmA, basis = "Cheb"), msgMsg)
