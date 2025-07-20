@@ -166,7 +166,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     gotWarning <- TRUE
   }
 
-  coefficients <- if (ratApprox) {
+  coeff <- if (ratApprox) {
     list(a = mmA$a, b = mmA$b)
   } else {
     list(a = mmA$a)
@@ -187,7 +187,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   diagnostics <- list(ExpErr = mmA$expe, ObsErr = mmA$mxae, iterations = mmA$i,
                       Extrema = mmA$x, Warning = gotWarning)
-  ret <- c(coefficients, monomialEq, diagnostics)
+  ret <- c(coeff, monomialEq, diagnostics)
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
   attr(ret, "basis") <- polynomalBasis
   attr(ret, "func") <- fn

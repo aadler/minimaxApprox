@@ -5,9 +5,9 @@
 print.minimaxApprox <- function(x, digits = 14L, ...) {
   basis <- list(`Polynomial Basis` = attr(x, "basis"))
   if (attr(x, "type") == "Polynomial") {
-    coefficients <- list(a = x$a)
+    coeff <- list(a = x$a)
   } else {
-    coefficients <- list(a = x$a, b = x$b)
+    coeff <- list(a = x$a, b = x$b)
   }
 
   if (attr(x, "basis") == "Chebyshev") {
@@ -32,24 +32,24 @@ print.minimaxApprox <- function(x, digits = 14L, ...) {
     c("ExpectedAbsError", "ObservedAbsError")
   }
 
-  print(c(basis, coefficients, monomialEq, diagnostics))
+  print(c(basis, coeff, monomialEq, diagnostics))
 }
 
 coef.minimaxApprox <- function(object, ...) {
   if (attr(object, "type") == "Polynomial") {
-    coef <- list(a = object$a)
+    coeff <- list(a = object$a)
   } else {
-    coef <- list(a = object$a, b = object$b)
+    coeff <- list(a = object$a, b = object$b)
   }
 
   if (attr(object, "basis") == "Chebyshev") {
-    coef <- c(coef, list(aMono = object$aMono))
+    coeff <- c(coeff, list(aMono = object$aMono))
     if (attr(object, "type") == "Rational") {
-      coef <- c(coef, list(bMono = object$bMono))
+      coeff <- c(coeff, list(bMono = object$bMono))
     }
   }
 
-  coef
+  coeff
 }
 
 # Plot method for errors and extremal points
@@ -58,7 +58,7 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
     message("The y values are taken from the minimaxApprox object. ",
             "Passed y values are ignored.")
   }
-  args <- list(...)
+  arguments <- list(...)
   rng <- attr(x, "range")
   fn <- attr(x, "func")
   basis <- tolower(substr(attr(x, "basis"), 1L, 1L))
@@ -71,8 +71,8 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
   ylab <- if (relErr) "Relative Error" else "Absolute Error"
 
   # Default y-axis limits
-  ylim <- if ("ylim" %in% names(args)) { # nolint
-    args$ylim
+  ylim <- if ("ylim" %in% names(arguments)) { # nolint
+    arguments$ylim
   } else {
     ybnd <- max(x$ExpErr, x$ObsErr)
     c(-ybnd, ybnd)
