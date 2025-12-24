@@ -10,5 +10,5 @@ bibentry(bibtype     = "Manual",
          year         = "2023",
          url          = "https://CRAN.R-project.org/package=minimaxApprox",
          doi          = "10.32614/CRAN.package.minimaxApprox",
-         note         = "R package version 0.4.3"
+         note         = "R package version 0.4.4"
 )

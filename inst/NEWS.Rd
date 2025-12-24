@@ -15,6 +15,23 @@
   }
 }
 
+\section{Version 0.4.4 (2025-12-25)}{
+  \subsection{Fixed}{
+    \itemize{
+      \item Fixed package metadata unit test and converted to \code{vapply} for
+      type safety.
+    }
+  }
+  \subsection{Changed}{
+    \itemize{
+      \item Updated Github-related files and workflows.
+      \item Updated \file{WORDLIST}.
+      \item Reduced overwriting of base \R function names.
+      \item Simplified nesting of various functions.
+    }
+  }
+}
+
 \section{Version 0.4.3 (2024-06-20)}{
   \subsection{Changed}{
     \itemize{
