@@ -91,7 +91,12 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   # allow the polynomial algorithm to try degree n + 1 if it fails due to
   # singular error in degree n. IF the resulting highest coefficient contributes
   # less than opts$tailtol to the result then consider it 0 and return the
-  # resulting degree n and message appropriately.
+  # resulting degree n and message appropriately. For rational approximation or
+  # if the error is not a simpleError or does not contain the word "singular",
+  # let the default R failure message come through.
+  #
+  # TODO: Trap other errors with better messages (AA: 2025-12-24)
+
 
   if (!ratApprox && inherits(mmA, "simpleError") &&
       grepl("singular", mmA$message, fixed = TRUE)) {
