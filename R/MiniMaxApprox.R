@@ -93,41 +93,39 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   # less than opts$tailtol to the result then consider it 0 and return the
   # resulting degree n and message appropriately.
 
-  if (!ratApprox && inherits(mmA, "simpleError")) {
-    if (grepl("singular", mmA$message, fixed = TRUE)) { # nolint unnecessary_nested_if_linter
-      if (!is.null(opts$tailtol)) { # May be different error
-        mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
-                                relErr, basis, opts),
-                        error = function(e) simpleError(trimws(e$message)))
-        if (inherits(mmA, "simpleError")) {
-          stop("The algorithm neither converged when looking for a polynomial",
-               " of length ", degree, " nor when looking for a polynomial of",
-               " degree ", degree + 1L, ".")
-        } else {
-          xmax <- max(abs(lower), abs(upper))
-          n <- length(mmA$a)
-          if ((mmA$a[n] * xmax ^ (n - 1L)) > opts$tailtol) {
-            stop("The algorithm did not converge when looking for a polynomial",
-                 " of length ", degree, " and when looking for a polynomial of",
-                 " degree ", degree + 1L, " the uppermost coefficient is not",
-                 " effectively zero.")
-          }
+  if (!ratApprox && inherits(mmA, "simpleError") &&
+      grepl("singular", mmA$message, fixed = TRUE)) {
 
-          mess <- paste("The algorithm failed while looking for a polynomial",
-                        "of degree", degree, "but successfully completed when",
-                        "looking for a polynomial of degree", degree + 1L,
-                        "with the largest coefficient's contribution to the",
-                        "approximation <= the tailtol option. The result is a",
-                        "polynomial of length", degree, "as the uppermost",
-                        "coefficient is effectively 0.")
-          mmA$a <- mmA$a[-n]
-          message(mess)
-        }
-      } else {
-        stop("The algorithm did not converge when looking for a polynomial of ",
-             "degree ", degree, " and NULL was passed to the tailtol option.")
-      }
+    if (is.null(opts$tailtol)) {
+      stop("The algorithm did not converge when looking for a polynomial of ",
+           "degree ", degree, " and NULL was passed to the tailtol option.")
     }
+
+    mmA <- tryCatch(remPoly(fn, lower, upper, as.integer(degree + 1L),
+                            relErr, basis, opts),
+                    error = function(e) simpleError(trimws(e$message)))
+
+    if (inherits(mmA, "simpleError")) {
+      stop("The algorithm neither converged when looking for a polynomial of",
+      " length ", degree, " nor when looking for a polynomial of degree ",
+      degree + 1L, ".")
+    }
+
+    xmax <- max(abs(lower), abs(upper))
+    n <- length(mmA$a)
+    if ((mmA$a[n] * xmax ^ (n - 1L)) > opts$tailtol) {
+      stop("The algorithm did not converge when looking for a polynomial of",
+           " length ", degree, " and when looking for a polynomial of degree ",
+           degree + 1L, " the uppermost coefficient is not effectively zero.")
+    }
+
+    mmA$a <- mmA$a[-n]
+    message("The algorithm failed while looking for a polynomial of degree ",
+            degree, " but successfully completed when looking for a polynomial",
+            " of degree ", degree + 1L, " with the largest coefficient's",
+            " contribution to the approximation <= the tailtol option. The",
+            " result is a polynomial of length ", degree, " as the uppermost",
+            " coefficient is effectively 0.")
   }
 
   # Handle all warnings centrally.
