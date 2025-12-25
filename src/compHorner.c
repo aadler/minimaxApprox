@@ -57,6 +57,10 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // Once the inner loop finishes, so too is the correction for that x, so it
   // applied at the end of the outer loop. Now only one nested loop is needed.
 
+  // Create auxiliary long double variables (ending in l) to leverage internal
+  // functions at higher precisions and only demote to double when populating
+  // the SEXP return object. (AA: 2025-12-25)
+
   if (n > 1) {
     long double Ax;
     long double pi;
@@ -80,17 +84,9 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
         // Horner Sum correction
         correction *= pxl;
         correction += pi + sigma;
-        // Ax = pret[i] * px[i];
-        // pi = twoProdFMAy(pret[i], px[i]);
-        // pret[i] = Ax + pa[j];
-        // sigma = twoSumy(Ax, pa[j]);
-        //// Horner Sum correction
-        //correction *= px[i];
-        //correction += pi + sigma;
       }
       pretl += correction;
       pret[i] = (double)pretl;
-      // pret[i] += correction;
     }
   }
 
