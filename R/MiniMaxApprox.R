@@ -22,7 +22,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   if ("conviter" %in% nopts) {
     # If actually passed then overwrite both maxiter and miniter if conviter is
-    # greather than either one.
+    # greater than either one.
     opts$maxiter <- max(opts$maxiter, opts$conviter)
     opts$miniter <- max(opts$miniter, opts$conviter)
   } else {
