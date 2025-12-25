@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0+
 
 #include <Rmath.h>
-#include <tgmath.h>
 
 #include "compHorner.h"
 
@@ -22,7 +21,7 @@ volatile long double twoSumy(long double a, long double b) {
 // This is the y component of twoProdFMA; the x component is the product itself.
 volatile long double twoProdFMAy(long double a, long double b) {
   long double x = a * b;
-  return(fma(a, b, -x));
+  return(fmal(a, b, -x));
 }
 
 // Compensated Horner method combining the Error-Free Transformation component
@@ -59,24 +58,39 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // applied at the end of the outer loop. Now only one nested loop is needed.
 
   if (n > 1) {
-    double Ax;
-    double pi;
-    double sigma;
-    double correction;
+    long double Ax;
+    long double pi;
+    long double sigma;
+    long double correction;
+    long double pretl;
+    long double pxl;
+    long double pal;
 
     for (int i = 0; i < m; ++i) {
-      correction = 0.0;
+      correction = 0.0L;
+      pretl = (long double)pret[i];
+      pxl = (long double)px[i];
       for (int j = nm1; j-- > 0; ) {
         // Error-Free-Transformation (EFT) Horner
-        Ax = pret[i] * px[i];
-        pi = twoProdFMAy(pret[i], px[i]);
-        pret[i] = Ax + pa[j];
-        sigma = twoSumy(Ax, pa[j]);
+        pal = (long double)pa[j];
+        Ax = pretl * pxl;
+        pi = twoProdFMAy(pretl, pxl);
+        pretl = Ax + pal;
+        sigma = twoSumy(Ax, pal);
         // Horner Sum correction
-        correction *= px[i];
+        correction *= pxl;
         correction += pi + sigma;
+        // Ax = pret[i] * px[i];
+        // pi = twoProdFMAy(pret[i], px[i]);
+        // pret[i] = Ax + pa[j];
+        // sigma = twoSumy(Ax, pa[j]);
+        //// Horner Sum correction
+        //correction *= px[i];
+        //correction += pi + sigma;
       }
-      pret[i] += correction;
+      pretl += correction;
+      pret[i] = (double)pretl;
+      // pret[i] += correction;
     }
   }
 
