@@ -227,15 +227,15 @@ expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
                            opts = list(tailtol = NULL)), errMsg)
 
 ## Test unsuccessful restart due to one failures and n + 1 not 0. This must be
-## sensitive to precision as it fails on some of github's test platforms, so
+## sensitive to precision as it fails on some of Github's test platforms, so
 ## only test on my machine and sacrifice the 100% coverage.
 ## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOMEDESKTOP") {
   errMsg <- paste("The algorithm did not converge when looking for a",
-                  "polynomial of length 22 and when looking for a polynomial",
-                  "of degree 23 the uppermost coefficient is not effectively",
+                  "polynomial of length 20 and when looking for a polynomial",
+                  "of degree 21 the uppermost coefficient is not effectively",
                   "zero.")
-  expect_error(minimaxApprox(abs, -0.15, 0.15, 22L, basis = "m"), errMsg)
+  expect_error(minimaxApprox(fn,-1, 1, 20L, basis = "m"), errMsg)
 }
 
 # Test ztol
