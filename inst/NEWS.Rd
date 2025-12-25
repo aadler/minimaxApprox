@@ -15,19 +15,23 @@
   }
 }
 
-\section{Version 0.4.4 (2025-12-25)}{
+\section{Version 0.4.4 (2026-01-07)}{
   \subsection{Fixed}{
     \itemize{
-      \item Fixed package metadata unit test and converted to \code{vapply} for
-      type safety.
+      \item Fixed error in one package metadata unit test.
     }
   }
   \subsection{Changed}{
     \itemize{
+      \item \strong{Breaking:} Converted \acronym{C} code for Compensated Horner
+      method to use \code{long double} internally to eke out a bit more
+      precision. One unit test had to be updated as what was formerly an error
+      now converged.
       \item Updated Github-related files and workflows.
       \item Updated \file{WORDLIST}.
       \item Reduced overwriting of base \R function names.
-      \item Simplified nesting of various functions.
+      \item Simplified code and nesting of various functions.
+      \item Package metadata tests now use \code{vapply} for type safety.
     }
   }
 }
