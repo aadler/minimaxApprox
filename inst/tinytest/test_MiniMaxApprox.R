@@ -232,10 +232,10 @@ expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
 ## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOMEDESKTOP") {
   errMsg <- paste("The algorithm did not converge when looking for a",
-                  "polynomial of length 20 and when looking for a polynomial",
-                  "of degree 21 the uppermost coefficient is not effectively",
+                  "polynomial of length 22 and when looking for a polynomial",
+                  "of degree 23 the uppermost coefficient is not effectively",
                   "zero.")
-  expect_error(minimaxApprox(fn,-1, 1, 20L, basis = "m"), errMsg)
+  expect_error(minimaxApprox(fn,-1, 1, 22L, basis = "m"), errMsg)
 }
 
 # Test ztol
