@@ -163,7 +163,7 @@ isUnchanging <- function(errs, errs_last, convrat, tol) {
 
 # Check denominator polynomial for zero in the requested range.
 checkDenom <- function(a, l, u, basis) {
-  calcFn <- if (basis == "m") polyCalc else chebCalc
+  calcFn <- switch(EXPR = basis, m = polyCalc, chebCalc)
   dngrRt <- tryCatch(uniroot(calcFn, c(l, u), extendInt = "no", a = a,
                              tol = .Machine$double.eps),
                      error = function(cond) simpleError(trimws(cond$message)))
