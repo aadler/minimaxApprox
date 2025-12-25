@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0+
 
 #include <Rmath.h>
+#include <tgmath.h>
 
 #include "compHorner.h"
 
@@ -12,15 +13,15 @@
 // variables need to be initialized as "volatile" as we specifically DO NOT WANT
 // the compiler to optimize them out (z to a for example). The entire point of
 // EFT algorithms is to capture the floating-point error as best possible!
-double twoSumy(double a, double b) {
-  volatile double x = a + b;
-  volatile double z = x - a;
+volatile long double twoSumy(long double a, long double b) {
+  volatile long double x = a + b;
+  volatile long double z = x - a;
   return((a - (x - z)) + (b - z));
 }
 
 // This is the y component of twoProdFMA; the x component is the product itself.
-double twoProdFMAy(double a, double b) {
-  double x = a * b;
+volatile long double twoProdFMAy(long double a, long double b) {
+  long double x = a * b;
   return(fma(a, b, -x));
 }
 
