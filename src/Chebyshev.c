@@ -57,6 +57,7 @@ extern SEXP chebMat_c(SEXP x, SEXP k) {
 
   SEXP ret = PROTECT(allocMatrix(REALSXP, m, n));
   double *pret = REAL(ret);
+  Memzero(pret, m * n);
 
   chebPolys(pret, px, m, n);
 
@@ -77,6 +78,7 @@ extern SEXP chebCalc_c(SEXP x, SEXP a) {
 
   SEXP ret = PROTECT(allocVector(REALSXP, m));
   double *pret = REAL(ret);
+  Memzero(pret, m);
   char *TR = "N";
   double d0 = 0.0;
   double d1 = 1.0;

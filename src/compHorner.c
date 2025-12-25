@@ -58,7 +58,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // applied at the end of the outer loop. Now only one nested loop is needed.
 
   // Create auxiliary long double variables (ending in l) to leverage internal
-  // functions at higher precisions and only demote to double when populating
+  // functions at higher precision and only demote to double when populating
   // the SEXP return object. (AA: 2025-12-25)
 
   if (n > 1) {
