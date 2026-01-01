@@ -15,7 +15,7 @@
   }
 }
 
-\section{Version 0.4.4 (2026-01-07)}{
+\section{Version 0.5.0 (2026-01-07)}{
   \subsection{Fixed}{
     \itemize{
       \item Fixed error in one package metadata unit test.
