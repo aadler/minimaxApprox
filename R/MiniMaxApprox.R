@@ -5,13 +5,106 @@
 minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
                           basis = "Chebyshev", xi = NULL, opts = list()) {
 
+  ## ------------------------------------------------------------------------
+  ## Input validation (F2/F10). This entire block runs before any option
+  ## default is set or option-derived quantity is computed. In particular,
+  ## opts$tailtol's default below uses (upper - lower), so lower/upper must
+  ## be validated first, or a bad range would silently poison that default
+  ## before ever being checked itself.
+  ## ------------------------------------------------------------------------
+
+  # fn: must be a function whose first formal argument is 'x' -- the
+  # documented contract (man/MiniMaxApprox.Rd), required because callFun()
+  # always dispatches via do.call(fn, list(x = x)). Primitives (exp, sin,
+  # gamma, ...) report formals(fn) == NULL, since their argument list is not
+  # an R closure; args(fn) returns a stub closure with a real formals list
+  # for primitives, and is a harmless no-op for ordinary closures -- so it is
+  # used uniformly here instead of formals(fn) directly, which would
+  # incorrectly reject every primitive.
+  if (!is.function(fn)) {
+    stop("'fn' must be a function whose first argument is 'x'.")
+  }
+  fnArgs <- names(formals(args(fn)))
+  if (length(fnArgs) == 0L || fnArgs[1L] != "x") {
+    stop("'fn' must be a function whose first argument is 'x'.")
+  }
+
+  # lower/upper: finite, non-missing numeric scalars, with lower < upper.
+  # (F2: an inverted range was previously never checked and silently
+  # returned a badly suboptimal result instead of erroring.)
+  if (!is.numeric(lower) || length(lower) != 1L || !is.finite(lower)) {
+    stop("'lower' must be a finite, non-missing numeric scalar.")
+  }
+  if (!is.numeric(upper) || length(upper) != 1L || !is.finite(upper)) {
+    stop("'upper' must be a finite, non-missing numeric scalar.")
+  }
+  if (lower >= upper) {
+    stop("'lower' must be less than 'upper'. Did you mean to swap the ",
+         "arguments?")
+  }
+
+  # degree: finite, non-missing numeric. Length (1 vs 2 vs invalid) is still
+  # dispatched further down with its existing message; this guard only
+  # ensures degree is safe to compare/floor -- previously, e.g.,
+  # `any(NA < 0)` is NA, and `if (NA)` threw "missing value where TRUE/FALSE
+  # needed" instead of a real error.
+  if (!is.numeric(degree) || anyNA(degree) || !all(is.finite(degree))) {
+    stop("'degree' must be finite, non-missing numeric value(s).")
+  }
+
+  # relErr (existing check, unchanged; relocated into the validation block).
+  if (!is.logical(relErr)) {
+    stop("Relative Error must be a logical value. ",
+         "Default FALSE returns absolute error.")
+  }
+
+  # basis (existing check, unchanged; relocated into the validation block).
   basis <- tolower(substr(basis, 1L, 1L))
   if (!(basis %in% c("c", "m"))) {
     stop("Must select either 'C'hebyshev or 'm'onomial basis for analysis.")
   }
 
-  # Handle configuration options
+  # opts: must be a list; only members the caller actually supplied are
+  # validated here (unknown names are still silently ignored downstream,
+  # unchanged behavior). This runs before the defaults block below, so a bad
+  # value (e.g. maxiter = 0) cannot slip through -- the defaults block below
+  # only fills in *missing* names, it never overwrites a supplied one.
+  if (!is.list(opts)) {
+    stop("'opts' must be a list.")
+  }
   nopts <- names(opts)
+
+  chkPosInt <- function(val, nm) {
+    if (!is.numeric(val) || length(val) != 1L || is.na(val) ||
+        !is.finite(val) || val < 1 || floor(val) != val) {
+      stop("'opts$", nm, "' must be a single positive integer.")
+    }
+  }
+  chkNumScalar <- function(val, nm) {
+    if (!is.numeric(val) || length(val) != 1L || is.na(val) ||
+        !is.finite(val)) {
+      stop("'opts$", nm, "' must be a single finite, non-missing numeric ",
+           "value.")
+    }
+  }
+  for (nm in c("maxiter", "miniter", "conviter")) {
+    if (nm %in% nopts) chkPosInt(opts[[nm]], nm)
+  }
+  for (nm in c("tol", "convrat")) {
+    if (nm %in% nopts) chkNumScalar(opts[[nm]], nm)
+  }
+  # tailtol/ztol may deliberately be NULL by design (NULL disables the
+  # tailtol restart check / requests no coefficient zeroing); only validate
+  # when the caller supplied a non-NULL value.
+  for (nm in c("tailtol", "ztol")) {
+    if (nm %in% nopts && !is.null(opts[[nm]])) chkNumScalar(opts[[nm]], nm)
+  }
+
+  ## ------------------------------------------------------------------------
+  ## End input validation.
+  ## ------------------------------------------------------------------------
+
+  # Handle configuration options
   if (!("maxiter" %in% nopts)) {
     opts$maxiter <- 100L
   }
@@ -51,11 +144,6 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   if (!("ztol" %in% nopts)) {
     opts$ztol <- NULL
-  }
-
-  if (!is.logical(relErr)) {
-    stop("Relative Error must be a logical value. ",
-         "Default FALSE returns absolute error.")
   }
 
   if (any(degree < 0) || any(floor(degree) < degree)) {
@@ -112,15 +200,15 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
     if (inherits(mmA, "simpleError")) {
       stop("The algorithm neither converged when looking for a polynomial of",
-      " length ", degree, " nor when looking for a polynomial of degree ",
-      degree + 1L, ".")
+           " degree ", degree, " nor when looking for a polynomial of degree ",
+           degree + 1L, ".")
     }
 
     xmax <- max(abs(lower), abs(upper))
     n <- length(mmA$a)
     if ((mmA$a[n] * xmax ^ (n - 1L)) > opts$tailtol) {
       stop("The algorithm did not converge when looking for a polynomial of",
-           " length ", degree, " and when looking for a polynomial of degree ",
+           " degree ", degree, " and when looking for a polynomial of degree ",
            degree + 1L, " the uppermost coefficient is not effectively zero.")
     }
 
@@ -129,7 +217,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
             degree, " but successfully completed when looking for a polynomial",
             " of degree ", degree + 1L, " with the largest coefficient's",
             " contribution to the approximation <= the tailtol option. The",
-            " result is a polynomial of length ", degree, " as the uppermost",
+            " result is a polynomial of degree ", degree, " as the uppermost",
             " coefficient is effectively 0.")
   }
 
@@ -222,7 +310,7 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
       evalFunc(x, mmA, "c")
     }
   } else if (onlyMono) {
-      evalFunc(x, mmA, "m")
+    evalFunc(x, mmA, "m")
   } else {
     RR <- list(a = mmA$aMono)
     if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))

@@ -202,7 +202,7 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
                 "10 but successfully completed when looking for a polynomial",
                 "of degree 11 with the largest coefficient's contribution to",
                 "the approximation <= the tailtol option. The result is a",
-                "polynomial of length 10 as the uppermost coefficient is",
+                "polynomial of degree 10 as the uppermost coefficient is",
                 "effectively 0.")
   fn <- function(x) 1 / (1 + (5 * x) ^ 2)
   control <- c(0.934077073, 0.0, -11.553015692, 0.0, 59.171892231,
@@ -232,7 +232,7 @@ expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
 ## Below case has failover to QR
 if (Sys.info()["nodename"] == "HOMEDESKTOP") {
   errMsg <- paste("The algorithm did not converge when looking for a",
-                  "polynomial of length 22 and when looking for a polynomial",
+                  "polynomial of degree 22 and when looking for a polynomial",
                   "of degree 23 the uppermost coefficient is not effectively",
                   "zero.")
   expect_error(minimaxApprox(fn,-1, 1, 22L, basis = "m"), errMsg)
@@ -317,3 +317,74 @@ expect_equal((minimaxEval(x, mmA) - exp(x)) / exp(x), minimaxErr(x, mmA),
 ## Check error trap
 errMsg <- "This function only works with 'minimaxApprox' objects."
 expect_error(minimaxErr(x, sin), errMsg)
+
+################################################################################
+# Input validation additions (Module M2: F2, F10, F13)
+
+# --- F2: lower > upper / lower == upper is now a clean error, not a silently
+# suboptimal result. Exact repro from the review document.
+errMsg <- "'lower' must be less than 'upper'"
+expect_error(minimaxApprox(exp, 1, 0, 3), errMsg)
+expect_error(minimaxApprox(exp, 1, 1, 3), errMsg)
+
+# --- F10: lower/upper must be finite, non-missing numeric scalars.
+errMsg <- "'lower' must be a finite, non-missing numeric scalar."
+expect_error(minimaxApprox(exp, NA, 1, 3), errMsg)
+expect_error(minimaxApprox(exp, NaN, 1, 3), errMsg)
+expect_error(minimaxApprox(exp, -Inf, 1, 3), errMsg)
+expect_error(minimaxApprox(exp, "a", 1, 3), errMsg)
+expect_error(minimaxApprox(exp, c(0, 1), 1, 3), errMsg)
+
+errMsg <- "'upper' must be a finite, non-missing numeric scalar."
+expect_error(minimaxApprox(exp, 0, NA, 3), errMsg)
+expect_error(minimaxApprox(exp, 0, NaN, 3), errMsg)
+expect_error(minimaxApprox(exp, 0, Inf, 3), errMsg)
+expect_error(minimaxApprox(exp, 0, "a", 3), errMsg)
+
+# --- F10: fn must be a function whose first formal is 'x'. Primitives
+# (formals() == NULL) must still be accepted via args().
+errMsg <- "'fn' must be a function whose first argument is 'x'."
+expect_error(minimaxApprox(function(t) exp(t), 0, 1, 3), errMsg)
+expect_error(minimaxApprox(function() 1, 0, 1, 3), errMsg)
+expect_error(minimaxApprox("not a function", 0, 1, 3), errMsg)
+expect_silent(minimaxApprox(sin, 0, 1, 3))
+expect_silent(minimaxApprox(exp, 0, 1, 3))
+expect_silent(minimaxApprox(function(x) sin(x), 0, 1, 3))
+
+# --- F10: degree must be finite, non-missing numeric.
+errMsg <- "'degree' must be finite, non-missing numeric value(s)."
+expect_error(minimaxApprox(exp, 0, 1, NA), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, NaN), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, Inf), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, "3"), errMsg, fixed = TRUE)
+expect_error(minimaxApprox(exp, 0, 1, c(3, NA)), errMsg, fixed = TRUE)
+
+# --- F10: opts must be a list; individual members type/range-checked when
+# supplied. tailtol/ztol remain permitted to be NULL by design.
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = 5), "'opts' must be a list.")
+
+errMsg <- "'opts\\$maxiter' must be a single positive integer."
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(maxiter = 0)), errMsg)
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(maxiter = NA)), errMsg)
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(maxiter = 1.5)), errMsg)
+
+errMsg <- "'opts\\$miniter' must be a single positive integer."
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(miniter = -1)), errMsg)
+
+errMsg <- "'opts\\$conviter' must be a single positive integer."
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(conviter = 0)), errMsg)
+
+errMsg <- "'opts\\$tol' must be a single finite, non-missing numeric value."
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(tol = "x")), errMsg)
+
+errMsg <- "'opts\\$convrat' must be a single finite, non-missing numeric value."
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(convrat = NA)), errMsg)
+
+errMsg <- "'opts\\$tailtol' must be a single finite, non-missing numeric value."
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(tailtol = "x")), errMsg)
+expect_silent(minimaxApprox(exp, 0, 1, 3, opts = list(tailtol = NULL)))
+
+errMsg <- "'opts\\$ztol' must be a single finite, non-missing numeric value."
+expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(ztol = "x")), errMsg)
+expect_silent(minimaxApprox(exp, 0, 1, 3, opts = list(ztol = NULL)))
+
