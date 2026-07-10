@@ -159,7 +159,7 @@
       \item Internal code was streamlined and tolerances were tightened.
       \item Updated documentation for new functionality.
       \item The \acronym{C} files were split and header files created to keep
-      Chebyshev and Horner code seperate from each other.
+      Chebyshev and Horner code separate from each other.
     }
   }
   \subsection{Fixed}{
@@ -185,7 +185,7 @@
       ratio if the difference between tested values is \eqn{\le}{<=}
       \code{.Machine$double.eps}.
       \item \strong{Breaking:} Increased default for \code{conviter} from 10 to
-      30 as tests on some values now need more iterations to acheive ratio
+      30 as tests on some values now need more iterations to achieve ratio
       convergence given a distance \eqn{\le}{<=} \code{.Machine$double.eps}.
     }
   }
