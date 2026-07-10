@@ -26,7 +26,10 @@ callFun <- function(fn, x) {
 # equioscillation extremum, and it is behaviorally inert for convergence anyway
 # (a zero forces mnae = 0 in isConverged, which independently fails the
 # Magnitude Test).
-isOscil <- function(x) !anyNA(s <- sign(x)) && all(abs(diff(s)) == 2)
+isOscil <- function(x) {
+  s <- sign(x)
+  !anyNA(s) && all(abs(diff(s)) == 2)
+}
 
 evalFunc <- function(x, R, basis) {
   calcFunc <- switch(EXPR = basis, m = polyCalc, chebCalc)
@@ -108,7 +111,11 @@ zeroBasisPerturb <- function(x_i, l, u, fn, maximize, peturb = 1e-12) {
     if (x_i - s == x_i || x_i + s == x_i) s <- abs(x_i) * peturb
     xreplace <- c(x_i - s, x_i + s)
     fnreplace <- callFun(fn, xreplace)
-    if (maximize) xreplace[which.max(fnreplace)] else xreplace[which.min(fnreplace)]
+    if (maximize) {
+      xreplace[which.max(fnreplace)]
+    } else {
+      xreplace[which.min(fnreplace)]
+    }
   }
 }
 
@@ -248,8 +255,7 @@ basisScale <- function(n, l, u, basis) {
 checkIrrelevant <- function(a, l, u, zt, basis) {
   n <- length(a)
   if (!is.null(zt) && n > 0) {
-    scale <- basisScale(n, l, u, basis)
-    a <- ifelse(abs(a * scale) <= zt, 0, a)
+    a <- ifelse(abs(a * basisScale(n, l, u, basis)) <= zt, 0, a)
   }
 
   a

@@ -213,7 +213,8 @@ expect_identical(zb(-2, -3, -1, function(x) x ^ 2 - 4, TRUE), oldInterior)
 ## Large |x|: the plain absolute step is a no-op, so the escalated step must
 ## actually move the point.
 x5 <- 5e4
-expect_true((x5 - 1e-12) == x5 && (x5 + 1e-12) == x5)   # confirms the no-op
+expect_true((x5 - 1e-12) == x5)
+expect_true((x5 + 1e-12) == x5)   # confirms the no-op
 expect_true(zb(x5, -1e5, 1e6, function(x) x, TRUE) != x5)
 ## Lower endpoint, both signs: perturbed point strictly inside (l, u).
 expect_true(zb(5e4, 5e4, 1e6, function(x) x, TRUE) > 5e4)

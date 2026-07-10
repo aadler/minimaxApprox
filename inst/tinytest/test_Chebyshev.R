@@ -59,7 +59,7 @@ mmM <- minimaxApprox(exp, -1, 1, 5L, basis = "monomial")
 xBig <- seq(0, 1, length.out = 5e6)
 resC <- minimaxEval(xBig, mmC)
 resM <- minimaxEval(xBig, mmM)
-expect_equal(length(resC), 5e6)
+expect_length(resC, 5e6)
 expect_true(all(is.finite(resC)))
 # Chebyshev and monomial representations of the same degree-5 approximation
 # must agree to floating tolerance at every point on the grid.
@@ -75,4 +75,5 @@ expect_equal(resC[c(1, 2.5e6, 5e6)], exp(xBig[c(1, 2.5e6, 5e6)]),
 # need be large, no large vector allocation required) validates the shared
 # code path used by both entry points.
 expect_error(minimaxApprox:::chebMat(1:2, 2147483647),
-             pattern = "exceeds the supported 2\\^31-cell limit")
+             pattern = "exceeds the supported 2^31-cell limit",
+             fixed = TRUE)
