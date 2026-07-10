@@ -20,11 +20,29 @@
     \itemize{
       \item Fixed a crash (\dQuote{segfault from C stack overflow}) evaluating a
       Chebyshev-basis approximation at several million or more points at once.
+
       \item Added a clear error, instead of undefined behavior, when an internal
       Chebyshev evaluation would require more than 2^31 matrix cells.
+
       \item Fixed \code{lower > upper} (or \code{lower == upper}) being silently
       accepted and producing a badly suboptimal approximation with no warning;
       this now raises a clear error suggesting the arguments be swapped.
+
+      \item Fixed the Remez-iteration stagnation check (\code{isUnchanging})
+      reporting convergence as \dQuote{unchanging} when errors were still
+      improving rapidly between iterations. The ratio test was checked in only
+      one direction. Now, it requires the ratio to be close to 1 in either
+      direction before treating the solution as stalled.
+
+      \item Fixed \code{opts$ztol} using the monomial-basis coefficient scale
+      even when the Chebyshev basis was requested, which could incorrectly zero
+      out genuine small-but-relevant Chebyshev coefficients on ranges
+      intersecting \eqn{[-1, 1]}.
+
+      \item Fixed the degree-\eqn{n+1} restart's \dQuote{uppermost coefficient
+      is effectively 0} check silently accepting any negative top coefficient
+      regardless of magnitude (a missing \code{abs()}), which could return a
+      polynomial one degree lower than warranted.
     }
   }
   \subsection{Changed}{
@@ -41,9 +59,21 @@
       positive integers and \code{opts$tol}/\code{convrat}/\code{tailtol}/
       \code{ztol} must be finite numeric scalars when supplied
       (\code{tailtol}/\code{ztol} may still be \code{NULL} by design).
+
       \item Corrected wording in the degree-\code{n+1} restart messages, which
       described the returned polynomial's length as its degree
       (a degree-\eqn{n} polynomial has \eqn{n+1} coefficients).
+
+      \item \code{isOscil}, used internally to test for the expected
+      alternating-sign error pattern, no longer propagates \code{NA} when passed
+      a \code{NaN}/\code{NA} error value; this previously could error deep
+      inside the convergence check instead of failing cleanly.
+
+      \item The internal zero-basis perturbation (relative-error mode, used when
+      the approximated function is exactly 0 at a candidate extremum) now
+      escalates to a magnitude-scaled step when the fixed \code{1e-12} nudge
+      would be a no-op (points with \eqn{|x| \gtrsim 4.5 \times 10^3}), while
+      remaining identical to the previous behavior at ordinary magnitudes.
     }
   }
 }

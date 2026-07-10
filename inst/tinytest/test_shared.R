@@ -158,3 +158,104 @@ expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
 # Test checkDenom
 expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1, TRUE), 0.5)
 expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2, TRUE))
+
+# --------------------------------------------------------------------------
+# M3 additions: F7, F8, F9, F6, F3
+# --------------------------------------------------------------------------
+
+# F7 -- isUnchanging must not flag rapidly-improving errors as stagnation.
+errs_last <- rep(1e-3, 4)
+convrat <- 1.000000001
+tolF <- 1e-14
+## 10x-shrink: genuine improvement, must NOT be flagged unchanging.
+expect_false(minimaxApprox:::isUnchanging(errs_last / 10, errs_last, convrat,
+                                          tolF))
+## Static vector: genuinely unchanging, must be flagged.
+expect_true(minimaxApprox:::isUnchanging(errs_last, errs_last, convrat, tolF))
+## Straddling the two-sided band (one ratio far below 1/convrat): must NOT be
+## flagged, since not all elements are close to unchanged.
+straddle <- c(1e-3, 1e-3, 1e-3, 5e-4)
+expect_false(minimaxApprox:::isUnchanging(straddle, errs_last, convrat, tolF))
+## Zero-denominator perturbation path still works (both become 1e-12, ratio
+## exactly 1, difference exactly 0).
+expect_true(minimaxApprox:::isUnchanging(rep(0, 4), rep(0, 4), convrat, tolF))
+
+# F8 -- isOscil must not propagate NA from NaN/NA input.
+expect_false(minimaxApprox:::isOscil(c(1, NaN, -1)))
+expect_false(minimaxApprox:::isOscil(c(1, NA, -1)))
+## Zero error treated as non-oscillating by design.
+expect_false(minimaxApprox:::isOscil(c(1, 0, -1)))
+## Genuinely alternating case unaffected.
+expect_true(minimaxApprox:::isOscil(c(-2, 1, -3, 4)))
+## isConverged no longer errors inside an if() when isOscil returns FALSE
+## instead of NA.
+expect_false({
+  ok <- TRUE
+  tryCatch(
+    if (minimaxApprox:::isConverged(c(1, NaN, -1), 1, 1.05, 1e-12)) NULL,
+    error = function(e) ok <<- FALSE)
+  !ok
+})
+
+# F9 -- zeroBasisPerturb: absolute step at ordinary |x| (released behavior),
+# escalating to a magnitude-scaled step only where the absolute step is
+# absorbed (large |x|). Tested at both endpoints, both signs, and interior.
+zb <- minimaxApprox:::zeroBasisPerturb
+## Ordinary |x_i|: interior perturbation is byte-identical to the released
+## absolute 1e-12 nudge (regression guard for the machine-precision
+## ZeroBasis end-to-end cases). fn = x^2-4 has its zero at the interior
+## point -2; released code probed c(-2-1e-12, -2+1e-12) and picked by fn.
+oldInterior <- {
+  cand <- c(-2 - 1e-12, -2 + 1e-12)
+  cand[which.max(cand ^ 2 - 4)]
+}
+expect_identical(zb(-2, -3, -1, function(x) x ^ 2 - 4, TRUE), oldInterior)
+## Large |x|: the plain absolute step is a no-op, so the escalated step must
+## actually move the point.
+x5 <- 5e4
+expect_true((x5 - 1e-12) == x5 && (x5 + 1e-12) == x5)   # confirms the no-op
+expect_true(zb(x5, -1e5, 1e6, function(x) x, TRUE) != x5)
+## Lower endpoint, both signs: perturbed point strictly inside (l, u).
+expect_true(zb(5e4, 5e4, 1e6, function(x) x, TRUE) > 5e4)
+expect_true(zb(-5e4, -5e4, 1e5, function(x) x, TRUE) > -5e4)
+## Upper endpoint, both signs: perturbed point strictly inside (l, u).
+expect_true(zb(5e4, -1e6, 5e4, function(x) x, TRUE) < 5e4)
+expect_true(zb(-5e4, -1e5, -5e4, function(x) x, TRUE) < -5e4)
+## Ordinary-magnitude endpoints: byte-identical to the released absolute step.
+expect_identical(zb(-3, -3, -1, function(x) x, TRUE), -3 + 1e-12)
+expect_identical(zb(-1, -3, -1, function(x) x, TRUE), -1 - 1e-12)
+## l == 0 / u == 0: pure absolute step, strictly inside.
+expect_identical(zb(0, 0, 1, function(x) x, TRUE), 0 + 1e-12)
+expect_identical(zb(0, -1, 0, function(x) x, TRUE), 0 - 1e-12)
+
+# F6 -- checkIrrelevant must be basis-aware.
+## Confirmed repro: genuine ~1e-3 Chebyshev contributions on [0, 0.5] must
+## survive ztol = 1e-4 (previously zeroed by the monomial xmax^k scaling).
+aCheb <- c(1, rep(1e-3, 6))
+rCheb <- minimaxApprox:::checkIrrelevant(aCheb, 0, 0.5, 1e-4, "c")
+expect_equal(rCheb, aCheb, tolerance = tol)
+## A genuinely negligible coefficient must still be zeroed, in both bases.
+aNeg <- c(1, rep(1e-10, 6))
+expect_equal(minimaxApprox:::checkIrrelevant(aNeg, 0, 0.5, 1e-4, "c"),
+             c(1, rep(0, 6)), tolerance = tol)
+expect_equal(minimaxApprox:::checkIrrelevant(aNeg, 0, 0.5, 1e-4, "m"),
+             c(1, rep(0, 6)), tolerance = tol)
+## Monomial-basis results bitwise-unchanged versus the pre-F6 formula.
+set.seed(20260710)
+aRand <- rnorm(8)
+oldMonomial <- {
+  nn <- length(aRand)
+  xmax <- max(abs(0), abs(2))
+  ifelse(abs(aRand * xmax ^ (seq_len(nn) - 1L)) <= 1e-6, 0, aRand)
+}
+expect_identical(minimaxApprox:::checkIrrelevant(aRand, 0, 2, 1e-6, "m"),
+                 oldMonomial)
+
+# F3 -- tailContribution: abs() + basis-correct scale.
+## A large NEGATIVE top coefficient must now exceed tailtol, in both bases
+## (previously silently passed with no abs()).
+expect_true(minimaxApprox:::tailContribution(-1e-5, 12, -1, 1, "m") > 1e-10)
+expect_true(minimaxApprox:::tailContribution(-1e-5, 12, -1, 1, "c") > 1e-10)
+## A tiny coefficient of either sign must not exceed tailtol.
+expect_false(minimaxApprox:::tailContribution(-1e-20, 12, -1, 1, "m") > 1e-10)
+expect_false(minimaxApprox:::tailContribution(1e-20, 12, -1, 1, "c") > 1e-10)

@@ -136,7 +136,7 @@ wrnMess <- paste(i, "successive calculated solutions were too close to each",
 expect_warning(minimaxApprox(fn, -1, 1, 21L, opts = opts), wrnMess)
 
 ## Rational
-expect_warning(minimaxApprox(fn, -pi, pi, c(14L, 13L), opts = opts), wrnMess)
+expect_warning(minimaxApprox(fn, -pi, pi, c(5L, 2L), opts = opts), wrnMess)
 
 # Test function choosing basis x as 0 trap
 wrnMess <- "functional value is 0"
