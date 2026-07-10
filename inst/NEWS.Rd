@@ -15,6 +15,17 @@
   }
 }
 
+\section{Version 0.6.0 (2026-10-01)}{
+  \subsection{Fixed}{
+    \itemize{
+      \item Fixed a crash (\dQuote{segfault from C stack overflow}) evaluating a
+      Chebyshev-basis approximation at several million or more points at once.
+      \item Added a clear error, instead of undefined behavior, when an internal
+      Chebyshev evaluation would require more than 2^31 matrix cells.
+    }
+  }
+}
+
 \section{Version 0.5.0 (2026-01-08)}{
   \subsection{Fixed}{
     \itemize{
