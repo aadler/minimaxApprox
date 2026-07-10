@@ -18,8 +18,15 @@ callFun <- function(fn, x) {
   do.call(match.fun(fn), args = list(x = x))
 }
 
-# Check that the values passed are oscillating in sign
-isOscil <- function(x) all(abs(diff(sign(x))) == 2)
+# Check that the values passed are oscillating in sign.
+# F8 fix: sign(x) on NaN/NA input propagates NA through all(), which later
+# errors inside an if() (isConverged is used as an if() condition). !anyNA()
+# short-circuits that to a clean FALSE. A zero error (sign 0) is treated as
+# non-oscillating: an exact zero at a reference point is not a magnitude-E
+# equioscillation extremum, and it is behaviorally inert for convergence anyway
+# (a zero forces mnae = 0 in isConverged, which independently fails the
+# Magnitude Test).
+isOscil <- function(x) !anyNA(s <- sign(x)) && all(abs(diff(s)) == 2)
 
 evalFunc <- function(x, R, basis) {
   calcFunc <- switch(EXPR = basis, m = polyCalc, chebCalc)
@@ -61,6 +68,48 @@ findRoots <- function(x, R, fn, relErr, basis) {
   }
 
   r
+}
+
+# F9 fix (hardening): compute the ZeroBasis perturbation for a candidate
+# extremum x_i that landed exactly on a zero of fn (relative error is
+# undefined there). The original fixed 1e-12 absolute nudge is a genuine
+# no-op once |x_i| >~ 4.5e3 (a double's ulp there already exceeds 1e-12),
+# silently leaving the zero-division problem in place -- at endpoints
+# (x_i + 1e-12 == x_i) and in the interior alike (both candidates collapse
+# to the same value). The fix escalates to a magnitude-scaled step ONLY
+# when the plain absolute step would not move x_i; at ordinary |x_i| the
+# step is byte-identical to the released 1e-12 absolute behavior (this
+# matters: the ZeroBasis end-to-end cases run at the machine-precision
+# floor, where changing the step's magnitude or direction perturbs
+# convergence). x_i == 0 keeps the pure absolute step. Extracted from
+# switchX so it is unit-testable independent of the optimizer.
+#
+# stepInto: additive step of magnitude >= peturb in the given direction
+# (+1 = increase x_i, -1 = decrease), escalating to abs(x_i)*peturb only if
+# the base peturb is absorbed. Used for the two endpoints (always stepping
+# inward, into the interval).
+stepInto <- function(x_i, dir, peturb = 1e-12) {
+  s <- peturb
+  if (x_i + dir * s == x_i) s <- abs(x_i) * peturb
+  x_i + dir * s
+}
+
+zeroBasisPerturb <- function(x_i, l, u, fn, maximize, peturb = 1e-12) {
+  if (x_i == l) {
+    # Step inward from the lower endpoint (toward the interior).
+    stepInto(x_i, 1, peturb)
+  } else if (x_i == u) {
+    # Step inward from the upper endpoint (mirror image of the l case).
+    stepInto(x_i, -1, peturb)
+  } else {
+    # Interior: offer both directions and let the max/min pick. Escalate the
+    # step magnitude only if the base absolute step is absorbed (large |x_i|).
+    s <- peturb
+    if (x_i - s == x_i || x_i + s == x_i) s <- abs(x_i) * peturb
+    xreplace <- c(x_i - s, x_i + s)
+    fnreplace <- callFun(fn, xreplace)
+    if (maximize) xreplace[which.max(fnreplace)] else xreplace[which.min(fnreplace)]
+  }
 }
 
 # Function to identify new x positions. This algorithm uses the multi-switch
@@ -105,20 +154,7 @@ switchX <- function(r, l, u, R, fn, relErr, basis) {
     # Test for 0 value at function if relative error
     if (relErr && callFun(fn, x[i]) == 0) {
       attr(x, "ZeroBasis") <- TRUE
-      peturb <- 1e-12
-      if (x[i] == l) {
-        x[i] <- x[i] + peturb
-      } else if (x[i] == u) {
-        x[i] <- x[i] - peturb
-      } else {
-        xreplace <- c(x[i] - peturb, x[i] + peturb)
-        fnreplace <- callFun(fn, xreplace)
-        if (maximize) {
-          x[i] <- xreplace[which.max(fnreplace)]
-        } else {
-          x[i] <- xreplace[which.min(fnreplace)]
-        }
-      }
+      x[i] <- zeroBasisPerturb(x[i], l, u, fn, maximize)
     }
 
     # Flip maximize.
@@ -157,7 +193,14 @@ isUnchanging <- function(errs, errs_last, convrat, tol) {
     errs_last[denomProblem] <- errs_last[denomProblem] + 1e-12
   }
   errsDiff <- abs(errs - errs_last)
-  all(abs(errs / errs_last) <= convrat) ||
+  ratio <- abs(errs / errs_last)
+  # F7 fix: the ratio test was one-sided (<= convrat), so errors shrinking
+  # rapidly (e.g. 10x per iteration) satisfied it and were flagged as
+  # "unchanging" -- premature stop on genuine improvement. The test must be
+  # two-sided: only a ratio close to 1 (in EITHER direction) indicates
+  # stagnation. The zero-denominator perturbation and absolute-difference
+  # clause are unchanged.
+  all(ratio <= convrat & ratio >= 1 / convrat) ||
     (all(errsDiff <= tol) && all(errsDiff > .Machine$double.eps))
 }
 
@@ -174,13 +217,50 @@ checkDenom <- function(a, l, u, basis) {
   }
 }
 
+# Basis-aware per-coefficient scale bounding a_k's contribution to the
+# approximation, for k = 0 .. n-1 (n = length(a)). Used by checkIrrelevant
+# (F6) and tailContribution (F3).
+# Monomial: unchanged xmax^k (xmax = max(|l|, |u|)).
+# Chebyshev (CURRENT unmapped semantics -- T_k evaluated at raw x, not an
+# affinely mapped argument): |T_k(x)| <= 1 only for x in [-1, 1], and grows
+# like cosh((k)*acosh(xmax)) outside that range. The correct bound is
+# max(|T_k(l)|, |T_k(u)|, and 1 if the range intersects [-1, 1], since T_k
+# can attain its unit extremum at an interior point of that intersection
+# even when neither endpoint reaches it). T_k(l)/T_k(u) are computed via the
+# package's own chebMat rather than reimplementing the recurrence.
+# NOTE: if F5 Option A (mapped Chebyshev) is adopted in M6, T_k is always
+# evaluated on the mapped [-1, 1] domain and this bound collapses to the
+# trivial 1 (i.e. the Chebyshev branch becomes unnecessary; the bound on
+# a_k's contribution is simply |a_k| itself).
+basisScale <- function(n, l, u, basis) {
+  if (basis == "m") {
+    xmax <- max(abs(l), abs(u))
+    xmax ^ (seq_len(n) - 1L)
+  } else {
+    tk <- abs(chebMat(c(l, u), n - 1L))
+    bound <- apply(tk, 2L, max)
+    if (l <= 1 && u >= -1) bound <- pmax(bound, 1)
+    bound
+  }
+}
+
 # Check for coefficient irrelevancy.
-checkIrrelevant <- function(a, l, u, zt) {
+checkIrrelevant <- function(a, l, u, zt, basis) {
   n <- length(a)
   if (!is.null(zt) && n > 0) {
-    xmax <- max(abs(l), abs(u))
-    a <- ifelse(abs(a * xmax^(seq_len(n) - 1L)) <= zt, 0, a)
+    scale <- basisScale(n, l, u, basis)
+    a <- ifelse(abs(a * scale) <= zt, 0, a)
   }
 
   a
+}
+
+# F3 fix: the n+1-restart "effectively zero" test in minimaxApprox() checked
+# (a_n * xmax^(n-1)) > tailtol with no abs() on a_n, so ANY negative top
+# coefficient -- of arbitrary magnitude -- passed and was silently dropped.
+# Extracted as its own function (unit-testable) taking abs() of the
+# coefficient and the basis-correct scale from basisScale (monomial:
+# xmax^(n-1); Chebyshev: the F6 endpoint/unit-extremum bound of |T_{n-1}|).
+tailContribution <- function(a_n, n, l, u, basis) {
+  abs(a_n) * basisScale(n, l, u, basis)[n]
 }

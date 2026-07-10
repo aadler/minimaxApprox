@@ -20,7 +20,8 @@ polyCoeffs <- function(x, fn, relErr, basis, l, u, zt) {
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = 1e-14)
-  list(a = checkIrrelevant(PP[-length(PP)], l, u, zt), E = PP[length(PP)])
+  list(a = checkIrrelevant(PP[-length(PP)], l, u, zt, basis),
+       E = PP[length(PP)])
 }
 
 # Main function to calculate and return the minimax polynomial approximation.

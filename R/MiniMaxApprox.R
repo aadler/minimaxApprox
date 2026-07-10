@@ -204,9 +204,14 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
            degree + 1L, ".")
     }
 
-    xmax <- max(abs(lower), abs(upper))
     n <- length(mmA$a)
-    if ((mmA$a[n] * xmax ^ (n - 1L)) > opts$tailtol) {
+    # F3 fix: was (mmA$a[n] * xmax^(n-1L)) > opts$tailtol -- no abs() on the
+    # coefficient, so any NEGATIVE top coefficient of arbitrary magnitude
+    # passed this test and was silently dropped as "effectively zero". Now
+    # routed through tailContribution, which takes abs() and uses the
+    # basis-correct scale (Chebyshev's unmapped-basis bound differs from
+    # xmax^(n-1); see basisScale in shared.R).
+    if (tailContribution(mmA$a[n], n, lower, upper, basis) > opts$tailtol) {
       stop("The algorithm did not converge when looking for a polynomial of",
            " degree ", degree, " and when looking for a polynomial of degree ",
            degree + 1L, " the uppermost coefficient is not effectively zero.")
