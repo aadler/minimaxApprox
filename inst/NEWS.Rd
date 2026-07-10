@@ -22,6 +22,28 @@
       Chebyshev-basis approximation at several million or more points at once.
       \item Added a clear error, instead of undefined behavior, when an internal
       Chebyshev evaluation would require more than 2^31 matrix cells.
+      \item Fixed \code{lower > upper} (or \code{lower == upper}) being silently
+      accepted and producing a badly suboptimal approximation with no warning;
+      this now raises a clear error suggesting the arguments be swapped.
+    }
+  }
+  \subsection{Changed}{
+    \itemize{
+      \item Added upfront validation of \code{fn}, \code{lower}, \code{upper},
+      \code{degree}, and \code{opts} in \code{minimaxApprox()}, replacing
+      cryptic low-level failures (e.g. \dQuote{missing value where TRUE/FALSE
+      needed}, \dQuote{invalid argument type}) with clear, argument-specific
+      error messages. \code{fn} must be a function whose first argument is
+      \code{x} (primitives such as \code{exp} and \code{sin} are still
+      accepted); \code{lower}/\code{upper} must be finite non-missing numeric
+      scalars; \code{degree} must be finite and non-missing;
+      \code{opts$maxiter}/\code{miniter}/\code{conviter} must be single
+      positive integers and \code{opts$tol}/\code{convrat}/\code{tailtol}/
+      \code{ztol} must be finite numeric scalars when supplied
+      (\code{tailtol}/\code{ztol} may still be \code{NULL} by design).
+      \item Corrected wording in the degree-\code{n+1} restart messages, which
+      described the returned polynomial's length as its degree
+      (a degree-\eqn{n} polynomial has \eqn{n+1} coefficients).
     }
   }
 }
