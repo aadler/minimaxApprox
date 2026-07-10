@@ -12,14 +12,15 @@
 // variables need to be initialized as "volatile" as we specifically DO NOT WANT
 // the compiler to optimize them out (z to a for example). The entire point of
 // EFT algorithms is to capture the floating-point error as best possible!
-volatile long double twoSumy(long double a, long double b) {
+
+long double twoSumy(long double a, long double b) {
   volatile long double x = a + b;
   volatile long double z = x - a;
   return((a - (x - z)) + (b - z));
 }
 
 // This is the y component of twoProdFMA; the x component is the product itself.
-volatile long double twoProdFMAy(long double a, long double b) {
+long double twoProdFMAy(long double a, long double b) {
   long double x = a * b;
   return(fmal(a, b, -x));
 }
@@ -27,9 +28,12 @@ volatile long double twoProdFMAy(long double a, long double b) {
 // Compensated Horner method combining the Error-Free Transformation component
 // and the HornerSum component.
 extern SEXP compHorner_c(SEXP x, SEXP a) {
-  const int m = LENGTH(x);
-  const int n = LENGTH(a);
-  const int nm1 = n - 1;   // Used often
+  // F12: m, n widened to R_xlen_t via XLENGTH so the loop bounds and index
+  // arithmetic below cannot overflow for long vectors. nm1 stays a plain
+  // R_xlen_t difference (n >= 1 always, since degree >= 0, so nm1 >= 0).
+  const R_xlen_t m = XLENGTH(x);
+  const R_xlen_t n = XLENGTH(a);
+  const R_xlen_t nm1 = n - 1;   // Used often
 
   double *px = REAL(x);
   double *pa = REAL(a);
@@ -42,7 +46,7 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
   // n must be at least 1 since degree must be >= 0. Therefore initialize ret
   // with the last value of a. If n == 1 then there is no need to calculate pi,
   // sig, or correction.
-  for (int i = 0; i < m; ++i) {
+  for (R_xlen_t i = 0; i < m; ++i) {
     pret[i] = pa[nm1];
     }
 
@@ -70,11 +74,11 @@ extern SEXP compHorner_c(SEXP x, SEXP a) {
     long double pxl;
     long double pal;
 
-    for (int i = 0; i < m; ++i) {
+    for (R_xlen_t i = 0; i < m; ++i) {
       correction = 0.0L;
       pretl = (long double)pret[i];
       pxl = (long double)px[i];
-      for (int j = nm1; j-- > 0; ) {
+      for (R_xlen_t j = nm1; j-- > 0; ) {
         // Error-Free-Transformation (EFT) Horner
         pal = (long double)pa[j];
         Ax = pretl * pxl;
