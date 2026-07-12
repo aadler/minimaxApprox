@@ -74,6 +74,24 @@
       escalates to a magnitude-scaled step when the fixed \code{1e-12} nudge
       would be a no-op (points with \eqn{|x| \gtrsim 4.5 \times 10^3}), while
       remaining identical to the previous behavior at ordinary magnitudes.
+
+      \item Functions that the requested degree resolves to (or near) machine
+      floating-point precision---including functions that are exactly
+      polynomials, such as \code{minimaxApprox(function(x) x^2, 0, 1, 2)}, and
+      well-behaved cases such as \code{minimaxApprox(exp, -1, 1, 14)}---no
+      longer hard-error or emit misleading non-convergence warnings. This case
+      can surface two ways, both now handled: (1) both the degree-\eqn{n} and
+      degree-\eqn{n+1} Remez solves fail singular, previously
+      \dQuote{neither converged}; or (2) on some \acronym{BLAS}/\acronym{LAPACK}
+      platforms the same case does not report singular but instead runs to
+      \code{maxiter} (or stalls \dQuote{unchanging}) while genuinely wandering
+      at the machine-precision floor. In either case, when there is no minimax
+      problem left to solve, the degree-\eqn{n} interpolant through the
+      Chebyshev reference is returned instead, together with a warning that it
+      is not technically a Remez result but that its error is below the level
+      at which a distinct minimax solution can be discerned. Genuinely
+      non-representable cases (where no polynomial comes near the function)
+      still raise the original error or convergence warning, unaffected.
     }
   }
 }

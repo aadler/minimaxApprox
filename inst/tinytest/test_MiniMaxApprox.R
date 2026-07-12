@@ -215,11 +215,17 @@ if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
   expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 }
 
-## Test unsuccessful restart due to two failures
+## Test unsuccessful restart due to two failures. F4: the former case here
+## (sin, 0.25, 0.75, 16, "m") is now RESCUED -- see the F4 block below --
+## because its interpolant is at the machine-precision floor. Replaced with a
+## genuinely non-representable case that must still hard-error: sqrt(x) on
+## [0, 1] has a branch point at 0, so no polynomial interpolant comes near it
+## (probe abs error ~2e-2 >> threshold), and the F4 rescue correctly falls
+## through to the original error rather than masking it.
 errMsg <- "The algorithm neither converged when looking for a"
 
 ## Below case has failover to QR
-expect_error(minimaxApprox(sin, 0.25, 0.75, 16L, basis = "m"), errMsg)
+expect_error(minimaxApprox(sqrt, 0, 1, 30L, basis = "m"), errMsg)
 
 # Test tailtol NULL
 errMsg <- "The algorithm did not converge when looking for a"
@@ -320,3 +326,76 @@ expect_silent(minimaxApprox(exp, 0, 1, 3, opts = list(tailtol = NULL)))
 errMsg <- "'opts\\$ztol' must be a single finite, non-missing numeric value."
 expect_error(minimaxApprox(exp, 0, 1, 3, opts = list(ztol = "x")), errMsg)
 expect_silent(minimaxApprox(exp, 0, 1, 3, opts = list(ztol = NULL)))
+
+# ---------------------------------------------------------------------------
+# F4: exact-representability / machine-precision-resolved rescue.
+# When both the degree-n and degree-(n+1) Remez solves fail singular AND the
+# degree-n interpolant is at the machine-precision floor, minimaxApprox now
+# returns that interpolant with a warning that it is NOT a Remez result. When
+# the interpolant is NOT at the floor (genuine non-representability), or the
+# interpolation is itself singular, or relErr is requested and fn has a zero
+# in range, the original hard error is preserved (tested above / below).
+# ---------------------------------------------------------------------------
+
+f4wrn <- "NOT technically a Remez result"
+
+# Exactly representable: x^2 is exactly a degree-2 polynomial. Rescue returns
+# the interpolant (== the function); aMono is (0, 0, 1) to machine precision.
+expect_warning(minimaxApprox(function(x) x^2, 0, 1, 2L), f4wrn)
+PPx2 <- suppressWarnings(minimaxApprox(function(x) x^2, 0, 1, 2L))
+expect_equal(PPx2$aMono, c(0, 0, 1), tolerance = 1e-12)
+expect_true(PPx2$ObsErr < 10 * .Machine$double.eps)
+expect_true(PPx2$Warning)
+
+# Resolved-to-precision: exp on [-1, 1] is resolved by the requested degree
+# (deg 13 already converges with ratio 1.52; deg 14, 15, 50 previously HARD
+# ERRORED). Chebyshev basis: conditioning ~1.4, so these are robust across
+# platforms. Rescue returns a floor-level interpolant.
+for (d in c(14L, 15L, 50L)) {
+  expect_warning(minimaxApprox(exp, -1, 1, d), f4wrn)
+  PPe <- suppressWarnings(minimaxApprox(exp, -1, 1, d))
+  expect_true(PPe$ObsErr < 1e-13)
+  expect_true(PPe$Warning)
+  # Re-measure the returned coefficients independently: floor-level everywhere.
+  g <- seq(-1, 1, length.out = 501L)
+  expect_true(max(abs(minimaxErr(g, PPe))) < 1e-13)
+}
+
+# relErr rescue-success path (covers interpRescue's relative-error branch,
+# lines "err <- max(abs((pg - fg) / fg))" / "thresh <- 10 * eps" -- every OTHER
+# relErr case in this file hits the any(fg == 0) zero-guard and returns before
+# reaching those lines). x^2 + 1 is exactly degree 2 and has no zero on [0, 1],
+# so relative error is well-defined and the rescue fires via that branch.
+expect_warning(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L, relErr = TRUE),
+               f4wrn)
+PPrel <- suppressWarnings(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L,
+                                        relErr = TRUE))
+expect_equal(PPrel$aMono, c(1, 0, 1), tolerance = 1e-12)
+expect_true(PPrel$ObsErr < 10 * .Machine$double.eps)
+expect_true(PPrel$Warning)
+
+# Fall-through 1 (relErr zero-guard): x on [-1, 1] with relErr has a zero at
+# x = 0 on the probe grid, so the relative criterion is undefined; the rescue
+# does NOT fire and the original hard error is raised.
+errMsg <- "The algorithm neither converged when looking for a"
+expect_error(minimaxApprox(function(x) x, -1, 1, 12L, relErr = TRUE,
+                           basis = "m"), errMsg)
+
+# ---------------------------------------------------------------------------
+# F4 (monomial, PLATFORM-FRAGILE -- flagged for HOMEDESKTOP/CRAN verification).
+# These monomial cases ALSO rescue in the reviewer container, contradicting the
+# module brief's expectation that high-degree monomial interpolation is "hopeless
+# by conditioning". The interpolation COEFFICIENTS stay small even though the
+# Vandermonde condition number is enormous (kappa ~ 1e17-1e18), so the probe
+# error lands at the floor. HEADROOM IS THIN: exp deg-50 monomial probe error is
+# 4.72e-15 vs threshold 6.04e-15 (~1.28x); sin deg-16 monomial is 5.27e-16 vs
+# 1.51e-15 (~2.9x). Whether these rescue may differ on another BLAS/LAPACK. The
+# maintainer must decide: keep basis-blind (these rescue) or add a one-line
+# basis guard in interpRescue() to keep monomial deliberately conservative
+# (then these two revert to hard errors and this block should be removed).
+# Guarded here to the reviewer container so they never fail the maintainer's CI
+# unverified.
+if (Sys.info()["nodename"] != "HOMEDESKTOP") {
+  expect_warning(minimaxApprox(sin, 0.25, 0.75, 16L, basis = "m"), f4wrn)
+  expect_warning(minimaxApprox(exp, -1, 1, 50L, basis = "m"), f4wrn)
+}

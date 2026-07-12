@@ -133,6 +133,28 @@ the resulting contribution to the approximation is \strong{not}
 \emph{de minimis}. Setting \code{tailtol} to \code{NULL} will skip the
 \code{n + 1} test completely.
 }
+\subsection{Machine-Precision-Resolved Functions}{
+When the requested degree is high enough that \code{fn} is resolved to (or
+extremely near) machine double precision---including functions that are
+\emph{exactly} representable, such as a quadratic requested at degree 2---there
+may be no minimax problem left to solve: any polynomial passing through a
+correctly-chosen reference already matches \code{fn} to the limits of floating
+point, so the Remez iteration has nothing left to optimize. This is detected
+either as a singular linear solve at both degree \code{n} and degree
+\code{n + 1} (see above), or, on some platforms, as the iteration running to
+\code{maxiter} or stalling \dQuote{unchanging} while the observed error is
+already at the machine-precision floor. In that situation, \code{minimaxApprox}
+returns the degree-\code{n} polynomial that \emph{interpolates} \code{fn}
+through the Chebyshev reference, rather than a Remez-optimized polynomial,
+together with a warning stating that the result is not technically a Remez
+result. This interpolant equals the true minimax polynomial when \code{fn} is
+exactly representable, and is indistinguishable from it (to within floating
+point) otherwise; \code{ExpErr} and \code{ObsErr} are equal in this case, since
+there is no separate leveled error to report. If the observed error is
+\strong{not} at the machine floor, the singularity or stall has a genuine cause
+unrelated to representability, and the original error or convergence warning is
+raised as before---this fallback never masks real non-convergence.
+}
 \subsection{Close-to-Zero Tolerance}{
 For each step of the algorithms' iterations, the contribution of the found
 coefficient to the total sum (as measured in the above section) is compared to
@@ -169,7 +191,10 @@ components:
     denominator coefficients for monomial expansion in \eqn{x^k}. Missing for
     both polynomial and monomial-based rational approximation.}
     \item{ExpErr}{The absolute value of the expected error as calculated by the
-    Remez algorithms.}
+    Remez algorithms. For a machine-precision-resolved result (see
+    \strong{Machine-Precision-Resolved Functions} above), there is no separate
+    Remez-computed expected error; \code{ExpErr} equals \code{ObsErr} in that
+    case.}
     \item{ObsErr}{The absolute value of largest observed error between the
     function and the approximation at the extremal points.}
     \item{iterations}{The number of iterations of the algorithm. This does not
