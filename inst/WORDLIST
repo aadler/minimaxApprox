@@ -15,6 +15,7 @@ OpenSSF
 Remez
 Rmpfr
 Roadmap
+affine
 al
 barycentric
 codecov
@@ -30,3 +31,4 @@ monomial
 monomials
 representability
 representable
+unmapped
