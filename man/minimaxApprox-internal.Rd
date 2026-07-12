@@ -12,8 +12,10 @@
 
 % In Chebyshev.R
 \alias{chebMat}
+\alias{chebMap}
 \alias{chebCalc}
 \alias{cheb2mon}
+\alias{composeAffine}
 
 % In monomial.R
 \alias{vanderMat}
