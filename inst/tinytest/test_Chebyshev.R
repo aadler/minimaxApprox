@@ -58,7 +58,7 @@ mmC <- minimaxApprox(exp, -1, 1, 5L, basis = "Chebyshev")
 mmM <- minimaxApprox(exp, -1, 1, 5L, basis = "monomial")
 xBig <- seq(0, 1, length.out = 5e6)
 resC <- minimaxEval(xBig, mmC)
-resM <- minimaxEval(xBig, mmM)
+resM <- suppressMessages(minimaxEval(xBig, mmM))
 expect_length(resC, 5e6)
 expect_true(all(is.finite(resC)))
 # Chebyshev and monomial representations of the same degree-5 approximation
