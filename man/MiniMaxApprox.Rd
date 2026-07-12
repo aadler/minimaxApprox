@@ -57,7 +57,8 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
             \item \code{showProgress}: logical; If \code{TRUE} will print error
             values at each iteration.
             \item \code{convrat}: numeric; The convergence ratio tolerance.
-            Defaults to \eqn{1 + 1 \times 10^{-9}}{1+1e-9}. See \strong{Details}.
+            Defaults to \eqn{1 + 1 \times 10^{-9}}{1+1e-9}. See
+            \strong{Details}.
             \item \code{tol}: numeric; The absolute difference tolerance.
             Defaults to \eqn{1 \times 10^{-14}}{1e-14}. See \strong{Details}.
             \item \code{tailtol}: numeric; The tolerance of the coefficient of

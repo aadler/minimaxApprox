@@ -44,13 +44,15 @@ controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
 
 ## Polynomial
 P <- list(a = 1:4)
-expect_equal(minimaxApprox:::evalFunc(x, P, "m", -1, 1), controlN, tolerance = tol)
+expect_equal(minimaxApprox:::evalFunc(x, P, "m", -1, 1), controlN,
+             tolerance = tol)
 
 ## Rational
 R <- list(a = 1:4, b = c(1, 2.2, 4.1))
 controlD <- 1 + 2.2 * x + 4.1 * x ^ 2
 control <- controlN / controlD
-expect_equal(minimaxApprox:::evalFunc(x, R, "m", -1, 1), control, tolerance = tol)
+expect_equal(minimaxApprox:::evalFunc(x, R, "m", -1, 1), control,
+             tolerance = tol)
 
 # Test remErr
 # Using fact that exp(1) has analytic answer for degree 1 and pass a zero-degree
@@ -77,18 +79,17 @@ fn <- function(x) exp(x) - 1
 x <- minimaxApprox:::chebNodes(3, 0, 1)
 
 ## Polynomial
-QQ <- minimaxApprox:::polyCoeffs(x, function(x) expm1(x), TRUE, "m", 0, 1,
-                                 opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, "m", 0, 1)
+QQ <- minimaxApprox:::polyCoeffs(x, expm1, TRUE, "m", 0, 1, opts$ztol)
+control <- minimaxApprox:::findRoots(x, QQ, expm1, TRUE, "m", 0, 1)
 PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, "m", 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, TRUE, "m", 0, 1)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 
 ## Rational
-QQ <- minimaxApprox:::ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE, "m",
+QQ <- minimaxApprox:::ratCoeffs(x, 0, expm1, 1L, 0L, TRUE, "m",
                                 0, 1, opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, "m", 0, 1)
+control <- minimaxApprox:::findRoots(x, QQ, expm1, TRUE, "m", 0, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, "m", 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, "m", 0, 1)
 ## Need weaker tolerance here since functions are not exactly the same

@@ -90,7 +90,6 @@ expect_message(minimaxApprox(fn, -1, 1, c(2L, 1L), opts = opts), "i: 1 E: ")
 
 # Test passing some maxiter, convrat, tol, and conviter. Also checks conviter
 # overwrite.
-fn <- function(x) exp(x) - 1
 opts <- list(maxiter = 25L, convrat = 1.01, tol = 1e-12, conviter = 50L)
 
 ## Polynomial
@@ -264,7 +263,7 @@ if (inherits(res, "mmaOutcomeErr")) {
                     as.character(res), fixed = TRUE))
 } else {
   # Outcome (B), clean-convergence form: a valid minimaxApprox object.
-  expect_true(inherits(res, "minimaxApprox"))
+  expect_inherits(res, "minimaxApprox")
 }
 
 # Test ztol
