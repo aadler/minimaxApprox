@@ -1,15 +1,15 @@
-# --------------------------------------------
-# CITATION file created with {cffr} R package
+# ------------------------------------------------
+# CITATION.cff file created with {cffr} R package
 # See also: https://docs.ropensci.org/cffr/
-# --------------------------------------------
-
+# ------------------------------------------------
+ 
 cff-version: 1.2.0
 message: 'To cite package "minimaxApprox" in publications use:'
 type: software
 license: MPL-2.0
 title: 'minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational
   Function Approximation'
-version: 0.5.0
+version: 0.6.0
 doi: 10.32614/CRAN.package.minimaxApprox
 identifiers:
 - type: doi
@@ -34,11 +34,11 @@ preferred-citation:
   year: '2023'
   url: https://CRAN.R-project.org/package=minimaxApprox
   doi: 10.32614/CRAN.package.minimaxApprox
-  notes: R package version 0.5.0
+  notes: R package version 0.6.0
 repository: https://CRAN.R-project.org/package=minimaxApprox
 repository-code: https://github.com/aadler/MiniMaxApprox
 url: https://github.com/aadler/MiniMaxApprox
-date-released: '2026-01-08'
+date-released: '2026-10-01'
 contact:
 - family-names: Adler
   given-names: Avraham
