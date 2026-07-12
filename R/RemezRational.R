@@ -1,6 +1,14 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
+# F13 (tolerance half): rational QR rank-detection tolerance. Kept DISTINCT
+# from the polynomial path's QRTOLPOLY (1e-14, defined in RemezPolynomial.R)
+# on purpose -- see the full rationale there. The rational path has no
+# degree-restart machinery, so its rank threshold is not load-bearing in the
+# same way, but the two are documented as an intentional pair rather than
+# silently divergent magic numbers.
+QRTOLRAT <- .Machine$double.eps
+
 # Function to create augmented Vandermonde or Chebyshev matrix for rational
 # approximation.
 ratMat <- function(x, E, y, nD, dD, relErr, basis) {
@@ -22,7 +30,7 @@ ratCoeffs <- function(x, E, fn, nD, dD, relErr, basis, l, u, zt) {
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y,
-                                                  tol = .Machine$double.eps)
+                                                  tol = QRTOLRAT)
   list(a = checkIrrelevant(PP[seq_len(nD + 1L)], l, u, zt, basis),
        b = checkIrrelevant(c(1, PP[seq_len(dD) + nD + 1L]), l, u, zt, basis),
        E = PP[length(PP)])

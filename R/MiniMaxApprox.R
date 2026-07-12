@@ -1,7 +1,6 @@
 # Copyright Avraham Adler (c) 2023
 # SPDX-License-Identifier: MPL-2.0+
 
-# Master user-exposed function
 minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
                           basis = "Chebyshev", xi = NULL, opts = list()) {
 
@@ -199,31 +198,80 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
                     error = function(e) simpleError(trimws(e$message)))
 
     if (inherits(mmA, "simpleError")) {
-      stop("The algorithm neither converged when looking for a polynomial of",
-           " degree ", degree, " nor when looking for a polynomial of degree ",
-           degree + 1L, ".")
-    }
+      # F4: both the degree-n and degree-(n+1) Remez solves failed singular.
+      # Before raising the original hard error, check whether the "failure" is
+      # actually that fn is (near-)exactly a polynomial of degree <= n, i.e.
+      # there is no minimax problem left to solve. interpRescue() builds the
+      # plain degree-n interpolant (NOT a Remez result) and returns it only if
+      # its error is at the machine-precision floor; otherwise NULL. If NULL,
+      # the singularity had a genuine (non-representability) cause and the
+      # original error is raised unchanged -- the rescue never masks it.
+      rescue <- interpRescue(fn, lower, upper, as.integer(degree), relErr,
+                             basis)
 
-    n <- length(mmA$a)
-    # F3 fix: was (mmA$a[n] * xmax^(n-1L)) > opts$tailtol -- no abs() on the
-    # coefficient, so any NEGATIVE top coefficient of arbitrary magnitude
-    # passed this test and was silently dropped as "effectively zero". Now
-    # routed through tailContribution, which takes abs() and uses the
-    # basis-correct scale (Chebyshev's unmapped-basis bound differs from
-    # xmax^(n-1); see basisScale in shared.R).
-    if (tailContribution(mmA$a[n], n, lower, upper, basis) > opts$tailtol) {
-      stop("The algorithm did not converge when looking for a polynomial of",
-           " degree ", degree, " and when looking for a polynomial of degree ",
-           degree + 1L, " the uppermost coefficient is not effectively zero.")
-    }
+      if (is.null(rescue)) {
+        stop("The algorithm neither converged when looking for a polynomial of",
+             " degree ", degree, " nor when looking for a polynomial of degree ",
+             degree + 1L, ".")
+      }
 
-    mmA$a <- mmA$a[-n]
-    message("The algorithm failed while looking for a polynomial of degree ",
-            degree, " but successfully completed when looking for a polynomial",
-            " of degree ", degree + 1L, " with the largest coefficient's",
-            " contribution to the approximation <= the tailtol option. The",
-            " result is a polynomial of degree ", degree, " as the uppermost",
-            " coefficient is effectively 0.")
+      # Assemble an mmA-like result from the interpolant. expe and mxae are
+      # both the probe error (there is no leveled E from a solve; ratio is 1).
+      # x is set to the interpolation nodes (the interpolant's natural
+      # reference; these are NOT equioscillation extrema). The `rescued` flag
+      # triggers the not-a-Remez warning in the central warning block below.
+      mmA <- list(a = rescue$a, expe = rescue$err, mxae = rescue$err,
+                  i = 0L, x = rescue$x, converged = TRUE, unchanged = FALSE,
+                  unchanging_i = 0L, zeroBasisError = FALSE, rescued = TRUE)
+
+    } else {
+      # Degree-(n+1) retry succeeded: existing tailtol "uppermost coefficient
+      # effectively 0" logic, unchanged.
+      n <- length(mmA$a)
+      # F3 fix: was (mmA$a[n] * xmax^(n-1L)) > opts$tailtol -- no abs() on the
+      # coefficient, so any NEGATIVE top coefficient of arbitrary magnitude
+      # passed this test and was silently dropped as "effectively zero". Now
+      # routed through tailContribution, which takes abs() and uses the
+      # basis-correct scale (Chebyshev's unmapped-basis bound differs from
+      # xmax^(n-1); see basisScale in shared.R).
+      if (tailContribution(mmA$a[n], n, lower, upper, basis) > opts$tailtol) {
+        stop("The algorithm did not converge when looking for a polynomial of",
+             " degree ", degree, " and when looking for a polynomial of degree ",
+             degree + 1L, " the uppermost coefficient is not effectively zero.")
+      }
+
+      mmA$a <- mmA$a[-n]
+      message("The algorithm failed while looking for a polynomial of degree ",
+              degree, " but successfully completed when looking for a polynomial",
+              " of degree ", degree + 1L, " with the largest coefficient's",
+              " contribution to the approximation <= the tailtol option. The",
+              " result is a polynomial of degree ", degree, " as the uppermost",
+              " coefficient is effectively 0.")
+    }
+  }
+
+  # F4, second manifestation. On some BLAS/LAPACK platforms an
+  # exactly-representable / precision-resolved function does NOT make the
+  # augmented solve report singular; instead the Remez iteration runs to
+  # maxiter (or stalls "unchanging") wandering at the machine-precision floor,
+  # and mmA comes back as a completed-but-not-converged result rather than a
+  # simpleError. Catch that here, DOWNSTREAM of the entire singular/restart
+  # block above (mmA is already a finished object; remPoly, switchX, and the
+  # restart machinery have all run), so this cannot interfere with the
+  # load-bearing singular->restart path the way an upstream guard would (cf. M3
+  # reverted collapse-guard). interpRescue()'s own probe -- including the relErr
+  # zero-of-fn guard -- is the sole arbiter: it returns the clean interpolant
+  # only if the function really is resolved to the machine floor at degree n,
+  # otherwise NULL (leaving a genuine non-convergence untouched, so its normal
+  # maxiter/unchanging warning still fires).
+  if (!ratApprox && !inherits(mmA, "simpleError") && !isTRUE(mmA$rescued) &&
+      !mmA$converged) {
+    rescue <- interpRescue(fn, lower, upper, as.integer(degree), relErr, basis)
+    if (!is.null(rescue)) {
+      mmA <- list(a = rescue$a, expe = rescue$err, mxae = rescue$err,
+                  i = 0L, x = rescue$x, converged = TRUE, unchanged = FALSE,
+                  unchanging_i = 0L, zeroBasisError = FALSE, rescued = TRUE)
+    }
   }
 
   # Handle all warnings centrally.
@@ -248,7 +296,24 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     gotWarning <- TRUE
   }
 
-  if (mmA$mxae < 10 * .Machine$double.eps) {
+  if (isTRUE(mmA$rescued)) {
+    warning("The requested degree resolves the function to within machine ",
+            "floating-point precision, so no Remez minimax iteration was ",
+            "possible (the augmented system is singular because there is no ",
+            "minimax problem left to solve). The returned polynomial is the ",
+            "degree-", degree, " interpolant through the Chebyshev reference; ",
+            "its maximum error (", fC(mmA$mxae), ") is at the ",
+            "machine-precision floor, below the level at which a distinct ",
+            "minimax solution can be discerned. This is NOT technically a ",
+            "Remez result.")
+    gotWarning <- TRUE
+  }
+
+  # The rescue warning above already states the machine-precision caveat in
+  # rescue-specific terms; suppress the generic near-eps warning in that case so
+  # a rescued result raises exactly one, more informative warning rather than
+  # two overlapping ones.
+  if (mmA$mxae < 10 * .Machine$double.eps && !isTRUE(mmA$rescued)) {
     warning("All errors very near machine double precision. The solution may ",
             "not be optimal given floating point limitations.")
     gotWarning <- TRUE
