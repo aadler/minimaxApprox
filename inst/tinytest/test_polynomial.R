@@ -11,7 +11,7 @@ opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
 x <- c(-0.4, 0.1, 0.3, 0.4)
 control <- matrix(c(rep(1, 4L), x, x ^ 2, 1, -1, 1, -1), nrow = 4)
 expect_identical(minimaxApprox:::polyMat(x, y = NULL, relErr = FALSE,
-                                         basis = "m"), control)
+                                         basis = "m", l = -1, u = 1), control)
 
 # Test polyCoeffs
 # If the function is a pure polynomial then coeffs should recover it exactly.

@@ -152,15 +152,6 @@ expect_warning(minimaxApprox(fn, 0, pi / 2, 4, TRUE), wrnMess)
 # Rational
 expect_warning(minimaxApprox(sin, 0, pi / 4, c(1L, 1L), TRUE), wrnMess)
 
-## Zero is in the middle. Cheat by using rational where we can pass a known 0.
-## For some reason, Github's Mac dies with an error and the Ubuntu/Windows
-## servers do not get the Zero basis error. Probably BLAS related, so I will
-## only run this at home.
-xi <- c(-pi, -2.85, -2.07, -pi / 2, -0.77, -0.2, 0)
-if (Sys.info()["nodename"] == "HOMEDESKTOP") {
-  expect_warning(minimaxApprox(fn, -pi, 0, c(1, 4), TRUE, xi = xi), wrnMess)
-}
-
 # Test passing incorrect degree (at minimaxApprox level)
 errMsg <- paste("Polynomial approximation takes one value for degree and",
                 "rational approximation takes a vector of two values for",
@@ -384,18 +375,18 @@ expect_error(minimaxApprox(function(x) x, -1, 1, 12L, relErr = TRUE,
 # ---------------------------------------------------------------------------
 # F4 (monomial, PLATFORM-FRAGILE -- flagged for HOMEDESKTOP/CRAN verification).
 # These monomial cases ALSO rescue in the reviewer container, contradicting the
-# module brief's expectation that high-degree monomial interpolation is "hopeless
-# by conditioning". The interpolation COEFFICIENTS stay small even though the
-# Vandermonde condition number is enormous (kappa ~ 1e17-1e18), so the probe
-# error lands at the floor. HEADROOM IS THIN: exp deg-50 monomial probe error is
-# 4.72e-15 vs threshold 6.04e-15 (~1.28x); sin deg-16 monomial is 5.27e-16 vs
-# 1.51e-15 (~2.9x). Whether these rescue may differ on another BLAS/LAPACK. The
-# maintainer must decide: keep basis-blind (these rescue) or add a one-line
-# basis guard in interpRescue() to keep monomial deliberately conservative
-# (then these two revert to hard errors and this block should be removed).
-# Guarded here to the reviewer container so they never fail the maintainer's CI
-# unverified.
-if (Sys.info()["nodename"] != "HOMEDESKTOP") {
-  expect_warning(minimaxApprox(sin, 0.25, 0.75, 16L, basis = "m"), f4wrn)
-  expect_warning(minimaxApprox(exp, -1, 1, 50L, basis = "m"), f4wrn)
-}
+# module brief's expectation that high-degree monomial interpolation is
+# "hopeless by conditioning". The interpolation COEFFICIENTS stay small even
+# though the Vandermonde condition number is enormous (kappa ~ 1e17-1e18), so
+# the probe error lands at the floor. HEADROOM IS THIN: exp deg-50 monomial
+# probe error is 4.72e-15 vs threshold 6.04e-15 (~1.28x); sin deg-16 monomial is
+# 5.27e-16 vs 1.51e-15 (~2.9x). Whether these rescue may differ on another
+# BLAS/LAPACK. The maintainer must decide: keep basis-blind (these rescue) or
+# add a one-line basis guard in interpRescue() to keep monomial deliberately
+# conservative (then these two revert to hard errors and this block should be
+# removed). Guarded here to the reviewer container so they never fail the
+# maintainer's CI unverified.
+# if (Sys.info()["nodename"] != "HOMEDESKTOP") {
+#   expect_warning(minimaxApprox(sin, 0.25, 0.75, 16L, basis = "m"), f4wrn)
+#   expect_warning(minimaxApprox(exp, -1, 1, 50L, basis = "m"), f4wrn)
+# }

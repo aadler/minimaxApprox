@@ -16,7 +16,8 @@ errVctr <- E * altSign
 yVctr <- y + errVctr
 control <- matrix(c(rep(1, 4L), x, x ^ 2, -(yVctr) * x, -(yVctr) * x ^ 2,
                     -altSign), nrow = length(x))
-expect_identical(minimaxApprox:::ratMat(x, E, y, 2L, 2L, FALSE, "m"), control)
+expect_identical(minimaxApprox:::ratMat(x, E, y, 2L, 2L, FALSE, "m", -1, 1),
+                 control)
 
 # Test ratCoeffs
 # If the function is a pure polynomial then coeffs should recover it exactly IF

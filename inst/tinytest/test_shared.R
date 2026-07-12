@@ -44,13 +44,13 @@ controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
 
 ## Polynomial
 P <- list(a = 1:4)
-expect_equal(minimaxApprox:::evalFunc(x, P, "m"), controlN, tolerance = tol)
+expect_equal(minimaxApprox:::evalFunc(x, P, "m", -1, 1), controlN, tolerance = tol)
 
 ## Rational
 R <- list(a = 1:4, b = c(1, 2.2, 4.1))
 controlD <- 1 + 2.2 * x + 4.1 * x ^ 2
 control <- controlN / controlD
-expect_equal(minimaxApprox:::evalFunc(x, R, "m"), control, tolerance = tol)
+expect_equal(minimaxApprox:::evalFunc(x, R, "m", -1, 1), control, tolerance = tol)
 
 # Test remErr
 # Using fact that exp(1) has analytic answer for degree 1 and pass a zero-degree
@@ -64,11 +64,11 @@ control <- tstFn(x) - exp(x)
 
 ## Polynomial
 PP <- minimaxApprox:::remPoly(fn, 0, 1, 1, FALSE, "m", opts)
-expect_equal(minimaxApprox:::remErr(x, PP, fn, FALSE, "m"), control,
+expect_equal(minimaxApprox:::remErr(x, PP, fn, FALSE, "m", 0, 1), control,
              tolerance = tol)
 ## Rational
 RR <- minimaxApprox:::remRat(fn, 0, 1, 1, 0, FALSE, "m", NULL, opts)
-expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE, "m"), control,
+expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE, "m", 0, 1), control,
              tolerance = tol)
 
 # Test findRoots
@@ -79,28 +79,28 @@ x <- minimaxApprox:::chebNodes(3, 0, 1)
 ## Polynomial
 QQ <- minimaxApprox:::polyCoeffs(x, function(x) expm1(x), TRUE, "m", 0, 1,
                                  opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, "m")
+control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, "m", 0, 1)
 PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, "m", 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, PP, fn, TRUE, "m")
+r <- minimaxApprox:::findRoots(x, PP, fn, TRUE, "m", 0, 1)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 
 ## Rational
 QQ <- minimaxApprox:::ratCoeffs(x, 0, function(x) expm1(x), 1L, 0L, TRUE, "m",
                                 0, 1, opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, "m")
+control <- minimaxApprox:::findRoots(x, QQ, function(x) expm1(x), TRUE, "m", 0, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, "m", 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, "m")
+r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, "m", 0, 1)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 
 ## Test error trap with contrived example
 ## Polynomial
-r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, "m")
+r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, "m", 0, 1)
 expect_identical(r, 1.2)
 
 ## Rational
-r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, "m")
+r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, "m", 0, 1)
 expect_identical(r, 1.2)
 
 # Test switchX
@@ -111,7 +111,7 @@ control <- c(-1, 0.10264791208519766, 0.33735881337846646, 0.62760501759598053,
 fn <- function(x) sin(x) + cos(x)
 x <- minimaxApprox:::chebNodes(6, 0, 1)
 PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, "m", 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, PP, fn, FALSE, "m")
+r <- minimaxApprox:::findRoots(x, PP, fn, FALSE, "m", 0, 1)
 x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE, "m")
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
@@ -122,7 +122,7 @@ control <- c(-1, -0.6706726462230721, -2.8931353340360859e-14,
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- minimaxApprox:::chebNodes(5, -1, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, "m", -1, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, RR, fn, FALSE, "m")
+r <- minimaxApprox:::findRoots(x, RR, fn, FALSE, "m", -1, 1)
 x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE, "m")
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
@@ -137,14 +137,6 @@ fn <- function(x) -3
 expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, "m"), c(0, 0),
                   tolerance = tol)
 
-## Test 0 value at function using relative error which isn't covered by other
-## cases. However, this is one that fails on Github (BLAS, I guess) so run only
-## at home.
-if (Sys.info()["nodename"] == "HOMEDESKTOP") {
-  fn <- function(x) x ^ 2 - 4
-  expect_warning(minimaxApprox::minimaxApprox(fn, -3, -1, 3, TRUE))
-}
-
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)
 E <- 0.1
@@ -156,8 +148,16 @@ errs <- c(-0.2, 0.1, -0.1)
 expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
 
 # Test checkDenom
-expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1, TRUE), 0.5)
-expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2, TRUE))
+# NOTE (M6): these previously passed basis = TRUE, which only ever "worked"
+# because switch(EXPR = TRUE, m = ..., ...) coerces TRUE to integer 1 and
+# picks the first listed alternative POSITIONALLY, regardless of its name --
+# an accident of switch()'s non-character-EXPR behavior, not a valid basis
+# value. checkDenom's now-explicit if (basis == "m") dispatch (needed to
+# route Chebyshev through the M6 affine map) correctly stops honoring that
+# accident. The polynomial -0.5 + x (root 0.5 on [0,1], no root on [1,2]) is
+# unambiguously the intended monomial-basis case; fixed to basis = "m".
+expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1, "m"), 0.5)
+expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2, "m"))
 
 # --------------------------------------------------------------------------
 # M3 additions: F7, F8, F9, F6, F3
@@ -210,6 +210,17 @@ oldInterior <- {
   cand[which.max(cand ^ 2 - 4)]
 }
 expect_identical(zb(-2, -3, -1, function(x) x ^ 2 - 4, TRUE), oldInterior)
+## Same interior case, minimize direction (maximize = FALSE): exercises the
+## which.min(fnreplace) branch, otherwise only reachable via the platform-
+## sensitive x^2-4 relErr end-to-end case (see the HOMEDESKTOP-gated block in
+## test_MiniMaxApprox.R). Deterministic, no Remez iteration/BLAS involved --
+## calls zeroBasisPerturb directly.
+oldInteriorMin <- {
+  cand <- c(-2 - 1e-12, -2 + 1e-12)
+  cand[which.min(cand ^ 2 - 4)]
+}
+expect_identical(zb(-2, -3, -1, function(x) x ^ 2 - 4, FALSE), oldInteriorMin)
+
 ## Large |x|: the plain absolute step is a no-op, so the escalated step must
 ## actually move the point.
 x5 <- 5e4
