@@ -23,6 +23,7 @@
 \alias{polyMat}
 \alias{polyCoeffs}
 \alias{remPoly}
+\alias{interpRescue}
 
 % In RemezRational.R
 \alias{ratMat}
@@ -42,5 +43,9 @@
 \alias{isUnchanging}
 \alias{checkDenom}
 \alias{checkIrrelevant}
+\alias{stepInto}
+\alias{zeroBasisPerturb}
+\alias{basisScale}
+\alias{tailContribution}
 
 \keyword{internal}
