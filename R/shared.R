@@ -31,35 +31,48 @@ isOscil <- function(x) {
   !anyNA(s) && all(abs(diff(s)) == 2)
 }
 
-evalFunc <- function(x, R, basis) {
+evalFunc <- function(x, R, basis, l, u) {
+  # M6 (F5 Option A): l/u are now REQUIRED (not defaulted) on purpose. This is
+  # the single innermost dispatch site for Chebyshev-basis evaluation; a
+  # missed CHEBYSHEV call site anywhere upstream (findRoots/remErr/plot/
+  # minimaxEval/...) now surfaces immediately as "argument l is missing"
+  # rather than silently evaluating T_k at raw x. NOTE: R's lazy evaluation
+  # means this only fires when l/u are actually dereferenced -- monomial-
+  # basis callers that omit l/u run fine (harmless, since this branch is
+  # never reached for them), which is why monomial callers below still pass
+  # them: for signature consistency with the required-parameter contract,
+  # not because omitting them would break anything for basis = "m". See
+  # switchX/checkDenom/basisScale for the established precedent of required
+  # (not optional) l/u on internals that need the range.
+  z <- if (basis == "c") chebMap(x, l, u) else x
   calcFunc <- switch(EXPR = basis, m = polyCalc, chebCalc)
-  ret <- calcFunc(x, R$a)
+  ret <- calcFunc(z, R$a)
   if ("b" %in% names(R)) {
-    ret <- ret / calcFunc(x, R$b)
+    ret <- ret / calcFunc(z, R$b)
   }
 
   ret
 }
 
 # Function to calculate error between known and calculated values.
-remErr <- function(x, R, fn, relErr, basis) {
+remErr <- function(x, R, fn, relErr, basis, l, u) {
   if (relErr) {
     y <- callFun(fn, x)
-    (evalFunc(x, R, basis) - y) / y
+    (evalFunc(x, R, basis, l, u) - y) / y
   } else {
-    evalFunc(x, R, basis) - callFun(fn, x)
+    evalFunc(x, R, basis, l, u) - callFun(fn, x)
   }
 }
 
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima.
-findRoots <- function(x, R, fn, relErr, basis) {
+findRoots <- function(x, R, fn, relErr, basis, l, u) {
   r <- double(length(x) - 1L)
   for (i in seq_along(r)) {
     intv <- c(x[i], x[i + 1L])
     root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no", R = R,
                              fn = fn, relErr = relErr, basis = basis,
-                             tol = sqrt(.Machine$double.eps)),
+                             l = l, u = u, tol = sqrt(.Machine$double.eps)),
                      error = function(cond) simpleError(trimws(cond$message)))
 
     # If there is no root in the interval, take the endpoint closest to zero.
@@ -126,19 +139,19 @@ switchX <- function(r, l, u, R, fn, relErr, basis) {
   tops <- c(r, u)
   x <- double(length(bottoms))
   attr(x, "ZeroBasis") <- FALSE
-  maximize <- sign(remErr(l, R, fn, relErr, basis)) == 1
+  maximize <- sign(remErr(l, R, fn, relErr, basis, l, u)) == 1
   for (i in seq_along(x)) {
     intv <- c(bottoms[i], tops[i])
     # Tighter tolerances than the default lead to issues (AA: 2024-01-31).
     extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
-                                relErr = relErr, basis = basis,
+                                relErr = relErr, basis = basis, l = l, u = u,
                                 maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
     # If no extremum then the take endpoint with "better" value depending if we
     # are maximizing or minimizing.
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, R, fn, relErr, basis)
+      endPtErr <- remErr(intv, R, fn, relErr, basis, l, u)
       if (maximize) {
         x[i] <- intv[which.max(endPtErr)]
       } else {
@@ -150,7 +163,7 @@ switchX <- function(r, l, u, R, fn, relErr, basis) {
 
     # Test endpoints for max/min even if an extremum was found.
     p <- c(bottoms[i], x[i], tops[i])
-    E <- remErr(p, R, fn, relErr, basis)
+    E <- remErr(p, R, fn, relErr, basis, l, u)
 
     if (maximize) {
       x[i] <- p[which.max(E)]
@@ -213,7 +226,16 @@ isUnchanging <- function(errs, errs_last, convrat, tol) {
 
 # Check denominator polynomial for zero in the requested range.
 checkDenom <- function(a, l, u, basis) {
-  calcFn <- switch(EXPR = basis, m = polyCalc, chebCalc)
+  # M6 (F5 Option A): uniroot searches over raw x in [l, u]; wrapping the
+  # evaluation function to map x -> z internally means uniroot's returned
+  # root is ALREADY in raw x -- no back-conversion needed, and the error
+  # message in remRat (which reports this root directly) stays correct
+  # without any change there.
+  calcFn <- if (basis == "m") {
+    polyCalc
+  } else {
+    function(x, a) chebCalc(chebMap(x, l, u), a)
+  }
   dngrRt <- tryCatch(uniroot(calcFn, c(l, u), extendInt = "no", a = a,
                              tol = .Machine$double.eps),
                      error = function(cond) simpleError(trimws(cond$message)))
@@ -228,26 +250,17 @@ checkDenom <- function(a, l, u, basis) {
 # approximation, for k = 0 .. n-1 (n = length(a)). Used by checkIrrelevant
 # (F6) and tailContribution (F3).
 # Monomial: unchanged xmax^k (xmax = max(|l|, |u|)).
-# Chebyshev (CURRENT unmapped semantics -- T_k evaluated at raw x, not an
-# affinely mapped argument): |T_k(x)| <= 1 only for x in [-1, 1], and grows
-# like cosh((k)*acosh(xmax)) outside that range. The correct bound is
-# max(|T_k(l)|, |T_k(u)|, and 1 if the range intersects [-1, 1], since T_k
-# can attain its unit extremum at an interior point of that intersection
-# even when neither endpoint reaches it). T_k(l)/T_k(u) are computed via the
-# package's own chebMat rather than reimplementing the recurrence.
-# NOTE: if F5 Option A (mapped Chebyshev) is adopted in M6, T_k is always
-# evaluated on the mapped [-1, 1] domain and this bound collapses to the
-# trivial 1 (i.e. the Chebyshev branch becomes unnecessary; the bound on
-# a_k's contribution is simply |a_k| itself).
+# M6 (F5 Option A): Chebyshev basis now ALWAYS evaluates T_k on the mapped
+# [-1, 1] domain, so |T_k(z)| <= 1 unconditionally -- the bound on a_k's
+# contribution collapses to the trivial 1 for every k, exactly as flagged by
+# the M3 comment this replaces. l/u are accepted but unused in this branch
+# (kept for signature symmetry with the monomial branch and existing callers).
 basisScale <- function(n, l, u, basis) {
   if (basis == "m") {
     xmax <- max(abs(l), abs(u))
     xmax ^ (seq_len(n) - 1L)
   } else {
-    tk <- abs(chebMat(c(l, u), n - 1L))
-    bound <- apply(tk, 2L, max)
-    if (l <= 1 && u >= -1) bound <- pmax(bound, 1)
-    bound
+    rep(1, n)
   }
 }
 

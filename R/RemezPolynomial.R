@@ -19,10 +19,16 @@ QRTOLPOLY <- 1e-14
 
 # Function to create augmented Vandermonde or Chebyshev matrix for polynomial
 # approximation.
-polyMat <- function(x, y, relErr, basis) {
+polyMat <- function(x, y, relErr, basis, l, u) {
   n <- length(x)
-  matFunc <- switch(EXPR = basis, m = vanderMat, chebMat)
-  A <- matFunc(x, n - 2L)
+  # M6 (F5 Option A): l/u required (see evalFunc in shared.R for the
+  # rationale -- required, not defaulted, so a missed CHEBYSHEV call site
+  # fails loudly; see shared.R's updated comment for the lazy-eval nuance).
+  A <- if (basis == "m") {
+    vanderMat(x, n - 2L)
+  } else {
+    chebMat(chebMap(x, l, u), n - 2L)
+  }
   altSgn <- (-1) ^ (seq_len(n) - 1L)
   # For relative error, need to weight the E by f(x).
   if (relErr) altSgn <- altSgn * y
@@ -32,7 +38,7 @@ polyMat <- function(x, y, relErr, basis) {
 # Function to calculate coefficients given matrix and known values.
 polyCoeffs <- function(x, fn, relErr, basis, l, u, zt) {
   y <- callFun(fn, x)
-  P <- polyMat(x, y, relErr, basis)
+  P <- polyMat(x, y, relErr, basis, l, u)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y, tol = QRTOLPOLY)
@@ -51,18 +57,18 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
 
   # Initial Polynomial Guess
   PP <- polyCoeffs(x, fn, relErr, basis, lower, upper, opts$ztol)
-  errs_last <- remErr(x, PP, fn, relErr, basis)
+  errs_last <- remErr(x, PP, fn, relErr, basis, lower, upper)
   converged <- unchanged <- FALSE
   unchanging_i <- i <- 0L
   repeat {
     # Check for maxiter
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- findRoots(x, PP, fn, relErr, basis)
+    r <- findRoots(x, PP, fn, relErr, basis, lower, upper)
     x <- switchX(r, lower, upper, PP, fn, relErr, basis)
     relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     PP <- polyCoeffs(x, fn, relErr, basis, lower, upper, opts$ztol)
-    errs <- remErr(x, PP, fn, relErr, basis)
+    errs <- remErr(x, PP, fn, relErr, basis, lower, upper)
     mxae <- max(abs(errs))
     expe <- abs(PP$E)
 
@@ -142,8 +148,13 @@ interpRescue <- function(fn, lower, upper, degree, relErr, basis) {
   # here we need an (degree + 1)-point square interpolation system).
   x <- chebNodes(degree + 1L, lower, upper)
   y <- callFun(fn, x)
-  matFunc <- switch(EXPR = basis, m = vanderMat, chebMat)
-  A <- matFunc(x, degree)
+  # M6 (F5 Option A): map nodes before the Chebyshev matrix build, consistent
+  # with every other Chebyshev-basis call site.
+  A <- if (basis == "m") {
+    vanderMat(x, degree)
+  } else {
+    chebMat(chebMap(x, lower, upper), degree)
+  }
 
   # Same solve -> qr.solve fallback shape as polyCoeffs, but on the UNaugmented
   # interpolation matrix, which is generally far better conditioned than the
@@ -162,8 +173,11 @@ interpRescue <- function(fn, lower, upper, degree, relErr, basis) {
   # verified stable (probe error flat from 1e3 to 5e4 points on all F4 cases).
   i_grid <- seq(lower, upper, length.out = 2001L)
   fg <- callFun(fn, i_grid)
-  calcFn <- switch(EXPR = basis, m = polyCalc, chebCalc)
-  pg <- calcFn(i_grid, a)
+  pg <- if (basis == "m") {
+    polyCalc(i_grid, a)
+  } else {
+    chebCalc(chebMap(i_grid, lower, upper), a)
+  }
 
   if (relErr) {
     # Relative criterion is undefined where f == 0: do not rescue.
@@ -181,4 +195,3 @@ interpRescue <- function(fn, lower, upper, degree, relErr, basis) {
 
   list(a = a, x = x, err = err)
 }
-

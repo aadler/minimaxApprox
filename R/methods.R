@@ -64,8 +64,8 @@ plot.minimaxApprox <- function(x, y = NULL, ...) {
   basis <- tolower(substr(attr(x, "basis"), 1L, 1L))
   relErr <- attr(x, "relErr")
   z <- seq(rng[1L], rng[2L], length.out = 1001L)
-  zz <- remErr(z, x, fn, relErr, basis)
-  y <- remErr(x$Extrema, x, fn, relErr, basis)
+  zz <- remErr(z, x, fn, relErr, basis, rng[1L], rng[2L])
+  y <- remErr(x$Extrema, x, fn, relErr, basis, rng[1L], rng[2L])
 
   # Default y-axis label
   ylab <- if (relErr) "Relative Error" else "Absolute Error"

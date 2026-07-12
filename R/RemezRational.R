@@ -11,22 +11,23 @@ QRTOLRAT <- .Machine$double.eps
 
 # Function to create augmented Vandermonde or Chebyshev matrix for rational
 # approximation.
-ratMat <- function(x, E, y, nD, dD, relErr, basis) {
+ratMat <- function(x, E, y, nD, dD, relErr, basis, l, u) {
   altSgn <- (-1) ^ (seq_along(x) - 1L)
   # For relative error, need to weight the E by f(x).
   if (relErr) altSgn <- altSgn * y
   altE <- altSgn * E
   yvctr <- -(y + altE)
-  matFunc <- switch(EXPR = basis, m = vanderMat, chebMat)
-  aMat <- matFunc(x, nD)
-  bMat <- matFunc(x, dD)[, -1L] * yvctr
+  # M6 (F5 Option A): l/u required (see evalFunc in shared.R for rationale).
+  z <- if (basis == "c") chebMap(x, l, u) else x
+  aMat <- if (basis == "m") vanderMat(x, nD) else chebMat(z, nD)
+  bMat <- (if (basis == "m") vanderMat(x, dD) else chebMat(z, dD))[, -1L] * yvctr
   cbind(aMat, bMat, -altSgn, deparse.level = 0L)
 }
 
 # Function to calculate coefficients given matrix and known values.
 ratCoeffs <- function(x, E, fn, nD, dD, relErr, basis, l, u, zt) {
   y <- callFun(fn, x)
-  P <- ratMat(x, E, y, nD, dD, relErr, basis)
+  P <- ratMat(x, E, y, nD, dD, relErr, basis, l, u)
   PP <- tryCatch(solve(P, y),
                  error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(PP, "simpleError")) PP <- qr.solve(P, y,
@@ -73,13 +74,13 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
   }
 
   RR <- convergeErr(x)
-  errs_last <- remErr(x, RR, fn, relErr, basis)
+  errs_last <- remErr(x, RR, fn, relErr, basis, lower, upper)
   converged <- unchanged <- FALSE
   unchanging_i <- i <- 0L
   repeat {
     if (i >= opts$maxiter) break
     i <- i + 1L
-    r <- findRoots(x, RR, fn, relErr, basis)
+    r <- findRoots(x, RR, fn, relErr, basis, lower, upper)
     x <- switchX(r, lower, upper, RR, fn, relErr, basis)
     relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     RR <- convergeErr(x)
@@ -91,7 +92,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
            "the numerator or denominator degree by 1 sometimes allows ",
            "convergence.")
     }
-    errs <- remErr(x, RR, fn, relErr, basis)
+    errs <- remErr(x, RR, fn, relErr, basis, lower, upper)
     mxae <- max(abs(errs))
     expe <- abs(RR$E)
 

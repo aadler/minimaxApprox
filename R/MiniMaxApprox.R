@@ -336,10 +336,21 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     monomialEq <- NULL
     polynomalBasis <- "Monomial"
   } else {
-    monomialEq <- list(aMono = cheb2mon(mmA$a))
+    # M6 (F5 Option A): mmA$a (and $b) are now coefficients of T_k(mapped z),
+    # not T_k(raw x). cheb2mon still produces monomial-in-z (unchanged --
+    # basis-conversion recursion, agnostic to what the variable is called).
+    # composeAffine converts monomial-in-z to monomial-in-RAW-x, so aMono/
+    # bMono remain the "natural" results in the user's original coordinates,
+    # exactly as before this module (and bitwise-identical to before on
+    # [-1, 1], per composeAffine's fast path).
+    monomialEq <- list(aMono = composeAffine(cheb2mon(mmA$a), lower, upper))
     polynomalBasis <- "Chebyshev"
     if (ratApprox) {
-      monomialEq <- c(monomialEq, list(bMono = cheb2mon(mmA$b)))
+      monomialEq <- c(monomialEq,
+                      list(bMono = composeAffine(cheb2mon(mmA$b), lower,
+                                                 upper)))
+      # Normalization (divide by bMono[1]) happens AFTER composition -- the
+      # composed bMono[1] is the correct raw-x leading denominator term.
       monomialEq <- mapply(`/`, monomialEq, monomialEq$bMono[1L],
                            SIMPLIFY = FALSE)
     }

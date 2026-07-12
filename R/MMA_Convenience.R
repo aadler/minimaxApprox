@@ -12,20 +12,25 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
   if (!(requestedbasis %in% c("c", "m"))) {
     stop("Select either the 'M'onomial or 'C'hebyshev basis.")
   }
+  # M6 (F5 Option A): evalFunc's l/u are now required whenever the Chebyshev
+  # branch is reached; the fitted range lives on the object as attr(range).
+  rng <- attr(mmA, "range")
   if (requestedbasis == "c") {
     if (onlyMono) {
       message("Analysis was run using only the monomial basis. Calculating ",
               "errors using monomials.")
-      evalFunc(x, mmA, "m")
+      evalFunc(x, mmA, "m", rng[1L], rng[2L])
     } else {
-      evalFunc(x, mmA, "c")
+      evalFunc(x, mmA, "c", rng[1L], rng[2L])
     }
   } else if (onlyMono) {
-    evalFunc(x, mmA, "m")
+    evalFunc(x, mmA, "m", rng[1L], rng[2L])
   } else {
+    # aMono/bMono are already in raw x (natural representation, unaffected by
+    # M6's internal mapping), so this monomial-evaluation branch needs no map.
     RR <- list(a = mmA$aMono)
     if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
-    evalFunc(x, RR, "m")
+    evalFunc(x, RR, "m", rng[1L], rng[2L])
   }
 }
 
@@ -36,7 +41,9 @@ minimaxErr <- function(x, mmA) {
     stop("This function only works with 'minimaxApprox' objects.")
   }
   y <- callFun(attr(mmA, "func"), x)
-  ret <- evalFunc(x, mmA, tolower(substr(attr(mmA, "basis"), 1L, 1L))) - y
+  rng <- attr(mmA, "range")
+  ret <- evalFunc(x, mmA, tolower(substr(attr(mmA, "basis"), 1L, 1L)),
+                  rng[1L], rng[2L]) - y
   if (attr(mmA, "relErr")) ret <- ret / y
 
   ret
