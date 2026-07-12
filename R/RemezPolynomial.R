@@ -160,10 +160,10 @@ interpRescue <- function(fn, lower, upper, degree, relErr, basis) {
 
   # Measure the interpolant against f on a dense probe grid. Grid density was
   # verified stable (probe error flat from 1e3 to 5e4 points on all F4 cases).
-  grid <- seq(lower, upper, length.out = 2001L)
-  fg <- callFun(fn, grid)
+  i_grid <- seq(lower, upper, length.out = 2001L)
+  fg <- callFun(fn, i_grid)
   calcFn <- switch(EXPR = basis, m = polyCalc, chebCalc)
-  pg <- calcFn(grid, a)
+  pg <- calcFn(i_grid, a)
 
   if (relErr) {
     # Relative criterion is undefined where f == 0: do not rescue.

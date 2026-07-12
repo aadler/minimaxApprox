@@ -342,10 +342,10 @@ f4wrn <- "NOT technically a Remez result"
 # Exactly representable: x^2 is exactly a degree-2 polynomial. Rescue returns
 # the interpolant (== the function); aMono is (0, 0, 1) to machine precision.
 expect_warning(minimaxApprox(function(x) x^2, 0, 1, 2L), f4wrn)
-PPx2 <- suppressWarnings(minimaxApprox(function(x) x^2, 0, 1, 2L))
-expect_equal(PPx2$aMono, c(0, 0, 1), tolerance = 1e-12)
-expect_true(PPx2$ObsErr < 10 * .Machine$double.eps)
-expect_true(PPx2$Warning)
+ppx2 <- suppressWarnings(minimaxApprox(function(x) x^2, 0, 1, 2L))
+expect_equal(ppx2$aMono, c(0, 0, 1), tolerance = 1e-12)
+expect_true(ppx2$ObsErr < 10 * .Machine$double.eps)
+expect_true(ppx2$Warning)
 
 # Resolved-to-precision: exp on [-1, 1] is resolved by the requested degree
 # (deg 13 already converges with ratio 1.52; deg 14, 15, 50 previously HARD
@@ -353,12 +353,12 @@ expect_true(PPx2$Warning)
 # platforms. Rescue returns a floor-level interpolant.
 for (d in c(14L, 15L, 50L)) {
   expect_warning(minimaxApprox(exp, -1, 1, d), f4wrn)
-  PPe <- suppressWarnings(minimaxApprox(exp, -1, 1, d))
-  expect_true(PPe$ObsErr < 1e-13)
-  expect_true(PPe$Warning)
+  ppe <- suppressWarnings(minimaxApprox(exp, -1, 1, d))
+  expect_true(ppe$ObsErr < 1e-13)
+  expect_true(ppe$Warning)
   # Re-measure the returned coefficients independently: floor-level everywhere.
   g <- seq(-1, 1, length.out = 501L)
-  expect_true(max(abs(minimaxErr(g, PPe))) < 1e-13)
+  expect_true(max(abs(minimaxErr(g, ppe))) < 1e-13)
 }
 
 # relErr rescue-success path (covers interpRescue's relative-error branch,
@@ -368,11 +368,11 @@ for (d in c(14L, 15L, 50L)) {
 # so relative error is well-defined and the rescue fires via that branch.
 expect_warning(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L, relErr = TRUE),
                f4wrn)
-PPrel <- suppressWarnings(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L,
+pprel <- suppressWarnings(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L,
                                         relErr = TRUE))
-expect_equal(PPrel$aMono, c(1, 0, 1), tolerance = 1e-12)
-expect_true(PPrel$ObsErr < 10 * .Machine$double.eps)
-expect_true(PPrel$Warning)
+expect_equal(pprel$aMono, c(1, 0, 1), tolerance = 1e-12)
+expect_true(pprel$ObsErr < 10 * .Machine$double.eps)
+expect_true(pprel$Warning)
 
 # Fall-through 1 (relErr zero-guard): x on [-1, 1] with relErr has a zero at
 # x = 0 on the probe grid, so the relative criterion is undefined; the rescue

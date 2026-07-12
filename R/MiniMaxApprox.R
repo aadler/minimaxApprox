@@ -242,11 +242,11 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
       mmA$a <- mmA$a[-n]
       message("The algorithm failed while looking for a polynomial of degree ",
-              degree, " but successfully completed when looking for a polynomial",
-              " of degree ", degree + 1L, " with the largest coefficient's",
-              " contribution to the approximation <= the tailtol option. The",
-              " result is a polynomial of degree ", degree, " as the uppermost",
-              " coefficient is effectively 0.")
+              degree, " but successfully completed when looking for a",
+              " polynomial of degree ", degree + 1L, " with the largest",
+              " coefficient's contribution to the approximation <= the tailtol",
+              " option. The result is a polynomial of degree ", degree, " as",
+              " the uppermost coefficient is effectively 0.")
     }
   }
 
