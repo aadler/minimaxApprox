@@ -43,10 +43,31 @@
       is effectively 0} check silently accepting any negative top coefficient
       regardless of magnitude (a missing \code{abs()}), which could return a
       polynomial one degree lower than warranted.
+
+      \item Fixed severe numerical conditioning loss when fitting the
+      Chebyshev basis on ranges far from \eqn{[-1, 1]} (e.g. degree 10 on
+      \eqn{[5, 6]} had a condition number around \eqn{10^{24}}), which could
+      cap the achievable accuracy or force convergence warnings well short of
+      the true minimax error (that \eqn{[5, 6]} case: observed error improved
+      from \eqn{\sim 1.8 \times 10^{-10}} to \eqn{\sim 3 \times 10^{-12}},
+      matching the true value). See the \strong{Breaking} change below.
     }
   }
   \subsection{Changed}{
     \itemize{
+      \item \strong{Breaking:} Chebyshev-basis approximation now internally
+      maps the requested range \eqn{[l, u]} to \eqn{[-1, 1]} before evaluating
+      \eqn{T_k}, fixing the conditioning issue noted above. \code{a} (and
+      \code{b}) are therefore coefficients of \eqn{T_k} of the internally
+      mapped variable, not \eqn{T_k(x)}, whenever the fitted range is not
+      \eqn{[-1, 1]}; results ON \eqn{[-1, 1]} are unchanged (the map is the
+      identity there, verified bitwise-identical). \code{aMono}/\code{bMono}
+      remain coefficients in the natural, raw \eqn{x} in every case, and are
+      the stable way to consume a Chebyshev-basis result without needing to
+      know about the internal map; see \code{\link{minimaxApprox}} for a
+      documented accuracy caveat on this conversion at high degree on wide,
+      far-off-\eqn{[-1,1]} ranges.
+
       \item Added upfront validation of \code{fn}, \code{lower}, \code{upper},
       \code{degree}, and \code{opts} in \code{minimaxApprox()}, replacing
       cryptic low-level failures (e.g. \dQuote{missing value where TRUE/FALSE

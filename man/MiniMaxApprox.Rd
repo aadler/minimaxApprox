@@ -114,9 +114,41 @@ will be gained by continued iterations.
 \subsection{Polynomial Evaluation}{
 Monomial polynomials are evaluated using the Compensated Horner Scheme of
 Langlois et al. (2006) to enhance both stability and precision. Chebyshev
-polynomials are evaluated normally. There may be cases where the algorithm will
-fail using the monomial basis but succeed using Chebyshev polynomials and vice
-versa. The default is to use the Chebyshev polynomials.
+polynomials are evaluated on an internally affine-mapped domain (see
+\strong{Mapped Chebyshev Basis} below). There may be cases where the algorithm
+will fail using the monomial basis but succeed using Chebyshev polynomials and
+vice versa. The default is to use the Chebyshev polynomials.
+}
+\subsection{Mapped Chebyshev Basis}{
+Chebyshev polynomials \eqn{T_k} are only well-conditioned on \eqn{[-1, 1]}; off
+that interval, conditioning degrades severely and grows with both distance from
+\eqn{[-1, 1]} and degree (for example, degree 10 on \eqn{[5, 6]} has a condition
+number around \eqn{10^{24}} unmapped versus about \eqn{1.4} mapped). To avoid
+this, the Chebyshev basis internally maps the requested range \eqn{[l, u]} to
+\eqn{[-1, 1]} via \eqn{z=\frac{2x - (l + u)}{u-l}}{z = (2x - (l + u)) / (u - l)}
+and evaluates \eqn{T_k} on \eqn{z}. The returned \code{a} (and \code{b})
+are therefore coefficients of \eqn{T_k(z)}, \strong{not} \eqn{T_k(x)}, whenever
+the fitted range is not \eqn{[-1, 1]}; on \eqn{[-1, 1]} itself the map is the
+identity and \code{a}/ \code{b} are unchanged from prior releases.
+
+\code{aMono}/\code{bMono} remain coefficients in the natural, raw \eqn{x} in
+every case, and are the stable way to consume a Chebyshev-basis result off
+\eqn{[-1, 1]} without needing to know about the internal map. They are obtained
+by converting the mapped-Chebyshev coefficients to monomials in \eqn{z} as
+before and then composing that polynomial with the affine map above to recover
+monomial coefficients in \eqn{x}.
+
+This composition step is itself a monomial-basis operation and inherits
+monomial ill-conditioning at high degree, the same way \code{aMono} always has.
+On ranges far from \eqn{[-1, 1]} at higher degrees, the composition's own error
+can grow to dominate the underlying fit's accuracy \eqn{-} for example, a
+degree-15 fit on \eqn{[10, 20]} can have a well-conditioned Chebyshev-basis
+error near \eqn{10^{-7}} while the composed \code{aMono} coefficients disagree
+with the Chebyshev-basis evaluation by closer to \eqn{10^{-6}} on the same
+range. When degree is high and the range is both wide and far from
+\eqn{[-1, 1]}, prefer evaluating with the Chebyshev basis directly (the default
+for \code{\link{minimaxEval}}/\code{\link{minimaxErr}}) over consuming
+\code{aMono} directly, if accuracy at that level matters.
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
@@ -178,18 +210,22 @@ An object of class \code{"minimaxApprox"} is a list containing the following
 components:
 
     \item{a}{The polynomial or rational numerator coefficients. When using
-    Chebyshev polynomials, these are the coefficients for \eqn{T_k}. When using
-    monomials, these are the coefficients for \eqn{x^k}.}
-    \item{b}{The rational denominator coefficients. When using Chebyshev
-    polynomials, these are the coefficients for \eqn{T_k}. When using monomials,
-    these are the coefficients for \eqn{x^k}. Missing for polynomial
-    approximation.}
+    Chebyshev polynomials, these are the coefficients for \eqn{T_k} of the
+    internally mapped variable \eqn{z} (see \strong{Mapped Chebyshev Basis}
+    above) whenever the fitted range is not \eqn{[-1, 1]}; on \eqn{[-1, 1]}
+    itself, \eqn{z = x} and these are unchanged from prior releases. When
+    using monomials, these are the coefficients for \eqn{x^k}.}
+    \item{b}{The rational denominator coefficients. Same semantics as
+    \code{a} above. Missing for polynomial approximation.}
     \item{aMono}{When using Chebyshev polynomials, these are the polynomial or
-    rational numerator coefficients for monomial expansion in \eqn{x^k}. Missing
-    for monomial-based approximation.}
+    rational numerator coefficients for monomial expansion in \eqn{x^k}
+    (natural, raw \eqn{x}, regardless of the internal map. See \strong{Mapped
+    Chebyshev Basis} above for an accuracy caveat at high degree on wide,
+    far-off-\eqn{[-1,1]} ranges). Missing for monomial-based approximation.}
     \item{bMono}{When using Chebyshev polynomials, these are the rational
-    denominator coefficients for monomial expansion in \eqn{x^k}. Missing for
-    both polynomial and monomial-based rational approximation.}
+    denominator coefficients for monomial expansion in \eqn{x^k} (natural, raw
+    \eqn{x}; same caveat as \code{aMono}). Missing for both polynomial and
+    monomial-based rational approximation.}
     \item{ExpErr}{The absolute value of the expected error as calculated by the
     Remez algorithms. For a machine-precision-resolved result (see
     \strong{Machine-Precision-Resolved Functions} above), there is no separate
