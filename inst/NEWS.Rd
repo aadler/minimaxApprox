@@ -115,6 +115,29 @@
       still raise the original error or convergence warning, unaffected.
     }
   }
+  \subsection{Added}{
+    \itemize{
+      \item Added a \code{"Barycentric"} option to the \code{basis} argument,
+      implementing the barycentric-Remez algorithm for best polynomial
+      approximation of Pach\enc{ó}{o}n and Trefethen (2009). It represents the
+      trial polynomial by its values at the reference points rather than by
+      coefficients in a fixed basis, avoiding the ill-conditioned linear solve
+      that limits the achievable degree in the classical bases. In consequence
+      it converges at degrees and on ranges where the Monomial and Chebyshev
+      bases fail with a singular-matrix error---for example,
+      \code{minimaxApprox(exp, -1, 1, 14)} (and degree 50), and \code{exp} on
+      \eqn{[5, 6]} at degree 10---and, using capacity scaling, remains stable on
+      very wide or far-off-center intervals. Exactly-representable and
+      machine-precision-resolved functions are handled natively (leveled error
+      \eqn{0}, no rescue needed). Relative error is supported; a function that is
+      \strong{exactly} zero at a reference point (typically an interval
+      endpoint), where the relative minimax does not exist, now raises a clear
+      error. The returned object carries the barycentric representation and a
+      coefficient-conversion residual diagnostic (\code{convResid}). Polynomial
+      approximation only in this release; requesting the barycentric basis for
+      rational approximation is an error. See \code{\link{minimaxApprox}}.
+    }
+  }
 }
 
 \section{Version 0.5.0 (2026-01-08)}{
