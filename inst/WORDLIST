@@ -1,5 +1,7 @@
 ACM
 AEC
+Barycentric
+Berrut
 CMD
 Chebyshev
 Dagstuhl
@@ -12,12 +14,15 @@ Mathematik
 Monomial
 Numerische
 OpenSSF
+Pach
 Remez
 Rmpfr
 Roadmap
+Trefethen
 affine
 al
 barycentric
+chebfun
 codecov
 de
 doi
@@ -29,6 +34,8 @@ md
 minimis
 monomial
 monomials
+natively
 representability
 representable
 unmapped
+ó
