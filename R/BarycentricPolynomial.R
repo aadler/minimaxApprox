@@ -72,11 +72,11 @@ baryWeights <- function(x, l, u) {
 #   sum_j w_j f_j (1 - sigma_j h) = 0  =>  h = sum(w f) / sum(sigma w f).
 # (Verified numerically by equioscillation of the RELATIVE error itself, not by
 # comparison to the absolute optimum -- the two optima differ.)
-levelError <- function(w, sigma, f, relErr) {
+levelError <- function(w, sigmaB, f, relErr) {
   if (relErr) {
-    sum(w * f) / sum(sigma * w * f)
+    sum(w * f) / sum(sigmaB * w * f)
   } else {
-    sum(w * f) / sum(sigma * w)
+    sum(w * f) / sum(sigmaB * w)
   }
 }
 
@@ -102,7 +102,7 @@ baryEval <- function(x, xref, w, pval) {
 # branch: R = list(bary = list(x, w, p)). The `bary` name (not `b`) is
 # deliberate -- evalFunc detects the rational denominator via `"b" %in%
 # names(R)`, so a field literally named `b` would collide.
-baryTrial <- function(x, fn, relErr, l, u, sigma) {
+baryTrial <- function(x, fn, relErr, l, u, sigmaB) {
   x <- separateNodes(x, l, u)
   w <- baryWeights(x, l, u)
   f <- callFun(fn, x)
@@ -111,7 +111,7 @@ baryTrial <- function(x, fn, relErr, l, u, sigma) {
   # Leveled error via the shared closed form (levelError is the single source
   # of truth for both the absolute and relative branches; baryTrial no longer
   # duplicates the formula).
-  h <- levelError(w, sigma, f, relErr)
+  h <- levelError(w, sigmaB, f, relErr)
 
   # relErr guard: a near-zero denominator (sum(sigma * w * f), the quantity
   # levelError divides by in relErr mode) means fn has (near) a zero close to
@@ -120,7 +120,7 @@ baryTrial <- function(x, fn, relErr, l, u, sigma) {
   # it (surfaces as the existing ZeroBasis warning in minimaxApprox()) and keep
   # h finite so the iteration can still report a result rather than crashing.
   if (relErr) {
-    d <- sigma * w * f
+    d <- sigmaB * w * f
     if (!is.finite(h) || abs(sum(d)) <= .Machine$double.eps * max(abs(d))) {
       zeroBasis <- TRUE
       # NaN reach the `h == 0` test below and abort the whole approximation. In
@@ -146,7 +146,7 @@ baryTrial <- function(x, fn, relErr, l, u, sigma) {
   # iteration.
   if (h == 0) h <- 1e-19
 
-  p <- if (relErr) f * (1 - sigma * h) else f - sigma * h
+  p <- if (relErr) f * (1 - sigmaB * h) else f - sigmaB * h
   list(R = list(bary = list(x = x, w = w, p = p)), h = h, x = x,
        zeroBasis = zeroBasis)
 }
@@ -233,7 +233,7 @@ finishBary <- function(trial, x, expe, mxae, i, converged, unchanged,
 remBary <- function(fn, lower, upper, degree, relErr, opts) {
   n <- as.integer(degree)
   N <- n + 2L
-  sigma <- (-1) ^ (seq_len(N) - 1L)
+  sigmaB <- (-1) ^ (seq_len(N) - 1L)
   relErrZeroBasis <- FALSE
 
   # ||f|| estimate (for the overshoot safeguard) and the machine-precision
@@ -246,7 +246,7 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
 
   # Initial reference: second-kind Chebyshev points.
   x <- chebNodes2(N, lower, upper)
-  trial <- baryTrial(x, fn, relErr, lower, upper, sigma)
+  trial <- baryTrial(x, fn, relErr, lower, upper, sigmaB)
   x <- trial$x
   relErrZeroBasis <- relErrZeroBasis || trial$zeroBasis
 
@@ -268,10 +268,10 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
   # on the tolerable Inf) and stop with a clear message: the relative-error
   # minimax genuinely does not exist at a node-on-exact-zero.
   if (relErr && anyNA(errs_last) && any(is.nan(errs_last))) {
-    stop("Relative error is undefined because 'fn' is exactly 0 at a reference ",
-         "point (typically an endpoint of the [lower, upper] interval). Use ",
-         "absolute error (relErr = FALSE), or choose an interval whose endpoints ",
-         "are not zeros of 'fn'.", call. = FALSE)
+    stop("Relative error is undefined because 'fn' is exactly 0 at a ",
+         "reference  point (typically an endpoint of the [lower, upper] ",
+         "interval). Use  absolute error (relErr = FALSE), or choose an ",
+         "interval whose endpoints  are not zeros of 'fn'.", call. = FALSE)
   }
 
   expe <- abs(trial$h)
@@ -326,7 +326,7 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
     }
     relErrZeroBasis <- relErrZeroBasis || isTRUE(zb)
 
-    trial <- baryTrial(x, fn, relErr, lower, upper, sigma)
+    trial <- baryTrial(x, fn, relErr, lower, upper, sigmaB)
     x <- trial$x
     relErrZeroBasis <- relErrZeroBasis || trial$zeroBasis
     errs <- remErr(x, trial$R, fn, relErr, "b", lower, upper)

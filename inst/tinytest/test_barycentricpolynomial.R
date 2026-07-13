@@ -179,7 +179,8 @@ expect_true(all(xnew >= -1 & xnew <= 1))
 # onePointExchange endpoint branches: with an interior-only reference the domain
 # endpoints are bracket candidates, so a trial whose error peaks at an endpoint
 # drives xnew there. A steep rising exp peaks the residual at the RIGHT end (the
-# `else` xold branch); a steep falling exp at the LEFT end (the `else if` branch).
+# `else` xold branch); a steep falling exp at the LEFT end (the `else if`
+# branch).
 mkTrial <- function(fnc, xk, l, u) {
   w <- minimaxApprox:::baryWeights(xk, l, u)
   sg <- (-1) ^ (seq_along(xk) - 1L)
@@ -191,11 +192,15 @@ xk_int <- c(-0.8, -0.4, 0, 0.4, 0.8)
 trR <- mkTrial(function(x) exp(6 * x), xk_int, -1, 1)
 outR <- minimaxApprox:::onePointExchange(xk_int, trR$R, function(x) exp(6 * x),
                                          FALSE, -1, 1)
-expect_true(max(outR) >= 0.8 && !is.unsorted(outR) && !any(duplicated(outR)))
+expect_true(max(outR) >= 0.8)
+expect_false(is.unsorted(outR))
+expect_identical(anyDuplicated(outR), 0L)
 trL <- mkTrial(function(x) exp(-6 * x), xk_int, -1, 1)
 outL <- minimaxApprox:::onePointExchange(xk_int, trL$R, function(x) exp(-6 * x),
                                          FALSE, -1, 1)
-expect_true(min(outL) <= -0.8 && !is.unsorted(outL) && !any(duplicated(outL)))
+expect_true(min(outL) <= -0.8 )
+expect_false(is.unsorted(outL))
+expect_identical(anyDuplicated(outL), 0L)
 
 # baryTrial relErr near-zero-denominator guard (distinct from the
 # exact-node-zero case, which errors in remBary). A 2-node relErr trial of fn =
