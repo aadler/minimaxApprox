@@ -53,9 +53,26 @@ errMsg <- "This function only works with 'minimaxApprox' objects."
 expect_error(minimaxEval(x, sin), errMsg)
 
 ## Check not selecting proper basis
-errMsg <- "Select either the 'M'onomial or 'C'hebyshev basis."
+errMsg <- "Select either the 'B'arycentric, 'M'onomial, or 'C'hebyshev basis."
 expect_error(minimaxEval(x, mmA, basis = "A"), errMsg)
 expect_error(minimaxEval(x, mmA, basis = 4), errMsg)
+
+# Explicit non-native basis on a barycentric object: evaluates via the converted
+# coefficients WITH a message (less accurate than the barycentric form, but still
+# correct for a well-behaved case). Covers the message + convert branches.
+rb <- suppressWarnings(minimaxApprox(exp, -1, 1, 8, basis = "b"))
+expect_message(minimaxEval(0.3, rb, "c"), "converted Chebyshev coefficients")
+expect_message(minimaxEval(0.3, rb, "m"), "converted monomial coefficients")
+expect_equal(suppressMessages(minimaxEval(0.3, rb, "c")), exp(0.3),
+             tolerance = 1e-7)
+expect_equal(suppressMessages(minimaxEval(0.3, rb, "m")), exp(0.3),
+             tolerance = 1e-7)
+# Requesting the barycentric basis for a NON-barycentric object has nothing to
+# evaluate through and errors clearly.
+rc_obj <- suppressWarnings(suppressMessages(minimaxApprox(exp, -1, 1, 8,
+                                                          basis = "c")))
+expect_error(minimaxEval(0.3, rc_obj, "b"),
+             "not run using the barycentric basis")
 
 ################################################################################
 # Test minimaxErr

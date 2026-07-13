@@ -45,7 +45,8 @@ expect_equal(RR$bMono, controlB, tolerance = 1e-5)
 expect_false(RR$Warning)
 
 # Test incorrect basis for analysis
-errMsg <- "Must select either 'C'hebyshev or 'm'onomial basis for analysis."
+errMsg <- paste("Must select either 'C'hebyshev, 'm'onomial, or 'b'arycentric",
+                "basis for analysis.")
 expect_error(minimaxApprox(exp, 0, 1, 0, basis = "x"), errMsg)
 expect_error(minimaxApprox(exp, 0, 1, 0, basis = 4), errMsg)
 
@@ -84,9 +85,14 @@ expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), "abs"), errMsg)
 ## Polynomial
 fn <- function(x) exp(x) - 1
 opts <- list(miniter = 1L, showProgress = TRUE)
-expect_message(minimaxApprox(fn, -1, 1, 9L, opts = opts), "i: 1 E: ")
+progMsg <- "i: 1 E: "
+expect_message(minimaxApprox(fn, -1, 1, 9L, opts = opts), progMsg)
+
 ## Rational
-expect_message(minimaxApprox(fn, -1, 1, c(2L, 1L), opts = opts), "i: 1 E: ")
+expect_message(minimaxApprox(fn, -1, 1, c(2L, 1L), opts = opts), progMsg)
+
+## Barycentric Polynomial
+expect_message(minimaxApprox(fn, -1, 1, 9L, basis = "b", opts = opts), progMsg)
 
 # Test passing some maxiter, convrat, tol, and conviter. Also checks conviter
 # overwrite.
@@ -111,6 +117,11 @@ expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, 9L, opts = opts)$Warning))
 dg <- c(2L, 2L)
 expect_warning(minimaxApprox(fn, -1, 1, dg, opts = opts), wrnMess)
 expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
+
+## Barycentric Polynomial
+expect_warning(minimaxApprox(fn, -1, 1, 9L, basis = "b", opts = opts), wrnMess)
+expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, 9L, basis = "b",
+                                           opts = opts)$Warning))
 
 # Test "very near machine double" warning message
 wrnMess <- paste("All errors very near machine double precision. The solution",
