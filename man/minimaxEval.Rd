@@ -19,8 +19,13 @@ minimaxEval(x, mmA, basis = "Chebyshev")
   \item{basis}{character; Which polynomial basis to use in to evaluate the
   function; see \code{\link{minimaxApprox}} for more details. If Chebyshev is
   requested but the analysis used only monomials, the calculation will proceed
-  using the monomials with a message. The default is \code{"Chebyshev"}, and the
-  parameter is case-insensitive and may be abbreviated.}
+  using the monomials with a message. If the analysis used the barycentric
+  basis, evaluation defaults to the (most accurate) stored barycentric
+  representation; requesting \code{"Chebyshev"} or \code{"Monomial"} instead
+  evaluates through the converted coefficients with a message, as that
+  conversion can be less accurate (see the object's \code{convResid}). The
+  default is \code{"Chebyshev"}, and the parameter is case-insensitive and may
+  be abbreviated.}
 }
 \details{
 This is a convenience function to evaluate the approximation at \code{x}.

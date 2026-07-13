@@ -50,4 +50,15 @@
 \alias{basisScale}
 \alias{tailContribution}
 
+% In Barycentric.R
+\alias{chebNodes2}
+\alias{separateNodes}
+\alias{baryWeights}
+\alias{levelError}
+\alias{baryEval}
+\alias{baryTrial}
+\alias{onePointExchange}
+\alias{finishBary}
+\alias{remBary}
+
 \keyword{internal}

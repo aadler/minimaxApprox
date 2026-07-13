@@ -35,9 +35,14 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
     \emph{absolute} error.}
     \item{basis}{character; Which polynomial basis to use in the analysis.
     \code{"Monomial"} uses the standard \eqn{x^k} basis. \code{"Chebyshev"} uses
-    the Chebyshev polynomials of the first kind, \eqn{T_k}. The default is
+    the Chebyshev polynomials of the first kind, \eqn{T_k}. \code{"Barycentric"}
+    uses the barycentric-Remez algorithm of Pach\enc{ó}{o}n and Trefethen (2009),
+    which represents the trial polynomial by its values at the reference rather
+    than by coefficients in a fixed basis, avoiding the ill-conditioned linear
+    solve entirely (see \strong{Barycentric Basis} below). The default is
     \code{"Chebyshev"}, and the parameter is case-insensitive and may be
-    abbreviated.}
+    abbreviated. \code{"Barycentric"} supports polynomial approximation only;
+    requesting it with a length-2 \code{degree} (rational) is an error.}
     \item{xi}{numeric; For rational approximation, a vector of initial points of
     the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
     missing, the approximation will use the appropriate Chebyshev nodes.
@@ -151,6 +156,42 @@ range. When degree is high and the range is both wide and far from
 for \code{\link{minimaxEval}}/\code{\link{minimaxErr}}) over consuming
 \code{aMono} directly, if accuracy at that level matters.
 }
+\subsection{Barycentric Basis}{
+Selecting \code{basis = "Barycentric"} uses the barycentric-Remez algorithm of
+Pach\enc{ó}{o}n and Trefethen (2009). Rather than solving an
+\eqn{(n + 2) \times (n + 2)} linear system in a fixed basis at each iteration
+\eqn{-} the source of the conditioning failures that cap the achievable degree
+in the classical bases \eqn{-} it represents the trial polynomial by its
+\emph{values} at the reference points, with barycentric weights, and computes
+the leveled error \eqn{h} in closed form. Weights are assembled with capacity
+scaling so that wide or far-off-center intervals and high degrees do not
+over- or underflow. As a result the barycentric basis typically converges at
+degrees where the classical bases fail with a singular-matrix error, and is
+well-conditioned off \eqn{[-1, 1]} without a separate mapping step.
+
+Functions that are exactly representable, or resolved to machine precision at
+the requested degree (the cases described in \strong{Machine-Precision-Resolved
+Functions} below), are handled \emph{natively}: the closed-form leveled error is
+\eqn{0} and the trial polynomial interpolates \code{fn}, so no singular-solve
+rescue is needed. Relative error is supported via the analogous closed form;
+however, if \code{fn} is \strong{exactly} \eqn{0} at a reference point
+(typically an endpoint of \eqn{[l, u]}, which is always a reference node), the
+relative error there is \eqn{0/0} and the relative minimax does not exist \eqn{-}
+this is reported as a clear error rather than a silent or crashed result. Use
+absolute error, or an interval whose endpoints are not zeros of \code{fn}.
+
+The returned object stores the barycentric representation (reference nodes,
+weights, and nodal values) as its primary form; \code{a}, \code{aMono}, and the
+convenience methods are derived from it. Because the coefficient recovery is the
+one step that can lose accuracy at high degree, a conversion residual is
+reported (see \code{convResid} in \strong{Value}); for functions with poles near
+the approximation interval this residual can be noticeably larger at some
+intermediate degrees (for example, a degree-20 fit of \eqn{1/(1 + x^2)} on
+\eqn{[-1, 1]} shows a residual near \eqn{10^{-8}} while degrees 10 and 50 are
+near \eqn{10^{-15}}). The \code{tailtol} degree-\code{n + 1} retry and the
+\code{ztol} coefficient-zeroing test do not apply to the barycentric basis,
+which has no coefficient solve to restart or prune.
+}
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
 often fails with a singular matrix error. In this case, for the
@@ -215,14 +256,19 @@ components:
     internally mapped variable \eqn{z} (see \strong{Mapped Chebyshev Basis}
     above) whenever the fitted range is not \eqn{[-1, 1]}; on \eqn{[-1, 1]}
     itself, \eqn{z = x} and these are unchanged from prior releases. When
-    using monomials, these are the coefficients for \eqn{x^k}.}
+    using the barycentric basis, these are the mapped-Chebyshev coefficients
+    recovered from the barycentric representation (see \strong{Barycentric
+    Basis} above). When using monomials, these are the coefficients for
+    \eqn{x^k}.}
     \item{b}{The rational denominator coefficients. Same semantics as
     \code{a} above. Missing for polynomial approximation.}
-    \item{aMono}{When using Chebyshev polynomials, these are the polynomial or
-    rational numerator coefficients for monomial expansion in \eqn{x^k}
-    (natural, raw \eqn{x}, regardless of the internal map. See \strong{Mapped
-    Chebyshev Basis} above for an accuracy caveat at high degree on wide,
-    far-off-\eqn{[-1,1]} ranges). Missing for monomial-based approximation.}
+    \item{aMono}{When using Chebyshev or barycentric polynomials, these are the
+    polynomial or rational numerator coefficients for monomial expansion in
+    \eqn{x^k} (natural, raw \eqn{x}), regardless of the internal map. See
+    \strong{Mapped Chebyshev Basis} above for an accuracy caveat at high degree
+    on wide, far-off-\eqn{[-1,1]} ranges; the barycentric basis reports the size
+    of this conversion loss directly in \code{convResid}. Missing for
+    monomial-based approximation.}
     \item{bMono}{When using Chebyshev polynomials, these are the rational
     denominator coefficients for monomial expansion in \eqn{x^k} (natural, raw
     \eqn{x}; same caveat as \code{aMono}). Missing for both polynomial and
@@ -239,11 +285,16 @@ components:
     approximation.}
     \item{Extrema}{The extrema at which the minimax error was achieved.}
     \item{Warning}{A logical flag indicating if any warnings were thrown.}
+    \item{convResid}{Barycentric basis only. The conversion residual: the
+    maximum absolute difference between the (accurate) barycentric evaluation of
+    the fitted polynomial and its reconstruction from the recovered coefficients,
+    measured on a dense probe grid. A diagnostic of how much accuracy the
+    coefficient recovery lost; see \strong{Barycentric Basis} above.}
 
 The object also contains the following attributes:
 
     \item{type}{"Rational" or "Polynomial".}
-    \item{basis}{"Monomial" or "Chebyshev".}
+    \item{basis}{"Monomial", "Chebyshev", or "Barycentric".}
     \item{func}{The function being approximated.}
     \item{range}{The range on which the function is being approximated.}
     \item{relErr}{A logical indicating that relative error was used. If
@@ -269,6 +320,14 @@ Langlois, P. and Graillat, S. and Louvet, N. (2006) \dQuote{Compensated Horner
 Scheme}, in \emph{Algebraic and Numerical Algorithms and Computer-assisted
 Proofs.} Dagstuhl Seminar Proceedings, \bold{5391},
 \doi{10.4230/DagSemProc.05391.3}
+
+Pach\enc{ó}{o}n, R. and Trefethen, L. N. (2009) \dQuote{Barycentric-Remez
+algorithms for best polynomial approximation in the chebfun system}, \emph{BIT
+Numerical Mathematics}, \bold{49}, 721--741, \doi{10.1007/s10543-009-0240-1}
+
+Berrut, J.-P. and Trefethen, L. N. (2004) \dQuote{Barycentric Lagrange
+interpolation}, \emph{SIAM Review}, \bold{46}(3), 501--517,
+\doi{10.1137/S0036144502417715}
 }
 
 \author{
@@ -296,6 +355,10 @@ minimaxApprox(function(x) x ^ 3 / sin(x), 0.7, 1.6, 6L)  # Anonymous
 fn <- function(x) besselJ(x, nu = 0)                     # More than one input
 b0 <- 0.893576966279167522                               # Zero of besselY
 minimaxApprox(fn, 0, b0, c(3L, 3L))                      # Cf. DLMF 3.11.19
+
+minimaxApprox(exp, -1, 1, 14, basis = "b")              # Barycentric: converges
+                                                        # at degrees where the
+                                                        # classical bases fail
 }
 
 \keyword{optimize}
