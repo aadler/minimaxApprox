@@ -32,18 +32,17 @@ isOscil <- function(x) {
 }
 
 evalFunc <- function(x, R, basis, l, u) {
-  # M6 (F5 Option A): l/u are now REQUIRED (not defaulted) on purpose. This is
-  # the single innermost dispatch site for Chebyshev-basis evaluation; a
-  # missed CHEBYSHEV call site anywhere upstream (findRoots/remErr/plot/
-  # minimaxEval/...) now surfaces immediately as "argument l is missing"
-  # rather than silently evaluating T_k at raw x. NOTE: R's lazy evaluation
-  # means this only fires when l/u are actually dereferenced -- monomial-
-  # basis callers that omit l/u run fine (harmless, since this branch is
-  # never reached for them), which is why monomial callers below still pass
-  # them: for signature consistency with the required-parameter contract,
-  # not because omitting them would break anything for basis = "m". See
-  # switchX/checkDenom/basisScale for the established precedent of required
-  # (not optional) l/u on internals that need the range.
+  # M5 (barycentric): basis "b" evaluates the trial/fitted polynomial directly
+  # from its stored barycentric representation R$bary = list(x, w, p) via the
+  # second barycentric formula (baryEval). This is the accurate evaluation path
+  # and the one findRoots/switchX/remErr/plot/minimaxErr all reach through this
+  # single dispatch site, so those functions need no barycentric-specific code.
+  # The field is named "bary" (not "b") so it does not collide with the
+  # rational-denominator detection `"b" %in% names(R)` below.
+  if (basis == "b") {
+    return(baryEval(x, R$bary$x, R$bary$w, R$bary$p))
+  }
+  # M6 (F5 Option A): l/u are now REQUIRED (not defaulted) on purpose.
   z <- if (basis == "c") chebMap(x, l, u) else x
   calcFunc <- switch(EXPR = basis, m = polyCalc, chebCalc)
   ret <- calcFunc(z, R$a)

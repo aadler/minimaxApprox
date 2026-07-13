@@ -57,10 +57,12 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
          "Default FALSE returns absolute error.")
   }
 
-  # basis (existing check, unchanged; relocated into the validation block).
+  # basis (existing check, extended for M5 barycentric; relocated into the
+  # validation block for M2).
   basis <- tolower(substr(basis, 1L, 1L))
-  if (!(basis %in% c("c", "m"))) {
-    stop("Must select either 'C'hebyshev or 'm'onomial basis for analysis.")
+  if (!(basis %in% c("c", "m", "b"))) {
+    stop("Must select either 'C'hebyshev, 'm'onomial, or 'b'arycentric basis ",
+         "for analysis.")
   }
 
   # opts: must be a list; only members the caller actually supplied are
@@ -166,9 +168,24 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
          "denominator degrees. Any other inputs are invalid.")
   }
 
+  # M5 Phase 1: the barycentric basis is polynomial-only in this release.
+  # Rational barycentric (E2, Filip-Nakatsukasa-Trefethen-Beckermann 2018) is
+  # documented future work; refuse it with a clear message rather than silently
+  # falling back to a classical rational fit.
+  if (basis == "b" && ratApprox) {
+    stop("The barycentric basis is not yet supported for rational ",
+         "approximation. Use a single degree for polynomial approximation, or ",
+         "the Chebyshev/monomial basis for rational approximation.") # nolint nonportable_path_linter
+  }
+
   # Call Calculation Functions
   mmA <- if (ratApprox) {
     remRat(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts)
+  } else if (basis == "b") {
+    # M5: barycentric path. It has no linear solve, so it never returns the
+    # "singular" simpleError the classical restart/rescue machinery keys on;
+    # genuine errors (e.g. a failing fn) propagate to the caller as usual.
+    remBary(fn, lower, upper, as.integer(degree), relErr, opts)
   } else {
     tryCatch(remPoly(fn, lower, upper, as.integer(degree), relErr, basis, opts),
              error = function(e) simpleError(trimws(e$message)))
@@ -185,7 +202,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   # TODO: Trap other errors with better messages (AA: 2025-12-24)
 
 
-  if (!ratApprox && inherits(mmA, "simpleError") &&
+  if (!ratApprox && basis != "b" && inherits(mmA, "simpleError") &&
       grepl("singular", mmA$message, fixed = TRUE)) {
 
     if (is.null(opts$tailtol)) {
@@ -264,8 +281,8 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   # only if the function really is resolved to the machine floor at degree n,
   # otherwise NULL (leaving a genuine non-convergence untouched, so its normal
   # maxiter/unchanging warning still fires).
-  if (!ratApprox && !inherits(mmA, "simpleError") && !isTRUE(mmA$rescued) &&
-      !mmA$converged) {
+  if (!ratApprox && basis != "b" && !inherits(mmA, "simpleError") &&
+      !isTRUE(mmA$rescued) && !mmA$converged) {
     rescue <- interpRescue(fn, lower, upper, as.integer(degree), relErr, basis)
     if (!is.null(rescue)) {
       mmA <- list(a = rescue$a, expe = rescue$err, mxae = rescue$err,
@@ -356,9 +373,22 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     }
   }
 
+  # M5: the barycentric fit reuses the Chebyshev-coefficient assembly above
+  # (mmA$a holds the mapped Chebyshev coefficients recovered in finishBary, and
+  # aMono is the same cheb2mon + composeAffine pipeline), but is labelled its
+  # own basis so methods dispatch to the stored barycentric representation.
+  if (basis == "b") polynomalBasis <- "Barycentric"
+
   diagnostics <- list(ExpErr = mmA$expe, ObsErr = mmA$mxae, iterations = mmA$i,
                       Extrema = mmA$x, Warning = gotWarning)
   ret <- c(coeff, monomialEq, diagnostics)
+
+  # M5: expose the primary barycentric representation (reference nodes, weights,
+  # p-values) and the coefficient-conversion residual on the object.
+  if (basis == "b") {
+    ret <- c(ret, list(bary = mmA$bary, convResid = mmA$convResid))
+  }
+
   attr(ret, "type") <- if (ratApprox) "Rational" else "Polynomial"
   attr(ret, "basis") <- polynomalBasis
   attr(ret, "func") <- fn

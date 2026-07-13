@@ -8,13 +8,44 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
     stop("This function only works with 'minimaxApprox' objects.")
   }
   requestedbasis <- tolower(substr(basis, 1L, 1L))
-  onlyMono <- attr(mmA, "basis") == "Monomial"
-  if (!(requestedbasis %in% c("c", "m"))) {
-    stop("Select either the 'M'onomial or 'C'hebyshev basis.")
+  objBasis <- attr(mmA, "basis")
+  onlyMono <- objBasis == "Monomial"
+  isBary <- objBasis == "Barycentric"                              # M5
+  if (!(requestedbasis %in% c("c", "m", "b"))) {                   # M5: + "b"
+    stop("Select either the 'B'arycentric, 'M'onomial, or 'C'hebyshev basis.")
   }
   # M6 (F5 Option A): evalFunc's l/u are now required whenever the Chebyshev
   # branch is reached; the fitted range lives on the object as attr(range).
   rng <- attr(mmA, "range")
+
+  # M5: for a barycentric object, the object's OWN basis wins (consistent with
+  # current behavior where the object's basis is the default evaluator). The
+  # stored barycentric representation is the most accurate path, so a defaulted
+  # or explicit "b" request evaluates through it. An explicit "c"/"m" request
+  # is honored via the converted coefficients, with a message (mirroring the
+  # Monomial-only message pattern) since that conversion can be less accurate
+  # (see the object's convResid).
+  if (isBary) {
+    if (missing(basis) || requestedbasis == "b") {
+      return(evalFunc(x, mmA, "b", rng[1L], rng[2L]))
+    }
+    message("Analysis was run using the barycentric basis. Evaluating via the ",
+            "converted ",
+            if (requestedbasis == "c") "Chebyshev" else "monomial",
+            " coefficients, which may be less accurate than the barycentric ",
+            "representation (see the object's convResid).")
+    if (requestedbasis == "c") {
+      return(evalFunc(x, mmA, "c", rng[1L], rng[2L]))
+    }
+    return(evalFunc(x, list(a = mmA$aMono), "m", rng[1L], rng[2L]))
+  }
+
+  # Non-barycentric object: a "b" request has nothing to evaluate.  # M5
+  if (requestedbasis == "b") {
+    stop("Analysis was not run using the barycentric basis. Select the ",
+         "'M'onomial or 'C'hebyshev basis.")
+  }
+
   if (requestedbasis == "c") {
     if (onlyMono) {
       message("Analysis was run using only the monomial basis. Calculating ",

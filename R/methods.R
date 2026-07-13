@@ -10,7 +10,7 @@ print.minimaxApprox <- function(x, digits = 14L, ...) {
     coeff <- list(a = x$a, b = x$b)
   }
 
-  if (attr(x, "basis") == "Chebyshev") {
+  if (attr(x, "basis") %in% c("Chebyshev", "Barycentric")) {
     monomialEq <- list(aMono = x$aMono)
     if ((attr(x, "type") == "Rational")) {
       monomialEq <- c(monomialEq, list(bMono = x$bMono))
@@ -42,7 +42,7 @@ coef.minimaxApprox <- function(object, ...) {
     coeff <- list(a = object$a, b = object$b)
   }
 
-  if (attr(object, "basis") == "Chebyshev") {
+  if (attr(object, "basis") %in% c("Chebyshev", "Barycentric")) {
     coeff <- c(coeff, list(aMono = object$aMono))
     if (attr(object, "type") == "Rational") {
       coeff <- c(coeff, list(bMono = object$bMono))
