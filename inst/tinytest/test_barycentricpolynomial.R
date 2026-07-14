@@ -101,13 +101,12 @@ expect_silent_ok <- sW(minimaxApprox(sin, -1, 1, 6, basis = "b",
                                                    relErr = TRUE))
 expect_true(is.finite(expect_silent_ok$ExpErr))
 
-# ---- Rational barycentric is rejected up front (Phase 1 is polynomial-only) --
-# A length-2 degree with basis "b" is a reachable user input; the guard rejects
-# it with a clear message rather than letting it fall through to remRat (which
-# would fail confusingly, since the barycentric evaluator expects R$bary, not
-# a/b coefficient lists). This covers the guard until Phase 2 replaces it.
-expect_error(minimaxApprox(exp, 0, 1, c(2L, 3L), basis = "b"),
-             "not yet supported for rational")
+# M5 Phase 2: rational barycentric approximation now dispatches to
+# remBaryRat. The reachable guard is relative error, which the FNT-subset
+# implementation deliberately excludes; it must be rejected upfront with a
+# clear message rather than falling through.
+expect_error(minimaxApprox(exp, 0, 1, c(2L, 3L), relErr = TRUE, basis = "b"),
+             "Relative error is not yet supported for rational")
 
 # ---- Capacity scaling: wide interval, high degree, no over/underflow ------
 rw <- sW(minimaxApprox(function(x) 1 / (1 + x^2), -1e4, 1e4, 50,
