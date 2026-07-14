@@ -67,10 +67,10 @@ c23 <- sW(minimaxApprox(exp, -1, 1, c(2L, 3L)))
 expect_true(abs(b23$ExpErr - c23$ExpErr) / c23$ExpErr < 1e-4)
 
 # Requested degrees are honored exactly in the recovered coefficients.
-expect_identical(length(b32$a), 4L)
-expect_identical(length(b32$b), 3L)
-expect_identical(length(b23$a), 3L)
-expect_identical(length(b23$b), 4L)
+expect_length(b32$a, 4L)
+expect_length(b32$b, 3L)
+expect_length(b23$a, 3L)
+expect_length(b23$b, 4L)
 expect_equal(b23$b[1L], 1, tolerance = tol)
 
 # ---- |x|: the case class the barycentric basis exists for ------------------
@@ -131,7 +131,8 @@ expect_true(abs(bxi$ExpErr - c22$ExpErr) / c22$ExpErr < 1e-6)
 
 # ---- Wide interval: capacity scaling ---------------------------------------
 bw <- minimaxApprox(exp, 0, 10, c(3L, 2L), basis = "b")
-expect_true(is.finite(bw$ExpErr) && bw$ExpErr > 0)
+expect_true(is.finite(bw$ExpErr))
+expect_true(bw$ExpErr > 0)
 gw <- seq(0, 10, length.out = 5001L)
 expect_true(max(abs(minimaxEval(gw, bw) - exp(gw))) / bw$ExpErr < 1 + 1e-6)
 
@@ -144,7 +145,7 @@ fEC <- function(x) exp(cos(x))
 # baryRatPoleCheck: a denominator weight of exactly 0 at a support point that
 # is also a probe-grid point makes q hit 0.0 exactly (the s == 0 branch).
 expect_equal(baryRatPoleCheck(c(-0.5, 0, 0.5), c(1, 1, 1), c(1, 0, 1),
-                              -1, 1), 0)
+                                  -1, 1), 0L, tolerance = tol)
 
 # Coincident reference points must return the clean "collapse" failure from
 # baryRatSolve (defense in depth), never a raw qr()/low-level error.
@@ -166,7 +167,7 @@ expect_error(baryRatFail("zeroweight", 3L, 2L),
              "denominator weight collapsed to zero")
 expect_error(baryRatFail("collapse", 3L, 2L),
              "reference points collapsed onto each other")
-expect_error(baryRatFail("rank", 3L, 2L), "c\\(2, 1\\)")   # suggested degrees
+expect_error(baryRatFail("rank", 3L, 2L), "c(2, 1)", fixed = TRUE)  # sugg degs
 
 # Defect family (even function): detect-and-stop end-to-end. exp(cos(x)) is
 # even, so its best rational approximations are non-normal at many requested

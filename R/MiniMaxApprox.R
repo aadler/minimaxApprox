@@ -175,7 +175,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   if (basis == "b" && ratApprox && relErr) {
     stop("Relative error is not yet supported for rational approximation ",
          "with the barycentric basis. Use absolute error (relErr = FALSE), ",
-         "or the Chebyshev/monomial basis.")
+         "or a Chebyshev or monomial basis.")
   }
 
   # Call Calculation Functions

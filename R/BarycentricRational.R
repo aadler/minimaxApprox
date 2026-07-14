@@ -1,6 +1,8 @@
 # Copyright Avraham Adler (c) 2026
 # SPDX-License-Identifier: MPL-2.0+
 
+# nolint start: object_name_linter
+
 # Module M5, Phase 2: barycentric-Remez RATIONAL approximation, following
 # Filip, Nakatsukasa, Trefethen & Beckermann (2018), SIAM J. Sci. Comput.
 # 40(4):A2427-A2455 (FNT), with AAA initialization per Nakatsukasa, Sete &
@@ -592,3 +594,6 @@ remBaryRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
   finishBaryRat(sol, x, expe, mxae, i, converged, unchanged, unchanging_i,
                 lower, upper, m, n, refLocal = refLocal, gridSup = gridSup)
 }
+
+# nolint end
+
