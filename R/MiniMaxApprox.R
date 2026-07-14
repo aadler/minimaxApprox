@@ -168,18 +168,24 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
          "denominator degrees. Any other inputs are invalid.")
   }
 
-  # M5 Phase 1: the barycentric basis is polynomial-only in this release.
-  # Rational barycentric (E2, Filip-Nakatsukasa-Trefethen-Beckermann 2018) is
-  # documented future work; refuse it with a clear message rather than silently
-  # falling back to a classical rational fit.
-  if (basis == "b" && ratApprox) {
-    stop("The barycentric basis is not yet supported for rational ",
-         "approximation. Use a single degree for polynomial approximation, or ",
-         "the Chebyshev/monomial basis for rational approximation.") # nolint nonportable_path_linter
+  # M5 Phase 2: rational barycentric approximation (Filip-Nakatsukasa-
+  # Trefethen-Beckermann 2018, subset scope) supports ABSOLUTE error only;
+  # hew to the published algorithm and refuse relErr with a clear message
+  # rather than improvising a weighted variant.
+  if (basis == "b" && ratApprox && relErr) {
+    stop("Relative error is not yet supported for rational approximation ",
+         "with the barycentric basis. Use absolute error (relErr = FALSE), ",
+         "or the Chebyshev/monomial basis.")
   }
 
   # Call Calculation Functions
-  mmA <- if (ratApprox) {
+  mmA <- if (ratApprox && basis == "b") {
+    # M5 Phase 2: rational barycentric path. Like the polynomial barycentric
+    # path, it has no classical linear solve and never returns the "singular"
+    # simpleError the restart/rescue machinery keys on; its degenerate-case
+    # errors (documented detect-and-stop limitations) propagate to the caller.
+    remBaryRat(fn, lower, upper, numerd, denomd, relErr, xi, opts)
+  } else if (ratApprox) {
     remRat(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts)
   } else if (basis == "b") {
     # M5: barycentric path. It has no linear solve, so it never returns the
@@ -343,6 +349,18 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     gotWarning <- TRUE
   }
 
+  if (isTRUE(mmA$refLocal)) {
+    warning("The rational barycentric iteration converged on its reference, ",
+            "but the approximation's maximum error on a dense grid (",
+            fC(mmA$gridSup), ") exceeds the leveled error (", fC(mmA$expe),
+            "). The requested degrees are likely non-normal for this ",
+            "function (e.g. an even or odd function); the returned expected ",
+            "error is a lower bound on the true minimax error, not a ",
+            "certificate. Degrees adapted to the function's symmetry may ",
+            "converge fully.")
+    gotWarning <- TRUE
+  }
+
   coeff <- if (ratApprox) {
     list(a = mmA$a, b = mmA$b)
   } else {
@@ -400,3 +418,4 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   ret
 }
+
