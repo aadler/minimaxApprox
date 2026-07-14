@@ -133,9 +133,28 @@
       \strong{exactly} zero at a reference point (typically an interval
       endpoint), where the relative minimax does not exist, now raises a clear
       error. The returned object carries the barycentric representation and a
-      coefficient-conversion residual diagnostic (\code{convResid}). Polynomial
-      approximation only in this release; requesting the barycentric basis for
-      rational approximation is an error. See \code{\link{minimaxApprox}}.
+      coefficient-conversion residual diagnostic (\code{convResid}). See
+      \code{\link{minimaxApprox}}.
+
+      \item Added \strong{rational} approximation support to the
+      \code{"Barycentric"} basis, implementing (a subset of) the adaptive
+      barycentric minimax algorithm of Filip, Nakatsukasa, Trefethen, and
+      Beckermann (2018), with the initial reference taken from the error
+      extrema of an AAA approximant (Nakatsukasa, S\enc{è}{e}te, and
+      Trefethen, 2018). The leveled error is computed as an eigenvalue of a
+      small symmetric matrix, so, as for the polynomial case, there is no
+      ill-conditioned linear solve; the classical smooth-function results are
+      reproduced to convergence tolerance while cases such as
+      \eqn{|x|} converge to the certified minimax where reference-based
+      classical iterations can struggle. Absolute error only in this release
+      (\code{relErr = TRUE} is an error); degenerate or defective requests
+      (e.g. even degrees for an even function) are detected and reported with
+      a clear error rather than repaired by degree reduction; a trial
+      denominator with a zero in the interval is an error mirroring the
+      classical rational path. The returned object carries \code{a}/\code{b}
+      normalized as in the classical path, \code{aMono}/\code{bMono}, the
+      barycentric representation, and a named two-component \code{convResid}.
+      See \code{\link{minimaxApprox}}.
     }
   }
 }
