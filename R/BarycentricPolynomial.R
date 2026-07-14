@@ -42,6 +42,20 @@ separateNodes <- function(x, l, u) {
       x[k + 1L] <- min(x[k] + sep, u)
     }
   }
+  # A collision at (or pushed to) the UPPER endpoint cannot be separated by
+  # the upward pass: the min(, u) clamp pins the later point at u and leaves
+  # the pair coincident. Sweep downward from the top for any remaining
+  # collision, pushing the EARLIER point down instead. For every input the
+  # forward pass already separates (all healthy references and all interior
+  # collapses), this loop compares and moves nothing, so previously-working
+  # behavior is bitwise unchanged; it acts only where the old code returned
+  # coincident nodes, which downstream turned into Inf barycentric weights
+  # (polynomial path) or a non-finite basis matrix (rational path).
+  for (k in rev(seq_len(length(x) - 1L))) {
+    if (x[k + 1L] - x[k] < sep) {
+      x[k] <- max(x[k + 1L] - sep, l)
+    }
+  }
   x
 }
 
