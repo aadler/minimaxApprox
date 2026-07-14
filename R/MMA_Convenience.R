@@ -37,13 +37,35 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
     if (requestedbasis == "c") {
       return(evalFunc(x, mmA, "c", rng[1L], rng[2L]))
     }
-    return(evalFunc(x, list(a = mmA$aMono), "m", rng[1L], rng[2L]))
+    # M5 Phase 2: a rational barycentric object also carries bMono; without
+    # it this branch would evaluate the numerator polynomial alone.
+    RR <- list(a = mmA$aMono)
+    if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
+    return(evalFunc(x, RR, "m", rng[1L], rng[2L]))
   }
 
   # Non-barycentric object: a "b" request has nothing to evaluate.  # M5
   if (requestedbasis == "b") {
     stop("Analysis was not run using the barycentric basis. Select the ",
          "'M'onomial or 'C'hebyshev basis.")
+  }
+
+  if (requestedbasis == "c") {
+    if (onlyMono) {
+      message("Analysis was run using only the monomial basis. Calculating ",
+              "errors using monomials.")
+      evalFunc(x, mmA, "m", rng[1L], rng[2L])
+    } else {
+      evalFunc(x, mmA, "c", rng[1L], rng[2L])
+    }
+  } else if (onlyMono) {
+    evalFunc(x, mmA, "m", rng[1L], rng[2L])
+  } else {
+    # aMono/bMono are already in raw x (natural representation, unaffected by
+    # M6's internal mapping), so this monomial-evaluation branch needs no map.
+    RR <- list(a = mmA$aMono)
+    if ("bMono" %in% names(mmA)) RR <- c(RR, list(b = mmA$bMono))
+    evalFunc(x, RR, "m", rng[1L], rng[2L])
   }
 
   if (requestedbasis == "c") {
