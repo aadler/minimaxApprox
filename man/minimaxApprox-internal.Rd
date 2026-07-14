@@ -50,7 +50,7 @@
 \alias{basisScale}
 \alias{tailContribution}
 
-% In Barycentric.R
+% In BarycentricPolynomial.R
 \alias{chebNodes2}
 \alias{separateNodes}
 \alias{baryWeights}
@@ -60,5 +60,18 @@
 \alias{onePointExchange}
 \alias{finishBary}
 \alias{remBary}
+
+% In BarycentricRational.R
+\alias{lejaAugment}
+\alias{krylovNull}
+\alias{baryRatCtilde}
+\alias{baryRatPQ}
+\alias{baryRatPoleCheck}
+\alias{baryRatSolve}
+\alias{baryRatFail}
+\alias{finishBaryRat}
+\alias{aaaApprox}
+\alias{baryRatInitRef}
+\alias{remBaryRat}
 
 \keyword{internal}

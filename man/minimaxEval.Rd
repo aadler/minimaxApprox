@@ -23,7 +23,9 @@ minimaxEval(x, mmA, basis = "Chebyshev")
   basis, evaluation defaults to the (most accurate) stored barycentric
   representation; requesting \code{"Chebyshev"} or \code{"Monomial"} instead
   evaluates through the converted coefficients with a message, as that
-  conversion can be less accurate (see the object's \code{convResid}). The
+  conversion can be less accurate (see the object's \code{convResid}). For a
+  rational barycentric approximation the stored representation and both
+  coefficient routes all evaluate the full numerator/denominator quotient. The
   default is \code{"Chebyshev"}, and the parameter is case-insensitive and may
   be abbreviated.}
 }

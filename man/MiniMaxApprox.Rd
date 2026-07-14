@@ -36,18 +36,23 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
     \item{basis}{character; Which polynomial basis to use in the analysis.
     \code{"Monomial"} uses the standard \eqn{x^k} basis. \code{"Chebyshev"} uses
     the Chebyshev polynomials of the first kind, \eqn{T_k}. \code{"Barycentric"}
-    uses the barycentric-Remez algorithm of Pach\enc{ó}{o}n and Trefethen (2009),
-    which represents the trial polynomial by its values at the reference rather
-    than by coefficients in a fixed basis, avoiding the ill-conditioned linear
-    solve entirely (see \strong{Barycentric Basis} below). The default is
-    \code{"Chebyshev"}, and the parameter is case-insensitive and may be
-    abbreviated. \code{"Barycentric"} supports polynomial approximation only;
-    requesting it with a length-2 \code{degree} (rational) is an error.}
+    for polynomials uses the barycentric-Remez algorithm of Pach\enc{ó}{o}n and
+    Trefethen (2009), which represents the trial polynomial by its values at the
+    reference rather than by coefficients in a fixed basis, avoiding the
+    ill-conditioned linear solve entirely (see \strong{Barycentric Basis}
+    below). For rational approximation, \code{"Barycentric"} uses the adaptive
+    barycentric algorithm of Filip, Nakatsukasa, Trefethen, and Beckermann
+    (2018) and supports \strong{absolute} error only; requesting it with
+    \code{relErr = TRUE} is an error. The default is \code{"Chebyshev"}, and the
+    parameter is case-insensitive and may be abbreviated.}
     \item{xi}{numeric; For rational approximation, a vector of initial points of
     the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
-    missing, the approximation will use the appropriate Chebyshev nodes.
-    Polynomial approximation \strong{always} uses Chebyshev nodes and will
-    ignore \code{xi} with a message.}
+    missing, the approximation will use the appropriate Chebyshev nodes,
+    except that rational approximation in the barycentric basis initializes
+    from the error extrema of an AAA approximant (see \strong{Barycentric
+    Basis} below); a supplied \code{xi} of the correct length overrides that
+    initialization. Polynomial approximation \strong{always} uses Chebyshev
+    nodes and will ignore \code{xi} with a message.}
     \item{opts}{\link{list}; Configuration options including:
         \itemize{
             \item \code{maxiter}: integer; The maximum number of iterations to
@@ -157,17 +162,19 @@ for \code{\link{minimaxEval}}/\code{\link{minimaxErr}}) over consuming
 \code{aMono} directly, if accuracy at that level matters.
 }
 \subsection{Barycentric Basis}{
-Selecting \code{basis = "Barycentric"} uses the barycentric-Remez algorithm of
-Pach\enc{ó}{o}n and Trefethen (2009). Rather than solving an
-\eqn{(n + 2) \times (n + 2)} linear system in a fixed basis at each iteration
-\eqn{-} the source of the conditioning failures that cap the achievable degree
-in the classical bases \eqn{-} it represents the trial polynomial by its
-\emph{values} at the reference points, with barycentric weights, and computes
-the leveled error \eqn{h} in closed form. Weights are assembled with capacity
-scaling so that wide or far-off-center intervals and high degrees do not
-over- or underflow. As a result the barycentric basis typically converges at
-degrees where the classical bases fail with a singular-matrix error, and is
-well-conditioned off \eqn{[-1, 1]} without a separate mapping step.
+\subsection{Polynomial Approximation}{
+Selecting \code{basis = "Barycentric"} for \strong{polynomial} approximation
+uses the barycentric-Remez algorithm of Pach\enc{ó}{o}n and Trefethen (2009).
+Rather than solving an \eqn{(n + 2) \times (n + 2)} linear system in a fixed
+basis at each iteration---the source of the conditioning failures that cap
+the achievable degree in the classical bases---it represents the trial
+polynomial by its \emph{values} at the reference points, with barycentric
+weights, and computes the leveled error \eqn{h} in closed form. Weights are
+assembled with capacity scaling so that wide or far-off-center intervals and
+high degrees do not over- or underflow. As a result the barycentric basis
+typically converges at degrees where the classical bases fail with a
+singular-matrix error, and is well-conditioned off \eqn{[-1, 1]} without a
+separate mapping step.
 
 Functions that are exactly representable, or resolved to machine precision at
 the requested degree (the cases described in \strong{Machine-Precision-Resolved
@@ -176,8 +183,8 @@ Functions} below), are handled \emph{natively}: the closed-form leveled error is
 rescue is needed. Relative error is supported via the analogous closed form;
 however, if \code{fn} is \strong{exactly} \eqn{0} at a reference point
 (typically an endpoint of \eqn{[l, u]}, which is always a reference node), the
-relative error there is \eqn{0/0} and the relative minimax does not exist \eqn{-}
-this is reported as a clear error rather than a silent or crashed result. Use
+relative error there is \eqn{0/0} and the relative minimax does not exist---this
+is reported as a clear error rather than a silent or crashed result. Use
 absolute error, or an interval whose endpoints are not zeros of \code{fn}.
 
 The returned object stores the barycentric representation (reference nodes,
@@ -191,6 +198,46 @@ intermediate degrees (for example, a degree-20 fit of \eqn{1/(1 + x^2)} on
 near \eqn{10^{-15}}). The \code{tailtol} degree-\code{n + 1} retry and the
 \code{ztol} coefficient-zeroing test do not apply to the barycentric basis,
 which has no coefficient solve to restart or prune.
+}
+\subsection{Rational Approximation}{
+\strong{Rational approximation} in the barycentric basis implements the
+adaptive-barycentric minimax algorithm of Filip, Nakatsukasa, Trefethen, and
+Beckermann (2018): the trial rational is represented as a quotient of
+barycentric forms over \emph{support points} chosen as every other reference
+point, and the leveled error at each iteration is an eigenvalue of a small
+\emph{symmetric} matrix, so there is again no ill-conditioned linear solve.
+The initial reference is taken from the error extrema of an AAA approximant
+(Nakatsukasa, S\enc{è}{e}te, and Trefethen, 2018) computed on a dense sample
+grid, falling back to Chebyshev points when the AAA error curve does not
+supply enough alternations. The returned \code{a}/\code{b} (and
+\code{aMono}/\code{bMono}) are recovered from the barycentric representation
+with the denominator normalized to a constant term of \eqn{1}, matching the
+classical rational path, and \code{convResid} is a named length-2 vector
+reporting the relative conversion residual of the numerator (\code{"a"}) and
+denominator (\code{"b"}) separately.
+
+The rational barycentric implementation is a deliberate subset of the
+published algorithm, with the following limitations. Only \strong{absolute}
+error is supported; \code{relErr = TRUE} is rejected with an error.
+Degenerate or \emph{defective} problems---for example, requesting even
+numerator and denominator degrees for an even function, where the true best
+approximation has fewer effective parameters than the requested type---are
+\strong{detected and reported as errors} rather than repaired by degree
+reduction as in the full published algorithm; the error message identifies
+the detected cause (a rank-deficient basis matrix, no pole-free solution of
+the leveled-error equations, or a collapsed barycentric weight). A trial
+denominator with a zero inside the approximation interval is likewise
+reported as an error, mirroring the classical rational path. Finally, for
+\emph{non-normal} requests (degrees for which the true best approximation
+equioscillates on more than \eqn{m + n + 2} points, as happens for even or odd
+functions at generic degrees) the fixed-size exchange can converge to a leveled
+fixed point that is not the global minimax; the returned approximation is then
+valid and its expected error is a lower bound on the true minimax error, and a
+warning to that effect is raised whenever the approximation's dense-grid error
+exceeds its leveled error. The same reference-local caveat applies, without the
+automatic check, to results within a few orders of magnitude of machine
+precision on any basis.
+}
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{
 When too high of a degree is requested for the tolerance of the algorithm, it
@@ -289,7 +336,10 @@ components:
     maximum absolute difference between the (accurate) barycentric evaluation of
     the fitted polynomial and its reconstruction from the recovered coefficients,
     measured on a dense probe grid. A diagnostic of how much accuracy the
-    coefficient recovery lost; see \strong{Barycentric Basis} above.}
+    coefficient recovery lost; see \strong{Barycentric Basis} above. For
+    rational approximation it is a named length-2 vector giving the
+    \emph{relative} residual of the numerator (\code{"a"}) and denominator
+    (\code{"b"}) polynomials separately.}
 
 The object also contains the following attributes:
 
@@ -328,6 +378,15 @@ Numerical Mathematics}, \bold{49}, 721--741, \doi{10.1007/s10543-009-0240-1}
 Berrut, J.-P. and Trefethen, L. N. (2004) \dQuote{Barycentric Lagrange
 interpolation}, \emph{SIAM Review}, \bold{46}(3), 501--517,
 \doi{10.1137/S0036144502417715}
+
+Filip, S.-I. and Nakatsukasa, Y. and Trefethen, L. N. and Beckermann, B.
+(2018) \dQuote{Rational minimax approximation via adaptive barycentric
+representations}, \emph{SIAM Journal on Scientific Computing}, \bold{40}(4),
+A2427--A2455, \doi{10.1137/17M1132409}
+
+Nakatsukasa, Y. and S\enc{è}{e}te, O. and Trefethen, L. N. (2018) \dQuote{The
+AAA algorithm for rational approximation}, \emph{SIAM Journal on Scientific
+Computing}, \bold{40}(3), A1494--A1522, \doi{10.1137/16M1106122}
 }
 
 \author{
