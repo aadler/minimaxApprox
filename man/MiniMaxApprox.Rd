@@ -335,7 +335,11 @@ components:
     Remez-computed expected error; \code{ExpErr} equals \code{ObsErr} in that
     case.}
     \item{ObsErr}{The absolute value of largest observed error between the
-    function and the approximation at the extremal points.}
+    function and the approximation at the extremal points. For a result
+    returned with \code{Warning = TRUE}, the final reference points need not
+    track the approximation's true extrema, so \code{ObsErr} can materially
+    understate the true maximum error; verify non-converged results with
+    \code{\link{minimaxErr}} on a dense grid before use.}
     \item{iterations}{The number of iterations of the algorithm. This does not
     include any iterations required to converge the error value in rational
     approximation.}
