@@ -9,8 +9,8 @@
 
 \description{
 Extracts the numerator and denominator vectors from a \code{"minimaxApprox"}
-object. For objects with both Chebyshev and monomial coefficients, it will
-extract both.
+object. For objects fitted with the Chebyshev or barycentric basis, it will
+also extract the corresponding monomial-basis coefficients.
 }
 
 \usage{
@@ -32,10 +32,12 @@ extract both.
     approximation.}
     \item{aMono}{The polynomial coefficients or the rational numerator
     coefficients for the monomial basis when the approximation was done using
-    Chebyshev polynomials. Missing if only the monomial basis was used.}
+    Chebyshev polynomials or the barycentric basis. Missing if only the
+    monomial basis was used.}
     \item{bMono}{The rational denominator coefficients for the monomial basis
-    when the approximation was done using Chebyshev polynomials. Missing if
-    either only the monomial basis was used or for polynomial approximation.}
+    when the approximation was done using Chebyshev polynomials or the
+    barycentric basis. Missing if either only the monomial basis was used or
+    for polynomial approximation.}
 }
 
 \author{
