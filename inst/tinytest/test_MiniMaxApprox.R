@@ -5,7 +5,8 @@ tol <- sqrt(.Machine$double.eps)
 sW <- function(x) suppressWarnings(x)
 sM <- function(x) suppressMessages(x)
 
-# Most tests of warnings and messages will perforce check internals too.
+nS <- getNamespace("minimaxApprox")
+chebNodes <- get("chebNodes", nS, inherits = FALSE, mode = "function")
 
 # Check Accuracy and lack of warning flag when converged
 ## Rational 1: Based on Fraser & Hart (1962) p. 403 Table 2
@@ -183,7 +184,7 @@ expect_message(minimaxApprox(exp, -1, 1, 10L, xi = 6), wrnMess)
 ## Rational - Check that proper length is passed
 errMsg <- paste("Given the requested degrees for numerator and denominator,",
                 "the x-vector needs to have 8 elements.")
-xi <- minimaxApprox:::chebNodes(5L, -1, 1)
+xi <- chebNodes(5L, -1, 1)
 expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi), errMsg)
 
 # Test that passing proper size works for rational
@@ -219,7 +220,7 @@ controlE <- 0.06592293
 msgs <- character(0)
 PP <- withCallingHandlers(minimaxApprox(fn, -1, 1, 10L),
                           message = function(m) {
-                            msgs <<- c(msgs, conditionMessage(m))
+                            msgs <<- c(msgs, conditionMessage(m)) # nolint: undesirable_operator_linter
                             invokeRestart("muffleMessage")
                           })
 expect_true(length(msgs) == 0L ||
@@ -290,8 +291,8 @@ targetErr <- paste("The algorithm did not converge when looking for a",
                    "zero.")
 res <- tryCatch(
   minimaxApprox(fn, -1, 1, 18L, basis = "m", opts = list(tailtol = 1e-10)),
-  error = function(e) structure(conditionMessage(e), class = "mmaOutcomeErr"),
-  message = function(m) structure(conditionMessage(m), class = "mmaOutcomeMsg"))
+  error = function(e) structure(conditionMessage(e), class = "mmaOutcomeErr"),   # nolint undesirable_operator_linter
+  message = function(m) structure(conditionMessage(m), class = "mmaOutcomeMsg")) # nolint undesirable_operator_linter
 
 if (inherits(res, "mmaOutcomeErr")) {
   # Outcome (A): must be exactly the target branch, NOT "neither converged".

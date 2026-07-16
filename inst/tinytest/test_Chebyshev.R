@@ -3,13 +3,21 @@
 
 tol <- sqrt(.Machine$double.eps)
 
+nS <- getNamespace("minimaxApprox")
+chebMat <- get("chebMat", nS, inherits = FALSE, mode = "function")
+chebMap <- get("chebMap", nS, inherits = FALSE, mode = "function")
+chebCalc <- get("chebCalc", nS, inherits = FALSE, mode = "function")
+polyCalc <- get("polyCalc", nS, inherits = FALSE, mode = "function")
+evalFunc <- get("evalFunc", nS, inherits = FALSE, mode = "function")
+composeAffine <- get("composeAffine", nS, inherits = FALSE, mode = "function")
+
 # chebMat
 x <- c(-1.5, 0, 1.5)
 nx <- length(x)
 k <- 3
 control <- matrix(c(rep(1, nx), x, 2 * x ^ 2 - 1, 4 * x ^ 3 - 3 * x), ncol = 4L,
                   byrow = FALSE)
-expect_equal(minimaxApprox:::chebMat(x, k), control, tolerance = tol)
+expect_equal(chebMat(x, k), control, tolerance = tol)
 
 # chebCalc
 a <- 2:5
@@ -18,7 +26,7 @@ control <- c(2 * 1 + 3 * -0.5 + 4 * (2 * (-0.5) ^ 2 - 1) +
                5 * (4 * (-0.5) ^ 3 - 3 * (-0.5)),
              2 * 1 + 3 * 1.5 + 4 * (2 * 1.5 ^ 2 - 1) +
                5 * (4 * 1.5 ^ 3 - 3 * 1.5))
-expect_equal(minimaxApprox:::chebCalc(x, a), control, tolerance = tol)
+expect_equal(chebCalc(x, a), control, tolerance = tol)
 
 # evalFunc using Chebyshev
 ## Uses a and x from immediately previous
@@ -26,8 +34,7 @@ expect_equal(minimaxApprox:::chebCalc(x, a), control, tolerance = tol)
 ## remains exactly the raw-x pass-through check it always was.
 ## Polynomial
 R <- list(a = a)
-expect_equal(minimaxApprox:::evalFunc(x, R, "c", -1, 1), control,
-             tolerance = tol)
+expect_equal(evalFunc(x, R, "c", -1, 1), control, tolerance = tol)
 
 ## Rational
 b <- c(-0.5, -1, 2)
@@ -35,8 +42,7 @@ controlD <- c(-0.5 * 1 - (-0.5) + 2 * (2 * (-0.5) ^ 2 - 1),
               -0.5 * 1 - 1.5 + 2 * (2 * 1.5 ^ 2 - 1))
 control <- control / controlD
 R <- list(a = a, b = b)
-expect_equal(minimaxApprox:::evalFunc(x, R, "c", -1, 1), control,
-             tolerance = tol)
+expect_equal(evalFunc(x, R, "c", -1, 1), control, tolerance = tol)
 
 # cheb2mon
 ## Polynomial
@@ -78,9 +84,8 @@ expect_equal(resC[c(1, 2.5e6, 5e6)], exp(xBig[c(1, 2.5e6, 5e6)]),
 # exercising it through chebMat_c (cheap: only the scalar degree argument
 # need be large, no large vector allocation required) validates the shared
 # code path used by both entry points.
-expect_error(minimaxApprox:::chebMat(1:2, 2147483647),
-             pattern = "exceeds the supported 2^31-cell limit",
-             fixed = TRUE)
+expect_error(chebMat(1:2, 2147483647),
+             pattern = "exceeds the supported 2^31-cell limit", fixed = TRUE)
 
 # --- M6 regression: mapped Chebyshev basis (F5 Option A) --------------------
 
@@ -88,16 +93,16 @@ expect_error(minimaxApprox:::chebMat(1:2, 2147483647),
 # the package to guarantee every Chebyshev-basis result on [-1, 1] is
 # bitwise-unchanged from prior releases.
 x <- c(-1, -0.37, 0, 0.6, 1)
-expect_identical(minimaxApprox:::chebMap(x, -1, 1), x)
+expect_identical(chebMap(x, -1, 1), x)
 cf <- c(1, -2, 3, -4, 5)
-expect_identical(minimaxApprox:::composeAffine(cf, -1, 1), cf)
+expect_identical(composeAffine(cf, -1, 1), cf)
 ## Middle coefficient exactly 0, range off [-1,1] (so the identity fast path
 ## is not taken): exercises the `if (ck == 0) next` skip, otherwise only
 ## reachable incidentally depending on which coefficients a given Remez fit
 ## happens to produce. Deterministic, no Remez iteration/BLAS involved.
 ## z = (2x - (0+2))/(2-0) = x - 1 on [0, 2]; p(z) = 1 + 0*z + 3*z^2, so
 ## p(x-1) = 1 + 3*(x-1)^2 = 3x^2 - 6x + 4 -> coefficients [4, -6, 3].
-expect_identical(minimaxApprox:::composeAffine(c(1, 0, 3), 0, 2), c(4, -6, 3))
+expect_identical(composeAffine(c(1, 0, 3), 0, 2), c(4, -6, 3))
 
 # F5 payoff case: exp on [5, 6], deg 10, basis "c". Pre-M6 this converged
 # (with a warning) only to ObsErr ~1.8e-10 against unmapped-basis kappa
@@ -125,8 +130,8 @@ expect_equal(r5_6_relaxed$ObsErr, r5_6$ObsErr, tolerance = 0.05)
 # range close to [-1, 1]. Must stay tight.
 rN <- suppressWarnings(minimaxApprox(exp, 0, 1, 4L, basis = "c"))
 gridN <- seq(0, 1, length.out = 1001L)
-chebN <- minimaxApprox:::chebCalc(minimaxApprox:::chebMap(gridN, 0, 1), rN$a)
-monoN <- minimaxApprox:::polyCalc(gridN, rN$aMono)
+chebN <- chebCalc(chebMap(gridN, 0, 1), rN$a)
+monoN <- polyCalc(gridN, rN$aMono)
 expect_true(max(abs(chebN - monoN)) < 1e-10)
 
 # Composition accuracy, documented caveat case: high degree, wide range far
@@ -137,8 +142,8 @@ expect_true(max(abs(chebN - monoN)) < 1e-10)
 # rather than asserting tight accuracy that does not hold for this case.
 rW <- suppressWarnings(minimaxApprox(sin, 10, 20, 15L, basis = "c"))
 gridW <- seq(10, 20, length.out = 1001L)
-chebW <- minimaxApprox:::chebCalc(minimaxApprox:::chebMap(gridW, 10, 20), rW$a)
-monoW <- minimaxApprox:::polyCalc(gridW, rW$aMono)
+chebW <- chebCalc(chebMap(gridW, 10, 20), rW$a)
+monoW <- polyCalc(gridW, rW$aMono)
 compErrW <- max(abs(chebW - monoW))
 expect_true(compErrW > 1e-8)   # confirms the caveat is real, not a fluke
 expect_true(compErrW < 1e-4)   # and bounds it, so a future regression here

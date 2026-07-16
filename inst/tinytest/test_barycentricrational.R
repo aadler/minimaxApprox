@@ -8,15 +8,17 @@ sW <- function(x) suppressWarnings(x)
 sM <- function(x) suppressMessages(x)
 
 nS <- getNamespace("minimaxApprox")
-baryRatCtilde <- get("baryRatCtilde", nS)
-baryRatSolve <- get("baryRatSolve", nS)
-baryRatPQ <- get("baryRatPQ", nS)
-baryRatPoleCheck <- get("baryRatPoleCheck", nS)
-chebNodes2 <- get("chebNodes2", nS)
-callFun <- get("callFun", nS)
-baryEval <- get("baryEval", nS)
-chebCalc <- get("chebCalc", nS)
-chebMap <- get("chebMap", nS)
+baryRatCtilde <- get("baryRatCtilde", nS, inherits = FALSE, mode = "function")
+baryRatSolve <- get("baryRatSolve", nS, inherits = FALSE, mode = "function")
+baryRatPQ <- get("baryRatPQ", nS, inherits = FALSE, mode = "function")
+baryRatPoleCheck <- get("baryRatPoleCheck", nS, inherits = FALSE,
+                        mode = "function")
+chebNodes2 <- get("chebNodes2", nS, inherits = FALSE, mode = "function")
+callFun <- get("callFun", nS, inherits = FALSE, mode = "function")
+baryEval <- get("baryEval", nS, inherits = FALSE, mode = "function")
+chebCalc <- get("chebCalc", nS, inherits = FALSE, mode = "function")
+chebMap <- get("chebMap", nS, inherits = FALSE, mode = "function")
+REFLOCALTOL <- get("REFLOCALTOL", nS, inherits = FALSE, mode = "double")
 
 # ---- Structural identities (FNT Lemma 4 / Corollary 6) ---------------------
 # The QR factor of the C-tilde matrix must be orthonormal AND S-orthogonal
@@ -198,7 +200,7 @@ if (inherits(r88, "error")) {
 } else {
   g88 <- seq(-pi, pi, length.out = 2e5L)
   expect_true(max(abs(minimaxEval(g88, r88) - fEC(g88))) / r88$ExpErr <=
-                minimaxApprox:::REFLOCALTOL || isTRUE(r88$Warning))
+                REFLOCALTOL || isTRUE(r88$Warning))
 }
 
 # x^4 (2,2): even-monomial NON-NORMAL family. The true minimax equioscillates
@@ -230,7 +232,7 @@ if (inherits(r4, "error")) {
   # reference-local convergence must still warn.
   g4 <- seq(-1, 1, length.out = 2e5L)
   r4Ratio <- max(abs(minimaxEval(g4, r4) - g4 ^ 4)) / r4$ExpErr
-  expect_true(isTRUE(r4$Warning) || r4Ratio <= minimaxApprox:::REFLOCALTOL)
+  expect_true(isTRUE(r4$Warning) || r4Ratio <= REFLOCALTOL)
 }
 
 # exp(cos(x)) (4,4): same non-normal family, bistable the OTHER way --
@@ -250,8 +252,7 @@ if (inherits(rec, "error")) {
   # certificate; reference-local convergence must still warn.
   gec <- seq(-pi, pi, length.out = 2e5L)
   recRatio <- max(abs(minimaxEval(gec, rec) - fEC(gec))) / rec$ExpErr
-  expect_true(isTRUE(rec$Warning) ||
-                recRatio <= minimaxApprox:::REFLOCALTOL)
+  expect_true(isTRUE(rec$Warning) || recRatio <= REFLOCALTOL)
 }
 
 # exp(cos(x)) (2,2): platform-STABLE pre-loop pole stop -- the deterministic

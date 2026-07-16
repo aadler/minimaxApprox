@@ -5,39 +5,61 @@ tol <- sqrt(.Machine$double.eps)
 sW <- function(x) suppressWarnings(x)
 sM <- function(x) suppressMessages(x)
 
+nS <- getNamespace("minimaxApprox")
+fC <- get("fC", nS, inherits = FALSE, mode = "function")
+chebNodes <- get("chebNodes", nS, inherits = FALSE, mode = "function")
+callFun <- get("callFun", nS, inherits = FALSE, mode = "function")
+isOscil <- get("isOscil", nS, inherits = FALSE, mode = "function")
+isConverged <- get("isConverged", nS, inherits = FALSE, mode = "function")
+zb <- get("zeroBasisPerturb", nS, inherits = FALSE, mode = "function")
+evalFunc <- get("evalFunc", nS, inherits = FALSE, mode = "function")
+remPoly <- get("remPoly", nS, inherits = FALSE, mode = "function")
+remRat <- get("remRat", nS, inherits = FALSE, mode = "function")
+remErr <- get("remErr", nS, inherits = FALSE, mode = "function")
+polyCoeffs <- get("polyCoeffs", nS, inherits = FALSE, mode = "function")
+findRoots <- get("findRoots", nS, inherits = FALSE, mode = "function")
+ratCoeffs <- get("ratCoeffs", nS, inherits = FALSE, mode = "function")
+switchX <- get("switchX", nS, inherits = FALSE, mode = "function")
+checkDenom <- get("checkDenom", nS, inherits = FALSE, mode = "function")
+isUnchanging <- get("isUnchanging", nS, inherits = FALSE, mode = "function")
+checkIrrelevant <- get("checkIrrelevant", nS, inherits = FALSE,
+                       mode = "function")
+tailContribution <- get("tailContribution", nS, inherits = FALSE,
+                        mode = "function")
+rlc <- get("refLocalCheck", nS, inherits = FALSE, mode = "function")
+REFLOCALTOL <- get("REFLOCALTOL", nS, inherits = FALSE, mode = "double")
+
 opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
              showProgress = FALSE, convrat = 1.000000001, tol = 1e-14,
              ztol = .Machine$double.eps)
 
 # Test fC
-expect_identical(minimaxApprox:::fC(1.234567, f = "e"), "1.234567e+00")
-expect_identical(minimaxApprox:::fC(1.234567, d = 2, f = "e"), "1.23e+00")
+expect_identical(fC(1.234567, f = "e"), "1.234567e+00")
+expect_identical(fC(1.234567, d = 2, f = "e"), "1.23e+00")
 
 # Test chebNodes
 n <- 6L
 k <- seq_len(n) - 1L
 # See https://en.wikipedia.org/wiki/Chebyshev_polynomials#Roots_and_extrema
 control <- sort(cos(pi * (k + 0.5) / n))
-expect_equal(minimaxApprox:::chebNodes(n, -1, 1), control, tolerance = tol)
-expect_equal(minimaxApprox:::chebNodes(6.2, -1, 1),
-             minimaxApprox:::chebNodes(n, -1, 1), tolerance = tol)
+expect_equal(chebNodes(n, -1, 1), control, tolerance = tol)
+expect_equal(chebNodes(6.2, -1, 1), chebNodes(n, -1, 1), tolerance = tol)
 
 # Test callFun
 ## Test functionality
 fn <- function(x) tan(x) - x ^ 3
 control <- tan(-0.4) - (-0.4) ^ 3
-expect_equal(minimaxApprox:::callFun(fn, -0.4), control, tolerance = tol)
+expect_equal(callFun(fn, -0.4), control, tolerance = tol)
 
 ## Test error trapping
-expect_error(minimaxApprox:::callFun("x ^ 2", -0.4),
-             "Unable to parse function.")
+expect_error(callFun("x ^ 2", -0.4), "Unable to parse function.")
 
 # Test isOscil
 control <- c(-2, 1, -3, 4, -1, 6, -7)
-expect_true(minimaxApprox:::isOscil(control))
+expect_true(isOscil(control))
 
 control <- c(-2, 1, -3, 4, -1, -6)
-expect_false(minimaxApprox:::isOscil(control))
+expect_false(isOscil(control))
 
 # Test evalFunc
 # Tests using Chebyshev polynomials are currently in test_Chebyshev.R
@@ -46,15 +68,13 @@ controlN <- 1 + 2 * x + 3 * x ^ 2 + 4 * x ^ 3
 
 ## Polynomial
 P <- list(a = 1:4)
-expect_equal(minimaxApprox:::evalFunc(x, P, "m", -1, 1), controlN,
-             tolerance = tol)
+expect_equal(evalFunc(x, P, "m", -1, 1), controlN, tolerance = tol)
 
 ## Rational
 R <- list(a = 1:4, b = c(1, 2.2, 4.1))
 controlD <- 1 + 2.2 * x + 4.1 * x ^ 2
 control <- controlN / controlD
-expect_equal(minimaxApprox:::evalFunc(x, R, "m", -1, 1), control,
-             tolerance = tol)
+expect_equal(evalFunc(x, R, "m", -1, 1), control, tolerance = tol)
 
 # Test remErr
 # Using fact that exp(1) has analytic answer for degree 1 and pass a zero-degree
@@ -63,37 +83,34 @@ fn <- function(x) exp(x)
 m <- exp(1) - 1
 c <- (exp(1) - m * log(m)) / 2
 tstFn <- function(x) m * x + c
-x <- minimaxApprox:::chebNodes(3, 0, 1)
+x <- chebNodes(3, 0, 1)
 control <- tstFn(x) - exp(x)
 
 ## Polynomial
-PP <- minimaxApprox:::remPoly(fn, 0, 1, 1, FALSE, "m", opts)
-expect_equal(minimaxApprox:::remErr(x, PP, fn, FALSE, "m", 0, 1), control,
-             tolerance = tol)
+PP <- remPoly(fn, 0, 1, 1, FALSE, "m", opts)
+expect_equal(remErr(x, PP, fn, FALSE, "m", 0, 1), control, tolerance = tol)
 ## Rational
-RR <- minimaxApprox:::remRat(fn, 0, 1, 1, 0, FALSE, "m", NULL, opts)
-expect_equal(minimaxApprox:::remErr(x, RR, fn, FALSE, "m", 0, 1), control,
-             tolerance = tol)
+RR <- remRat(fn, 0, 1, 1, 0, FALSE, "m", NULL, opts)
+expect_equal(remErr(x, RR, fn, FALSE, "m", 0, 1), control, tolerance = tol)
 
 # Test findRoots
 ## This one will rely on expm1(x) and exp(x) - 1 being close
 fn <- function(x) exp(x) - 1
-x <- minimaxApprox:::chebNodes(3, 0, 1)
+x <- chebNodes(3, 0, 1)
 
 ## Polynomial
-QQ <- minimaxApprox:::polyCoeffs(x, expm1, TRUE, "m", 0, 1, opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, expm1, TRUE, "m", 0, 1)
-PP <- minimaxApprox:::polyCoeffs(x, fn, TRUE, "m", 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, PP, fn, TRUE, "m", 0, 1)
+QQ <- polyCoeffs(x, expm1, TRUE, "m", 0, 1, opts$ztol)
+control <- findRoots(x, QQ, expm1, TRUE, "m", 0, 1)
+PP <- polyCoeffs(x, fn, TRUE, "m", 0, 1, opts$ztol)
+r <- findRoots(x, PP, fn, TRUE, "m", 0, 1)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 
 ## Rational
-QQ <- minimaxApprox:::ratCoeffs(x, 0, expm1, 1L, 0L, TRUE, "m",
-                                0, 1, opts$ztol)
-control <- minimaxApprox:::findRoots(x, QQ, expm1, TRUE, "m", 0, 1)
-RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 1L, 0L, TRUE, "m", 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, "m", 0, 1)
+QQ <- ratCoeffs(x, 0, expm1, 1L, 0L, TRUE, "m", 0, 1, opts$ztol)
+control <- findRoots(x, QQ, expm1, TRUE, "m", 0, 1)
+RR <- ratCoeffs(x, 0, fn, 1L, 0L, TRUE, "m", 0, 1, opts$ztol)
+r <- findRoots(x, RR, fn, TRUE, "m", 0, 1)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 
@@ -102,16 +119,15 @@ expect_equal(r, control, tolerance = 1e-7)
 ## swallowed it, and the fallback path returned 1.2 -- a latent test bug that
 ## only tested the trap by accident. The fallback no longer exists.)
 ## A rootless error curve now yields numeric(0), not a substituted endpoint.
-Pc <- list(a = 5)
+pc <- list(a = 5)
 fc <- function(x) 3
-expect_identical(minimaxApprox:::findRoots(c(0.4, 0.6), Pc, fc, FALSE,
-                                           "m", 0, 1), numeric(0))
+expect_identical(findRoots(c(0.4, 0.6), pc, fc, FALSE, "m", 0, 1), double(0))
 ## D1 regression (MP2 B1-1): a sign change OUTSIDE the between-reference
 ## span -- here the root at 0.2 lies left of the reference {0.5, 0.6} -- was
 ## structurally invisible pre-E5 and must now be found.
-Pl <- list(a = c(-0.2, 1))
+pl <- list(a = c(-0.2, 1))
 f0 <- function(x) 0 * x
-r <- minimaxApprox:::findRoots(c(0.5, 0.6), Pl, f0, FALSE, "m", 0, 1)
+r <- findRoots(c(0.5, 0.6), pl, f0, FALSE, "m", 0, 1)
 expect_equal(r, 0.2, tolerance = 1e-7)
 
 # Test switchX
@@ -120,10 +136,10 @@ expect_equal(r, 0.2, tolerance = 1e-7)
 control <- c(-1, 0.10264791208519766, 0.33735881337846646, 0.62760501759598053,
              0.88066205512236839, 1)
 fn <- function(x) sin(x) + cos(x)
-x <- minimaxApprox:::chebNodes(6, 0, 1)
-PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, "m", 0, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, PP, fn, FALSE, "m", 0, 1)
-x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE, "m", x)
+x <- chebNodes(6, 0, 1)
+PP <- polyCoeffs(x, fn, FALSE, "m", 0, 1, opts$ztol)
+r <- findRoots(x, PP, fn, FALSE, "m", 0, 1)
+x <- switchX(r, -1, 1, PP, fn, FALSE, "m", x)
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
@@ -131,10 +147,10 @@ expect_equivalent(x, control, tolerance = 3.5e-5)
 control <- c(-1, -0.6706726462230721, -2.8931353340360859e-14,
              0.67067262060160282, 1)
 fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
-x <- minimaxApprox:::chebNodes(5, -1, 1)
-RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, "m", -1, 1, opts$ztol)
-r <- minimaxApprox:::findRoots(x, RR, fn, FALSE, "m", -1, 1)
-x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE, "m", x)
+x <- chebNodes(5, -1, 1)
+RR <- ratCoeffs(x, 0, fn, 2L, 1L, FALSE, "m", -1, 1, opts$ztol)
+r <- findRoots(x, RR, fn, FALSE, "m", -1, 1)
+x <- switchX(r, -1, 1, RR, fn, FALSE, "m", x)
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
@@ -146,24 +162,24 @@ expect_equivalent(x, control, tolerance = 3.5e-5)
 R <- list(a = 0, b = 1)
 fn <- function(x) 3
 xk <- c(0.25, 0.75)
-xf <- minimaxApprox:::switchX(numeric(0), 0, 1, R, fn, FALSE, "m", xk)
+xf <- switchX(numeric(0), 0, 1, R, fn, FALSE, "m", xk)
 expect_equivalent(as.vector(xf), xk, tolerance = tol)
 expect_false(attr(xf, "ZeroBasis"))
 
 fn <- function(x) -3
-xf <- minimaxApprox:::switchX(numeric(0), 0, 1, R, fn, FALSE, "m", xk)
+xf <- switchX(numeric(0), 0, 1, R, fn, FALSE, "m", xk)
 expect_equivalent(as.vector(xf), xk, tolerance = tol)
 expect_false(attr(xf, "ZeroBasis"))
 
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)
 E <- 0.1
-expect_true(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
+expect_true(isConverged(errs, E, 1.05, 1e-12))
 E <- 0.05
-expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
+expect_false(isConverged(errs, E, 1.05, 1e-12))
 E <- 0.1
 errs <- c(-0.2, 0.1, -0.1)
-expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
+expect_false(isConverged(errs, E, 1.05, 1e-12))
 
 # Test checkDenom
 # NOTE (M6): these previously passed basis = TRUE, which only ever "worked"
@@ -174,8 +190,8 @@ expect_false(minimaxApprox:::isConverged(errs, E, 1.05, 1e-12))
 # route Chebyshev through the M6 affine map) correctly stops honoring that
 # accident. The polynomial -0.5 + x (root 0.5 on [0,1], no root on [1,2]) is
 # unambiguously the intended monomial-basis case; fixed to basis = "m".
-expect_equal(minimaxApprox:::checkDenom(c(-0.5, 1), 0, 1, "m"), 0.5)
-expect_null(minimaxApprox:::checkDenom(c(-0.5, 1), 1, 2, "m"))
+expect_equal(checkDenom(c(-0.5, 1), 0, 1, "m"), 0.5)
+expect_null(checkDenom(c(-0.5, 1), 1, 2, "m"))
 
 # --------------------------------------------------------------------------
 # M3 additions: F7, F8, F9, F6, F3
@@ -186,39 +202,38 @@ errs_last <- rep(1e-3, 4)
 convrat <- 1.000000001
 tolF <- 1e-14
 ## 10x-shrink: genuine improvement, must NOT be flagged unchanging.
-expect_false(minimaxApprox:::isUnchanging(errs_last / 10, errs_last, convrat,
-                                          tolF))
+expect_false(isUnchanging(errs_last / 10, errs_last, convrat, tolF))
 ## Static vector: genuinely unchanging, must be flagged.
-expect_true(minimaxApprox:::isUnchanging(errs_last, errs_last, convrat, tolF))
+expect_true(isUnchanging(errs_last, errs_last, convrat, tolF))
 ## Straddling the two-sided band (one ratio far below 1/convrat): must NOT be
 ## flagged, since not all elements are close to unchanged.
 straddle <- c(1e-3, 1e-3, 1e-3, 5e-4)
-expect_false(minimaxApprox:::isUnchanging(straddle, errs_last, convrat, tolF))
+expect_false(isUnchanging(straddle, errs_last, convrat, tolF))
 ## Zero-denominator perturbation path still works (both become 1e-12, ratio
 ## exactly 1, difference exactly 0).
-expect_true(minimaxApprox:::isUnchanging(rep(0, 4), rep(0, 4), convrat, tolF))
+expect_true(isUnchanging(rep(0, 4), rep(0, 4), convrat, tolF))
 
 # F8 -- isOscil must not propagate NA from NaN/NA input.
-expect_false(minimaxApprox:::isOscil(c(1, NaN, -1)))
-expect_false(minimaxApprox:::isOscil(c(1, NA, -1)))
+expect_false(isOscil(c(1, NaN, -1)))
+expect_false(isOscil(c(1, NA, -1)))
 ## Zero error treated as non-oscillating by design.
-expect_false(minimaxApprox:::isOscil(c(1, 0, -1)))
+expect_false(isOscil(c(1, 0, -1)))
 ## Genuinely alternating case unaffected.
-expect_true(minimaxApprox:::isOscil(c(-2, 1, -3, 4)))
+expect_true(isOscil(c(-2, 1, -3, 4)))
 ## isConverged no longer errors inside an if() when isOscil returns FALSE
 ## instead of NA.
 expect_false({
   ok <- TRUE
   tryCatch(
-    if (minimaxApprox:::isConverged(c(1, NaN, -1), 1, 1.05, 1e-12)) NULL,
-    error = function(e) ok <<- FALSE)
+    if (isConverged(c(1, NaN, -1), 1, 1.05, 1e-12)) NULL,
+    error = function(e) ok <<- FALSE) # nolint: undesirable_operator_linter
   !ok
 })
 
 # F9 -- zeroBasisPerturb: absolute step at ordinary |x| (released behavior),
 # escalating to a magnitude-scaled step only where the absolute step is
 # absorbed (large |x|). Tested at both endpoints, both signs, and interior.
-zb <- minimaxApprox:::zeroBasisPerturb
+
 ## Ordinary |x_i|: interior perturbation is byte-identical to the released
 ## absolute 1e-12 nudge (regression guard for the machine-precision
 ## ZeroBasis end-to-end cases). fn = x^2-4 has its zero at the interior
@@ -262,13 +277,13 @@ expect_identical(zb(0, -1, 0, function(x) x, TRUE), 0 - 1e-12)
 ## Confirmed repro: genuine ~1e-3 Chebyshev contributions on [0, 0.5] must
 ## survive ztol = 1e-4 (previously zeroed by the monomial xmax^k scaling).
 aCheb <- c(1, rep(1e-3, 6))
-rCheb <- minimaxApprox:::checkIrrelevant(aCheb, 0, 0.5, 1e-4, "c")
+rCheb <- checkIrrelevant(aCheb, 0, 0.5, 1e-4, "c")
 expect_equal(rCheb, aCheb, tolerance = tol)
 ## A genuinely negligible coefficient must still be zeroed, in both bases.
 aNeg <- c(1, rep(1e-10, 6))
-expect_equal(minimaxApprox:::checkIrrelevant(aNeg, 0, 0.5, 1e-4, "c"),
+expect_equal(checkIrrelevant(aNeg, 0, 0.5, 1e-4, "c"),
              c(1, rep(0, 6)), tolerance = tol)
-expect_equal(minimaxApprox:::checkIrrelevant(aNeg, 0, 0.5, 1e-4, "m"),
+expect_equal(checkIrrelevant(aNeg, 0, 0.5, 1e-4, "m"),
              c(1, rep(0, 6)), tolerance = tol)
 ## Monomial-basis results bitwise-unchanged versus the pre-F6 formula.
 set.seed(20260710)
@@ -278,23 +293,21 @@ oldMonomial <- {
   xmax <- max(abs(0), abs(2))
   ifelse(abs(aRand * xmax ^ (seq_len(nn) - 1L)) <= 1e-6, 0, aRand)
 }
-expect_identical(minimaxApprox:::checkIrrelevant(aRand, 0, 2, 1e-6, "m"),
-                 oldMonomial)
+expect_identical(checkIrrelevant(aRand, 0, 2, 1e-6, "m"), oldMonomial)
 
 # F3 -- tailContribution: abs() + basis-correct scale.
 ## A large NEGATIVE top coefficient must now exceed tailtol, in both bases
 ## (previously silently passed with no abs()).
-expect_true(minimaxApprox:::tailContribution(-1e-5, 12, -1, 1, "m") > 1e-10)
-expect_true(minimaxApprox:::tailContribution(-1e-5, 12, -1, 1, "c") > 1e-10)
+expect_true(tailContribution(-1e-5, 12, -1, 1, "m") > 1e-10)
+expect_true(tailContribution(-1e-5, 12, -1, 1, "c") > 1e-10)
 ## A tiny coefficient of either sign must not exceed tailtol.
-expect_false(minimaxApprox:::tailContribution(-1e-20, 12, -1, 1, "m") > 1e-10)
-expect_false(minimaxApprox:::tailContribution(1e-20, 12, -1, 1, "c") > 1e-10)
+expect_false(tailContribution(-1e-20, 12, -1, 1, "m") > 1e-10)
+expect_false(tailContribution(1e-20, 12, -1, 1, "c") > 1e-10)
 
 # CP-1 (E5 Phase 1) -- reference-local certificate on all paths.
 # Mechanism: MP2 B1-1 / E5 brief section 0.1 (D3 certification vacuum).
 
 ## Unit tests of refLocalCheck itself.
-rlc <- minimaxApprox:::refLocalCheck
 ## Healthy classical fit: converged exp deg 6 -- certificate passes.
 hf <- sW(minimaxApprox(exp, -1, 1, 6L))
 expect_false(rlc(list(a = hf$a), exp, FALSE, "c", -1, 1, hf$ExpErr)$refLocal)
@@ -332,8 +345,7 @@ certAt <- function(fn, l, u, d, b, oracle) {
   o <- sM(minimaxApprox(fn, l, u, d, basis = b))
   g <- seq(l, u, length.out = 2e5L)
   gridRatio <- max(abs(sM(minimaxEval(g, o) - fn(g)))) / o$ExpErr
-  !o$Warning && gridRatio <= minimaxApprox:::REFLOCALTOL &&
-    abs(o$ExpErr / oracle - 1) < 1e-4
+  !o$Warning && gridRatio <= REFLOCALTOL && abs(o$ExpErr / oracle - 1) < 1e-4
 }
 expect_true(certAt(atan, 0, 3, 3L, "b", 4.802475e-3))
 expect_true(certAt(atan, -1, 1, 9L, "m", 1.143854e-5))

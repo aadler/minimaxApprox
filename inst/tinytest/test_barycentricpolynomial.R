@@ -14,6 +14,16 @@ tol <- sqrt(.Machine$double.eps)
 sM <- function(x) suppressMessages(x)
 sW <- function(x) suppressWarnings(x)
 
+nS <- getNamespace("minimaxApprox")
+chebNodes2 <- get("chebNodes2", nS, inherits = FALSE, mode = "function")
+separateNodes <- get("separateNodes", nS, inherits = FALSE, mode = "function")
+baryWeights <- get("baryWeights", nS, inherits = FALSE, mode = "function")
+baryEval <- get("baryEval", nS, inherits = FALSE, mode = "function")
+levelError <- get("levelError", nS, inherits = FALSE, mode = "function")
+baryTrial <- get("baryTrial", nS, inherits = FALSE, mode = "function")
+onePointExchange <- get("onePointExchange", nS, inherits = FALSE,
+                        mode = "function")
+
 # ---- PT09 Table 1 oracles (deg 10, absolute) ------------------------------
 f1 <- function(x) tanh(x + 0.5) - tanh(x - 0.5)
 f2 <- function(x) sin(exp(x))
@@ -96,7 +106,8 @@ expect_error(
   sW(minimaxApprox(sin, 0, 3.5, 6, basis = "b", relErr = TRUE)),
   "Relative error is undefined")
 # Contrast: sin on [-1,1] has an interior node at 0 that is only floating-point-
-# near zero (~6.12e-17), NOT exactly zero -> finite ratio, well-posed, converges.
+# near zero (~6.12e-17), NOT exactly zero -> finite ratio, well-posed,
+# converges.
 expect_silent_ok <- sW(minimaxApprox(sin, -1, 1, 6, basis = "b",
                                                    relErr = TRUE))
 expect_true(is.finite(expect_silent_ok$ExpErr))
@@ -109,8 +120,7 @@ expect_error(minimaxApprox(exp, 0, 1, c(2L, 3L), relErr = TRUE, basis = "b"),
              "Relative error is not yet supported for rational")
 
 # ---- Capacity scaling: wide interval, high degree, no over/underflow ------
-rw <- sW(minimaxApprox(function(x) 1 / (1 + x^2), -1e4, 1e4, 50,
-                                     basis = "b"))
+rw <- sW(minimaxApprox(function(x) 1 / (1 + x^2), -1e4, 1e4, 50, basis = "b"))
 expect_true(is.finite(rw$ExpErr))
 expect_false(any(is.nan(rw$aMono)))
 
@@ -134,7 +144,7 @@ expect_true(cr(50L) < 1e-12)
 
 # ---- Internal unit tests (deterministic, no linear solve / no BLAS path) --
 # chebNodes2: second-kind, endpoints included, sorted ascending.
-z <- minimaxApprox:::chebNodes2(6L, -1, 1)
+z <- chebNodes2(6L, -1, 1)
 expect_equal(z[1L], -1, tolerance = tol)
 expect_equal(z[length(z)], 1, tolerance = tol)
 expect_false(is.unsorted(z))
@@ -142,34 +152,34 @@ expect_false(is.unsorted(z))
 # separateNodes: nudges sub-tolerance-adjacent nodes apart, leaves well-spaced
 # nodes untouched.
 sep_in <- c(-1, -0.5, -0.5 + 1e-14, 0.5, 1)      # two nodes 1e-14 apart
-sep_out <- minimaxApprox:::separateNodes(sep_in, -1, 1)
+sep_out <- separateNodes(sep_in, -1, 1)
 expect_true(all(diff(sep_out) > 0))
-expect_equal(minimaxApprox:::separateNodes(c(-1, 0, 1), -1, 1), c(-1, 0, 1),
-             tolerance = tol)  # already well-spaced: unchanged
+
+# below already well-spaced: unchanged
+expect_equal(separateNodes(c(-1, 0, 1), -1, 1), c(-1, 0, 1), tolerance = tol)
 
 # baryWeights + baryEval: exact-node short-circuit returns the node value.
-xr <- minimaxApprox:::chebNodes2(6L, -1, 1)
-wv <- minimaxApprox:::baryWeights(xr, -1, 1)
+xr <- chebNodes2(6L, -1, 1)
+wv <- baryWeights(xr, -1, 1)
 pv <- exp(xr)
-expect_identical(minimaxApprox:::baryEval(xr[3L], xr, wv, pv), pv[3L])
+expect_identical(baryEval(xr[3L], xr, wv, pv), pv[3L])
 # Off-node, the second barycentric formula reproduces a low-degree polynomial
 # exactly: interpolating x^2 at 6 nodes evaluates x^2 at an arbitrary point.
-pv2 <- xr^2
-expect_equal(minimaxApprox:::baryEval(0.37, xr, wv, pv2), 0.37^2,
-             tolerance = tol)
+pv2 <- xr ^ 2
+expect_equal(baryEval(0.37, xr, wv, pv2), 0.37 ^ 2, tolerance = tol)
 
 # levelError: absolute closed form on a symmetric even reference cancels to ~0
 # (this is the cancellation the F4 grid-detection is designed to see through).
-sig6 <- (-1)^(seq_len(6L) - 1L)
+sig6 <- (-1) ^ (seq_len(6L) - 1L)
 fe <- f1(xr)
-expect_true(abs(minimaxApprox:::levelError(wv, sig6, fe, FALSE)) < 1e-10)
+expect_true(abs(levelError(wv, sig6, fe, FALSE)) < 1e-10)
 
 # onePointExchange (overshoot safeguard body): unreachable via the public API
 # with this package's exchange quality (max observed overshoot ratio ~0.36 vs
 # the 1e5 trigger), so exercised by a direct call. Must return a same-length,
 # sorted, unique, in-range reference.
-tr <- minimaxApprox:::baryTrial(xr, exp, FALSE, -1, 1, sig6)
-xnew <- minimaxApprox:::onePointExchange(tr$x, tr$R, exp, FALSE, -1, 1)
+tr <- baryTrial(xr, exp, FALSE, -1, 1, sig6)
+xnew <- onePointExchange(tr$x, tr$R, exp, FALSE, -1, 1)
 expect_length(xnew, length(tr$x))
 expect_false(is.unsorted(xnew))
 expect_identical(anyDuplicated(xnew), 0L)
@@ -181,22 +191,20 @@ expect_true(all(xnew >= -1 & xnew <= 1))
 # `else` xold branch); a steep falling exp at the LEFT end (the `else if`
 # branch).
 mkTrial <- function(fnc, xk, l, u) {
-  w <- minimaxApprox:::baryWeights(xk, l, u)
+  w <- baryWeights(xk, l, u)
   sg <- (-1) ^ (seq_along(xk) - 1L)
   fv <- fnc(xk)
-  h <- minimaxApprox:::levelError(w, sg, fv, FALSE)
+  h <- levelError(w, sg, fv, FALSE)
   list(R = list(bary = list(x = xk, w = w, p = fv - sg * h)))
 }
 xk_int <- c(-0.8, -0.4, 0, 0.4, 0.8)
 trR <- mkTrial(function(x) exp(6 * x), xk_int, -1, 1)
-outR <- minimaxApprox:::onePointExchange(xk_int, trR$R, function(x) exp(6 * x),
-                                         FALSE, -1, 1)
+outR <- onePointExchange(xk_int, trR$R, function(x) exp(6 * x), FALSE, -1, 1)
 expect_true(max(outR) >= 0.8)
 expect_false(is.unsorted(outR))
 expect_identical(anyDuplicated(outR), 0L)
 trL <- mkTrial(function(x) exp(-6 * x), xk_int, -1, 1)
-outL <- minimaxApprox:::onePointExchange(xk_int, trL$R, function(x) exp(-6 * x),
-                                         FALSE, -1, 1)
+outL <- onePointExchange(xk_int, trL$R, function(x) exp(-6 * x), FALSE, -1, 1)
 expect_true(min(outL) <= -0.8 )
 expect_false(is.unsorted(outL))
 expect_identical(anyDuplicated(outL), 0L)
@@ -206,8 +214,7 @@ expect_identical(anyDuplicated(outL), 0L)
 # x on symmetric nodes makes sum(sigma * w * f) == 0 exactly (f = c(-a, a)), so
 # h is non-finite: the guard flags zeroBasis and resets h to 0. No node is
 # itself a zero of fn.
-z2 <- minimaxApprox:::baryTrial(c(-0.5, 0.5), function(x) x, TRUE, -0.5, 0.5,
-                                c(1, -1))
+z2 <- baryTrial(c(-0.5, 0.5), function(x) x, TRUE, -0.5, 0.5, c(1, -1))
 expect_true(z2$zeroBasis)
 expect_true(is.finite(z2$h))
 
@@ -224,8 +231,7 @@ expect_warning(
   minimaxApprox(exp, -1, 1, 6, basis = "b",
                 opts = list(maxiter = 60L, miniter = 1000L, conviter = 1L,
                             showProgress = FALSE, convrat = 1.000000001,
-                            tol = 1e-14)),
-  "too close")
+                            tol = 1e-14)), "too close")
 
 # ---- Methods dispatch on the barycentric object ---------------------------
 rb <- sW(minimaxApprox(exp, -1, 1, 8, basis = "b"))
@@ -248,6 +254,6 @@ if (Sys.info()["nodename"] == "HOMEDESKTOP") {
   rz <- tryCatch(
     sW(minimaxApprox(function(x) x^2 - 4, -3, -1, 3,
                                    basis = "b", relErr = TRUE)),
-    error = function(e) structure(conditionMessage(e), class = "errcase"))
+    error = function(e) structure(conditionMessage(e), class = "errcase")) # nolint undesirable_operator_linter
   expect_true(inherits(rz, "errcase") || is.finite(rz$ExpErr))
 }
