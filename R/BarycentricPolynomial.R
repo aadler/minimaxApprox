@@ -324,13 +324,15 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
     # error at the full-exchange reference blows up relative to ||f|| (a large-
     # norm trial polynomial, usually near an endpoint), discard the full
     # exchange and redo it from the PREVIOUS reference with a one-point swap.
-    # Measured note: with this package's mature findRoots/switchX exchange, the
-    # full-exchange step does not overshoot on standard inputs (max observed
-    # ratio ~0.36 on Runge deg 10/20, |x| deg 11, tanh(20x) deg 16, etc. -- all
-    # far below the 1e5 trigger). The master-pass prototype hit overshoot only
-    # because it used a crude exchange. The branch is therefore defensive and
-    # not reachable through the public API here; onePointExchange itself is
-    # exercised by a direct unit test. Kept per PT09 for robustness.
+    #
+    # Measured note: the exchange does not overshoot on standard inputs. Pre-E5
+    # max observed ratio ~0.36 (Runge deg 10/20, |x| deg 11, tanh(20x) deg 16);
+    # re-measured post-E5 (MP3): max 0.2365 over 125 branch evaluations on that
+    # set plus the quintet family and off-range cases -- all far below the 1e5
+    # trigger. The master-pass prototype hit overshoot only because it used a
+    # crude exchange. The branch is therefore defensive and not reachable
+    # through the public API here; onePointExchange itself is exercised by a
+    # direct unit test. Kept per PT09 for robustness.
     errFull <- remErr(xFull, trial$R, fn, relErr, "b", lower, upper)
     scale_b <- if (relErr) 1 else normf
     if (max(abs(errFull)) / scale_b > 1e5) {
