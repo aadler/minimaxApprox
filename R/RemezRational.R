@@ -120,7 +120,16 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
     errs_last <- errs
   }
 
+  # CP-1: reference-local certificate at the converged exit only. See
+  # refLocalCheck in shared.R for mechanism and skip conditions.
+  rl <- if (converged) {
+    refLocalCheck(RR, fn, relErr, basis, lower, upper, expe)
+  } else {
+    list(gridSup = NA_real_, refLocal = FALSE)
+  }
+
   list(a = RR$a, b = RR$b, expe = expe, mxae = mxae, i = i, x = x,
        converged = converged, unchanged = unchanged,
-       unchanging_i = unchanging_i, zeroBasisError = relErrZeroBasis)
+       unchanging_i = unchanging_i, zeroBasisError = relErrZeroBasis,
+       refLocal = rl$refLocal, gridSup = rl$gridSup)
 }

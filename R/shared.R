@@ -63,6 +63,73 @@ remErr <- function(x, R, fn, relErr, basis, l, u) {
   }
 }
 
+# CP-1 (E5 Phase 1): reference-local certificate threshold, shared by all four
+# approximation paths. Calibrated on the rational-barycentric path (M5P2 F.2:
+# healthy converged fits <= 1 + 1.2e-5, known sub-optimal fixed points
+# >= 1.11) and re-verified on the polynomial paths (MP2 B1-1: healthy
+# <= 1 + 3.4e-5, bad cases >= 1.77): 1.001 sits in a four-decade dead zone.
+REFLOCALTOL <- 1.001
+
+# CP-1: certificate check run at a CONVERGED exit only. The Remez loop's
+# convergence test evaluates the trial at its own reference, where the trial
+# is leveled by construction (or leveled up to solve residual on the classical
+# paths), so it carries no off-reference information -- any exchange stall is
+# certified as convergence (MP2 B1-1 mechanism D3). This check supplies the
+# missing certificate: compare the returned approximation's dense-grid sup
+# error against its leveled error; a ratio above REFLOCALTOL means the
+# leveled error is only a lower bound (de la Vallee Poussin) on the true
+# minimax error, not a certificate, and the caller raises the refLocal
+# warning centrally.
+#
+# Skips (returns gridSup = NA, refLocal = FALSE, i.e. no certificate rather
+# than a spurious one):
+# * relErr with an exact zero of fn on the probe grid: the relative error
+#   diverges as 1/fn around the zero, so the grid sup is dominated by the
+#   blow-up and any threshold fires spuriously. Excluding only the exact-zero
+#   points does not help -- neighboring points still carry the divergence.
+#   (Same guard and rationale as interpRescue, M4.)
+# * Floor gate: expe at or below ~100*eps*max(1, ||f||) (relErr: 100*eps).
+#   Below that the "excess" of gridSup over expe is linear-solve residual
+#   noise at magnitude ~O(10)*eps*||f||, not a basin miss (measured: the
+#   exp[5, 6] degree-10 relaxed-convrat fit, expe 2.94e-12 vs gate 8.96e-12,
+#   ratio 1.05 of pure noise). True sub-optimal fixed points in the floor
+#   neighborhood sit well ABOVE the gate (sin degree 9, expe 3.2e-13 vs gate
+#   2.2e-14, ratio 406) and still fire.
+# * A non-finite probe evaluation (defensive; a converged fit has already
+#   evaluated fn across the interval).
+#
+# The rational-barycentric path (remBaryRat) retains its own in-loop F.2
+# check -- permanent there because non-normal rational problems have true
+# alternants exceeding m + n + 2 points, which no exchange rule can hold --
+# and shares only the REFLOCALTOL constant, not this gate.
+refLocalCheck <- function(R, fn, relErr, basis, lower, upper, expe) {
+  none <- list(gridSup = NA_real_, refLocal = FALSE)
+  probe <- seq(lower, upper, length.out = 2001L)
+  fv <- callFun(fn, probe)
+  if (relErr && any(fv == 0)) return(none)
+  normf <- max(abs(fv))
+  if (!is.finite(normf)) return(none)                               # nocov
+  gate <- 100 * .Machine$double.eps * if (relErr) 1 else max(1, normf)
+  if (expe <= gate) return(none)
+  e <- evalFunc(probe, R, basis, lower, upper) - fv
+  if (relErr) e <- e / fv
+  gridSup <- max(abs(e))
+  if (!is.finite(gridSup)) return(none)                             # nocov
+  # Absolute-excess condition (approved refinement to the ratio test): the
+  # ratio detects the reference-local phenomenon, but when expe is only
+  # modestly above the floor gate, a ratio a whisker over REFLOCALTOL can
+  # correspond to an ABSOLUTE excess of a few eps*||f|| -- pure solve /
+  # evaluation noise, platform-flappy by construction (measured: exp deg 11
+  # Chebyshev, ratio 1.0011, excess 1.1e-15 ~ 4*eps*||f||). Require the
+  # excess itself to be resolvable above floating-point noise. Every
+  # ordinary-magnitude signal has excess many orders above this (B1-1
+  # quartet: 1.3e-10 .. 3.1e-3), so no signal is lost.
+  noiseFloor <- 10 * .Machine$double.eps * if (relErr) 1 else max(1, normf)
+  list(gridSup = gridSup,
+       refLocal = gridSup > REFLOCALTOL * expe &&
+         gridSup - expe > noiseFloor)
+}
+
 # Function to identify roots of the error equation for use as bounds in finding
 # the maxima and minima.
 findRoots <- function(x, R, fn, relErr, basis, l, u) {

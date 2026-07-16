@@ -95,9 +95,20 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
     errs_last <- errs
   }
 
+  # CP-1: reference-local certificate at the converged exit only (maxiter and
+  # unchanging exits already raise their own warnings; a certificate on a
+  # non-converged result would be redundant noise). See refLocalCheck in
+  # shared.R for the mechanism (D3 certification vacuum) and skip conditions.
+  rl <- if (converged) {
+    refLocalCheck(PP, fn, relErr, basis, lower, upper, expe)
+  } else {
+    list(gridSup = NA_real_, refLocal = FALSE)
+  }
+
   list(a = PP$a, expe = expe, mxae = mxae, i = i, x = x, converged = converged,
        unchanged = unchanged, unchanging_i = unchanging_i,
-       zeroBasisError = relErrZeroBasis)
+       zeroBasisError = relErrZeroBasis, refLocal = rl$refLocal,
+       gridSup = rl$gridSup)
 }
 
 # F4 rescue: exactly-representable / machine-precision-resolved interpolant.

@@ -221,7 +221,8 @@ onePointExchange <- function(xk, R, fn, relErr, l, u) {
 #    conversion is the one step that can lose accuracy at high degree, so its
 #    gap is measured and stored (documented caveat).
 finishBary <- function(trial, x, expe, mxae, i, converged, unchanged,
-                       unchanging_i, zeroBasisError, l, u, n) {
+                       unchanging_i, zeroBasisError, l, u, n,
+                       refLocal = FALSE, gridSup = NA_real_) {
   bx <- trial$R$bary$x
   bw <- trial$R$bary$w
   bp <- trial$R$bary$p
@@ -236,7 +237,8 @@ finishBary <- function(trial, x, expe, mxae, i, converged, unchanged,
   list(a = a, bary = list(x = bx, w = bw, p = bp), convResid = convResid,
        expe = expe, mxae = mxae, i = i, x = x, converged = converged,
        unchanged = unchanged, unchanging_i = unchanging_i,
-       zeroBasisError = zeroBasisError)
+       zeroBasisError = zeroBasisError, refLocal = refLocal,
+       gridSup = gridSup)
 }
 
 # Main barycentric-Remez driver (polynomial). Mirrors remPoly's loop structure
@@ -367,6 +369,17 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
     errs_last <- errs
   }
 
+  # CP-1: reference-local certificate at the converged exit only. The h-floor
+  # short-circuit return above keeps finishBary's defaults (no certificate):
+  # its error is roundoff noise, per the F4 rationale. See refLocalCheck in
+  # shared.R for mechanism and skip conditions.
+  rl <- if (converged) {
+    refLocalCheck(trial$R, fn, relErr, "b", lower, upper, expe)
+  } else {
+    list(gridSup = NA_real_, refLocal = FALSE)
+  }
+
   finishBary(trial, x, expe, mxae, i, converged, unchanged, unchanging_i,
-             relErrZeroBasis, lower, upper, n)
+             relErrZeroBasis, lower, upper, n, refLocal = rl$refLocal,
+             gridSup = rl$gridSup)
 }

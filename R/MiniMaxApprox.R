@@ -264,6 +264,18 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
       }
 
       mmA$a <- mmA$a[-n]
+      # CP-1 / DP-4b: the driver computed the certificate for the FULL
+      # degree-(n+1) polynomial; the tail drop above changes the returned
+      # fit's error by <= tailtol, so recompute for the polynomial actually
+      # returned rather than accepting a tailtol-bounded discrepancy.
+      # evalFunc needs only $a for the classical polynomial bases (this
+      # branch is gated on !ratApprox && basis != "b").
+      if (isTRUE(mmA$converged)) {
+        rl <- refLocalCheck(list(a = mmA$a), fn, relErr, basis, lower, upper,
+                            mmA$expe)
+        mmA$refLocal <- rl$refLocal
+        mmA$gridSup <- rl$gridSup
+      }
       message("The algorithm failed while looking for a polynomial of degree ",
               degree, " but successfully completed when looking for a",
               " polynomial of degree ", degree + 1L, " with the largest",
@@ -349,15 +361,20 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     gotWarning <- TRUE
   }
 
+  # CP-1: path-generic since E5 Phase 1 -- all four drivers now surface
+  # refLocal/gridSup from their converged exits (the classical and barycentric
+  # polynomial paths via refLocalCheck in shared.R; rational barycentric via
+  # its in-loop F.2 check).
   if (isTRUE(mmA$refLocal)) {
-    warning("The rational barycentric iteration converged on its reference, ",
-            "but the approximation's maximum error on a dense grid (",
+    warning("The Remez iteration converged on its reference, but the ",
+            "approximation's maximum error on a dense grid (",
             fC(mmA$gridSup), ") exceeds the leveled error (", fC(mmA$expe),
-            "). The requested degrees are likely non-normal for this ",
-            "function (e.g. an even or odd function); the returned expected ",
-            "error is a lower bound on the true minimax error, not a ",
-            "certificate. Degrees adapted to the function's symmetry may ",
-            "converge fully.")
+            "). The returned expected error is therefore a lower bound on ",
+            "the true minimax error, not a certificate. This can occur when ",
+            "the requested degree(s) are non-normal for the function (e.g. ",
+            "an even or odd function) or when the exchange stalled at a ",
+            "reference-local fixed point. Degrees adapted to the function's ",
+            "symmetry may converge fully.")
     gotWarning <- TRUE
   }
 

@@ -573,10 +573,11 @@ remBaryRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
       # to a leveled fixed point that is not the global minimax. The dense-
       # grid sup then exceeds the leveled error by far more than evaluation
       # noise (measured: healthy converged cases <= 1 + 1.2e-5; known
-      # sub-optimal fixed points >= 1.11; threshold 1.001 sits in a four-
-      # decade dead zone). The probe grid already exists (pole check).
+      # sub-optimal fixed points >= 1.11; REFLOCALTOL = 1.001, now shared
+      # with the polynomial paths via shared.R (CP-1), sits in a four-decade
+      # dead zone). The probe grid already exists (pole check).
       gridSup <- max(abs(remErr(probe, R, fn, FALSE, "b", lower, upper)))
-      refLocal <- gridSup > 1.001 * expe
+      refLocal <- gridSup > REFLOCALTOL * expe
       break
     }
 
