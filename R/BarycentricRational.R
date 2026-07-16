@@ -199,11 +199,6 @@ baryRatSolve <- function(x, f, m, n, l, u) {
   mid <- (l + u) / 2
   tm <- (t - mid) / cap
 
-  # DETECT-AND-STOP (rank): a rank-deficient basis matrix means the
-  # reference/support geometry cannot represent the requested type --
-  # a defect signal. Full FNT would reduce the degree; we stop.
-  rankTol <- .Machine$double.eps * N
-
   # The rank checks below are defense in depth only: C-tilde is a scaled
   # Cauchy-type matrix, nonsingular for DISTINCT reference/support points
   # (which the collapse check above and separateNodes upstream guarantee),
