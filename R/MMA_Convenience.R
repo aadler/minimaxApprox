@@ -11,7 +11,7 @@ minimaxEval <- function(x, mmA, basis = "Chebyshev") {
   objBasis <- attr(mmA, "basis")
   onlyMono <- objBasis == "Monomial"
   isBary <- objBasis == "Barycentric"                              # M5
-  if (!(requestedbasis %in% c("c", "m", "b"))) {                   # M5: + "b"
+  if (!(requestedbasis %in% c("c", "m", "b"))) {                   # M5: & "b"
     stop("Select either the 'B'arycentric, 'M'onomial, or 'C'hebyshev basis.")
   }
   # M6 (F5 Option A): evalFunc's l/u are now required whenever the Chebyshev

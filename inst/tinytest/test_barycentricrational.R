@@ -146,8 +146,8 @@ fEC <- function(x) exp(cos(x))
 
 # baryRatPoleCheck: a denominator weight of exactly 0 at a support point that
 # is also a probe-grid point makes q hit 0.0 exactly (the s == 0 branch).
-expect_equal(baryRatPoleCheck(c(-0.5, 0, 0.5), c(1, 1, 1), c(1, 0, 1),
-                                  -1, 1), 0L, tolerance = tol)
+expect_equal(baryRatPoleCheck(c(-0.5, 0, 0.5), c(1, 1, 1), c(1, 0, 1), -1, 1),
+             0L, tolerance = tol)
 
 # Coincident reference points must return the clean "collapse" failure from
 # baryRatSolve (defense in depth), never a raw qr()/low-level error.

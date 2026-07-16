@@ -44,18 +44,18 @@ expect_true(r1$iterations > 0L)
 
 # ---- |x| deg-11 monomial coefficients (chebfun oracle) --------------------
 rx <- sW(minimaxApprox(function(x) abs(x), -1, 1, 11, basis = "b"))
-cheb_even <- c(0.02784511855, 4.75365049278, -20.64625015816, 47.77533460523,
-               -49.59209097049, 18.70935603064)
-expect_equal(rx$aMono[c(1, 3, 5, 7, 9, 11)], cheb_even, tolerance = 1e-6)
+chebEven <- c(0.02784511855, 4.75365049278, -20.64625015816, 47.77533460523,
+              -49.59209097049, 18.70935603064)
+expect_equal(rx$aMono[c(1, 3, 5, 7, 9, 11)], chebEven, tolerance = 1e-6)
 expect_true(max(abs(rx$aMono[c(2, 4, 6, 8, 10, 12)])) < 1e-8)  # odd coeffs ~ 0
 
 # ---- F4 family handled in-basis (paper 3.6), no interpRescue --------------
 # Exactly representable and resolved-to-precision cases return E ~ 0 with NO
 # 'rescued' field (that field is classical-only; barycentric handles it
 # natively).
-r_x2 <- sW(minimaxApprox(function(x) x^2, -1, 1, 2, basis = "b"))
-expect_true(r_x2$ExpErr < 1e-14)
-expect_null(r_x2$rescued)
+rX2 <- sW(minimaxApprox(function(x) x^2, -1, 1, 2, basis = "b"))
+expect_true(rX2$ExpErr < 1e-14)
+expect_null(rX2$rescued)
 for (d in c(14L, 15L, 50L)) {
   rr <- sW(minimaxApprox(exp, -1, 1, d, basis = "b"))
   expect_true(rr$ExpErr < 1e-14)
@@ -83,8 +83,8 @@ parity <- function(f, l, u, d) {
 expect_true(parity(exp, -1, 1, 8) < 1e-6)     # on-range, classical is stable
 expect_true(parity(sin, -2, 2, 10) < 1e-6)    # near-range, stable
 # off-range: stable equioscillation self-check + coarse cross-basis sanity only
-rb_off <- sW(minimaxApprox(exp, 0, 3, 12, basis = "b"))
-expect_true(abs(rb_off$ObsErr / rb_off$ExpErr - 1) < 1e-3)
+rbOff <- sW(minimaxApprox(exp, 0, 3, 12, basis = "b"))
+expect_true(abs(rbOff$ObsErr / rbOff$ExpErr - 1) < 1e-3)
 expect_true(parity(exp, 0, 3, 12) < 1e-3)
 
 # ---- relErr closed form: equioscillates and differs from absErr optimum ---
@@ -102,15 +102,13 @@ expect_true(abs(rrel$ExpErr - rabs$ExpErr) / rabs$ExpErr > 1e-6)
 # sin on [0, 3.5]: endpoint 0 is an EXACT zero of sin and a forced reference
 # node, so relErr is 0/0 = NaN there; the relErr minimax does not exist -> a
 # clear error, NOT a crash ("missing value where TRUE/FALSE needed").
-expect_error(
-  sW(minimaxApprox(sin, 0, 3.5, 6, basis = "b", relErr = TRUE)),
-  "Relative error is undefined")
+expect_error(sW(minimaxApprox(sin, 0, 3.5, 6, basis = "b", relErr = TRUE)),
+             "Relative error is undefined")
 # Contrast: sin on [-1,1] has an interior node at 0 that is only floating-point-
 # near zero (~6.12e-17), NOT exactly zero -> finite ratio, well-posed,
 # converges.
-expect_silent_ok <- sW(minimaxApprox(sin, -1, 1, 6, basis = "b",
-                                                   relErr = TRUE))
-expect_true(is.finite(expect_silent_ok$ExpErr))
+expectSilentOk <- sW(minimaxApprox(sin, -1, 1, 6, basis = "b", relErr = TRUE))
+expect_true(is.finite(expectSilentOk$ExpErr))
 
 # M5 Phase 2: rational barycentric approximation now dispatches to
 # remBaryRat. The reachable guard is relative error, which the FNT-subset
@@ -151,9 +149,9 @@ expect_false(is.unsorted(z))
 
 # separateNodes: nudges sub-tolerance-adjacent nodes apart, leaves well-spaced
 # nodes untouched.
-sep_in <- c(-1, -0.5, -0.5 + 1e-14, 0.5, 1)      # two nodes 1e-14 apart
-sep_out <- separateNodes(sep_in, -1, 1)
-expect_true(all(diff(sep_out) > 0))
+sepIn <- c(-1, -0.5, -0.5 + 1e-14, 0.5, 1)      # two nodes 1e-14 apart
+sepOut <- separateNodes(sepIn, -1, 1)
+expect_true(all(diff(sepOut) > 0))
 
 # below already well-spaced: unchanged
 expect_equal(separateNodes(c(-1, 0, 1), -1, 1), c(-1, 0, 1), tolerance = tol)
@@ -197,15 +195,15 @@ mkTrial <- function(fnc, xk, l, u) {
   h <- levelError(w, sg, fv, FALSE)
   list(R = list(bary = list(x = xk, w = w, p = fv - sg * h)))
 }
-xk_int <- c(-0.8, -0.4, 0, 0.4, 0.8)
-trR <- mkTrial(function(x) exp(6 * x), xk_int, -1, 1)
-outR <- onePointExchange(xk_int, trR$R, function(x) exp(6 * x), FALSE, -1, 1)
+xkInt <- c(-0.8, -0.4, 0, 0.4, 0.8)
+trR <- mkTrial(function(x) exp(6 * x), xkInt, -1, 1)
+outR <- onePointExchange(xkInt, trR$R, function(x) exp(6 * x), FALSE, -1, 1)
 expect_true(max(outR) >= 0.8)
 expect_false(is.unsorted(outR))
 expect_identical(anyDuplicated(outR), 0L)
-trL <- mkTrial(function(x) exp(-6 * x), xk_int, -1, 1)
-outL <- onePointExchange(xk_int, trL$R, function(x) exp(-6 * x), FALSE, -1, 1)
-expect_true(min(outL) <= -0.8 )
+trL <- mkTrial(function(x) exp(-6 * x), xkInt, -1, 1)
+outL <- onePointExchange(xkInt, trL$R, function(x) exp(-6 * x), FALSE, -1, 1)
+expect_true(min(outL) <= -0.8)
 expect_false(is.unsorted(outL))
 expect_identical(anyDuplicated(outL), 0L)
 
@@ -227,11 +225,11 @@ expect_warning(minimaxApprox(function(x) 0 * x, -1, 1, 2, basis = "b"),
 # remBary "unchanging" (stall) exit: setting miniter above maxiter blocks the
 # isConverged branch, so a fit whose error vector stabilises exits via
 # isUnchanging instead. Deterministic (opts-driven, not BLAS-driven).
-expect_warning(
-  minimaxApprox(exp, -1, 1, 6, basis = "b",
-                opts = list(maxiter = 60L, miniter = 1000L, conviter = 1L,
-                            showProgress = FALSE, convrat = 1.000000001,
-                            tol = 1e-14)), "too close")
+expect_warning(minimaxApprox(exp, -1, 1, 6, basis = "b",
+                             opts = list(maxiter = 60L, miniter = 1000L,
+                                         conviter = 1L, showProgress = FALSE,
+                                         convrat = 1.000000001, tol = 1e-14)),
+               "too close")
 
 # ---- Methods dispatch on the barycentric object ---------------------------
 rb <- sW(minimaxApprox(exp, -1, 1, 8, basis = "b"))
@@ -251,9 +249,10 @@ if (Sys.info()["nodename"] == "HOMEDESKTOP") {
   # x^2 - 4 on [-3,-1] has an exact interior zero at x = -2; relErr is undefined
   # there. Barycentric must not silently return a wrong answer -- either the
   # exact-zero guard or a clean non-convergence, never a crash.
-  rz <- tryCatch(
-    sW(minimaxApprox(function(x) x^2 - 4, -3, -1, 3,
-                                   basis = "b", relErr = TRUE)),
-    error = function(e) structure(conditionMessage(e), class = "errcase")) # nolint undesirable_operator_linter
+  rz <- tryCatch(sW(minimaxApprox(function(x) x^2 - 4, -3, -1, 3,
+                                  basis = "b", relErr = TRUE)),
+                 error = function(e) {
+                   structure(conditionMessage(e), class = "errcase") # nolint undesirable_operator_linter
+                 })
   expect_true(inherits(rz, "errcase") || is.finite(rz$ExpErr))
 }

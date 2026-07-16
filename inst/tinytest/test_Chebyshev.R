@@ -115,9 +115,9 @@ expect_identical(composeAffine(c(1, 0, 3), 0, 2), c(4, -6, 3))
 # prototype, master doc Section 3) is E ~2.9e-12. Tolerance is loose (relative
 # to the ~60x improvement being demonstrated) to stay robust across BLAS/
 # platform differences, per the project's platform-fragility convention.
-r5_6 <- suppressWarnings(minimaxApprox(exp, 5, 6, 10L, basis = "c"))
-expect_true(r5_6$ObsErr < 1e-10)
-expect_true(r5_6$ObsErr > 1e-13)
+r56 <- suppressWarnings(minimaxApprox(exp, 5, 6, 10L, basis = "c"))
+expect_true(r56$ObsErr < 1e-10)
+expect_true(r56$ObsErr > 1e-13)
 # A default-opts Warning is still EXPECTED here (see NEWS/session record): the
 # residual oscillation is a floating-point noise floor of the classical
 # linear-solve Remez iteration at this magnitude (relative error ~34*eps),
@@ -126,10 +126,10 @@ expect_true(r5_6$ObsErr > 1e-13)
 # package default) reaches the same accuracy without hitting maxiter,
 # demonstrating the underlying fit is genuinely converged, not merely
 # "improved but still broken".
-r5_6_relaxed <- minimaxApprox(exp, 5, 6, 10L, basis = "c",
-                              opts = list(convrat = 1.03))
-expect_false(r5_6_relaxed$Warning)
-expect_equal(r5_6_relaxed$ObsErr, r5_6$ObsErr, tolerance = 0.05)
+r56Relaxed <- minimaxApprox(exp, 5, 6, 10L, basis = "c",
+                            opts = list(convrat = 1.03))
+expect_false(r56Relaxed$Warning)
+expect_equal(r56Relaxed$ObsErr, r56$ObsErr, tolerance = 0.05)
 
 # Composition accuracy (composeAffine / aMono), normal case: modest degree,
 # range close to [-1, 1]. Must stay tight.

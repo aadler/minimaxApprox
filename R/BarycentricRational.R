@@ -605,4 +605,3 @@ remBaryRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 }
 
 # nolint end
-

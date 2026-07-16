@@ -296,9 +296,10 @@ switchX <- function(r, l, u, R, fn, relErr, basis, xk) {
     # If no extremum then take the endpoint with "better" value depending if
     # we are maximizing or minimizing.
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, R, fn, relErr, basis, l, u)            # nocov
-      xi <- intv[if (maximize) which.max(endPtErr) else                # nocov
-        which.min(endPtErr)]                                # nocov
+      # nocov start
+      endPtErr <- remErr(intv, R, fn, relErr, basis, l, u)
+      xi <- intv[if (maximize) which.max(endPtErr) else which.min(endPtErr)]
+      # nocov end
     } else {
       xi <- extrma[[1L]]
     }
@@ -442,9 +443,9 @@ checkDenom <- function(a, l, u, basis) {
                      error = function(cond) simpleError(trimws(cond$message)))
   if (inherits(dngrRt, "simpleError")) {
     return(NULL)
-  } else {
-    return(dngrRt$root)
   }
+
+  dngrRt$root
 }
 
 # Basis-aware per-coefficient scale bounding a_k's contribution to the

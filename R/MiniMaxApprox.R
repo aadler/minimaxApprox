@@ -77,13 +77,14 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   chkPosInt <- function(val, nm) {
     if (!is.numeric(val) || length(val) != 1L || is.na(val) ||
-        !is.finite(val) || val < 1 || floor(val) != val) {
+          !is.finite(val) || val < 1 || floor(val) != val) {
       stop("'opts$", nm, "' must be a single positive integer.")
     }
   }
   chkNumScalar <- function(val, nm) {
-    if (!is.numeric(val) || length(val) != 1L || is.na(val) ||
-        !is.finite(val)) {
+    if (
+      !is.numeric(val) || length(val) != 1L || is.na(val) || !is.finite(val)
+    ) {
       stop("'opts$", nm, "' must be a single finite, non-missing numeric ",
            "value.")
     }
@@ -204,13 +205,9 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   # resulting degree n and message appropriately. For rational approximation or
   # if the error is not a simpleError or does not contain the word "singular",
   # let the default R failure message come through.
-  #
-  # TODO: Trap other errors with better messages (AA: 2025-12-24)
-
 
   if (!ratApprox && basis != "b" && inherits(mmA, "simpleError") &&
-      grepl("singular", mmA$message, fixed = TRUE)) {
-
+        grepl("singular", mmA$message, fixed = TRUE)) {
     if (is.null(opts$tailtol)) {
       stop("The algorithm did not converge when looking for a polynomial of ",
            "degree ", degree, " and NULL was passed to the tailtol option.")
@@ -325,7 +322,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
   # otherwise NULL (leaving a genuine non-convergence untouched, so its normal
   # maxiter/unchanging warning still fires).
   if (!ratApprox && basis != "b" && !inherits(mmA, "simpleError") &&
-      !isTRUE(mmA$rescued) && !mmA$converged) {
+        !isTRUE(mmA$rescued) && !mmA$converged) {
     rescue <- interpRescue(fn, lower, upper, as.integer(degree), relErr, basis)
     if (!is.null(rescue)) {
       mmA <- list(a = rescue$a, expe = rescue$err, mxae = rescue$err,
@@ -460,4 +457,3 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   ret
 }
-

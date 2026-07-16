@@ -71,8 +71,7 @@ expect_equal(sM(minimaxEval(0.3, rb, "m")), exp(0.3),
              tolerance = 1e-7)
 # Requesting the barycentric basis for a NON-barycentric object has nothing to
 # evaluate through and errors clearly.
-rc_obj <- sW(sM(minimaxApprox(exp, -1, 1, 8,
-                                                          basis = "c")))
+rc_obj <- sW(sM(minimaxApprox(exp, -1, 1, 8, basis = "c")))
 expect_error(minimaxEval(0.3, rc_obj, "b"),
              "not run using the barycentric basis")
 

@@ -226,7 +226,8 @@ expect_false({
   ok <- TRUE
   tryCatch(
     if (isConverged(c(1, NaN, -1), 1, 1.05, 1e-12)) NULL,
-    error = function(e) ok <<- FALSE) # nolint: undesirable_operator_linter
+    error = function(e) ok <<- FALSE # nolint: undesirable_operator_linter
+  )
   !ok
 })
 

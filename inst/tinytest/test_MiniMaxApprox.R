@@ -123,8 +123,7 @@ expect_true(sW(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
 
 ## Barycentric Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 9L, basis = "b", opts = opts), wrnMess)
-expect_true(sW(minimaxApprox(fn, -1, 1, 9L, basis = "b",
-                                           opts = opts)$Warning))
+expect_true(sW(minimaxApprox(fn, -1, 1, 9L, basis = "b", opts = opts)$Warning))
 
 ## E5 re-baseline: pre-E5 this stalled at the floor and raised the near-eps
 ## warning; the E5 exchange's trajectory reaches the singular -> rescue path
@@ -253,15 +252,16 @@ expect_error(minimaxApprox(sqrt, 0, 1, 30L, basis = "m"), errMsg)
 # strictly better outcome than the hard error. Accept either honest form
 # (a platform whose solve still goes singular takes the error arm).
 errMsg <- "The algorithm did not converge when looking for a"
-oTT <- tryCatch(sM(
-  minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
-                opts = list(tailtol = NULL))),
-  warning = function(w) w, error = function(e) e)
+oTT <- tryCatch(
+  sM(minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
+                   opts = list(tailtol = NULL))),
+  warning = function(w) w, error = function(e) e
+)
 expect_true(inherits(oTT, "error") &&
               grepl(errMsg, conditionMessage(oTT), fixed = TRUE) ||
               inherits(oTT, "warning") &&
-              grepl("NOT technically a Remez result", conditionMessage(oTT),
-                    fixed = TRUE))
+                grepl("NOT technically a Remez result", conditionMessage(oTT),
+                      fixed = TRUE))
 
 ## Test unsuccessful restart: degree-n Remez fails singular, degree-(n+1)
 ## retry SUCCEEDS but its uppermost coefficient is NOT effectively zero (fails
@@ -291,8 +291,9 @@ targetErr <- paste("The algorithm did not converge when looking for a",
                    "zero.")
 res <- tryCatch(
   minimaxApprox(fn, -1, 1, 18L, basis = "m", opts = list(tailtol = 1e-10)),
-  error = function(e) structure(conditionMessage(e), class = "mmaOutcomeErr"),   # nolint undesirable_operator_linter
-  message = function(m) structure(conditionMessage(m), class = "mmaOutcomeMsg")) # nolint undesirable_operator_linter
+  error = function(e) structure(conditionMessage(e), class = "mmaOutcomeErr"),  # nolint undesirable_operator_linter
+  message = function(m) structure(conditionMessage(m), class = "mmaOutcomeMsg") # nolint undesirable_operator_linter
+)
 
 if (inherits(res, "mmaOutcomeErr")) {
   # Outcome (A): must be exactly the target branch, NOT "neither converged".
@@ -439,8 +440,7 @@ for (d in c(14L, 15L, 50L)) {
 # so relative error is well-defined and the rescue fires via that branch.
 expect_warning(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L, relErr = TRUE),
                f4wrn)
-pprel <- sW(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L,
-                                        relErr = TRUE))
+pprel <- sW(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L, relErr = TRUE))
 expect_equal(pprel$aMono, c(1, 0, 1), tolerance = 1e-12)
 expect_true(pprel$ObsErr < 10 * .Machine$double.eps)
 expect_true(pprel$Warning)
@@ -460,7 +460,7 @@ expect_true(pprel$Warning)
 # either the documented error, or a completed result with Warning TRUE.
 errMsg <- "The algorithm neither converged when looking for a"
 oXR <- tryCatch(sW(minimaxApprox(function(x) x, -1, 1, 12L,
-                                               relErr = TRUE, basis = "m")),
+                                 relErr = TRUE, basis = "m")),
                 error = function(e) e)
 expect_true(inherits(oXR, "error") &&
               grepl(errMsg, conditionMessage(oXR), fixed = TRUE) ||
