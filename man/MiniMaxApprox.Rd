@@ -169,7 +169,9 @@ Rather than solving an \eqn{(n + 2) \times (n + 2)} linear system in a fixed
 basis at each iteration---the source of the conditioning failures that cap
 the achievable degree in the classical bases---it represents the trial
 polynomial by its \emph{values} at the reference points, with barycentric
-weights, and computes the leveled error \eqn{h} in closed form. Weights are
+weights, and computes the leveled error \eqn{h} in closed form. Evaluation uses
+the second barycentric formula, which is forward-stable for well-distributed
+nodes such as these (Higham, 2004). Weights are
 assembled with capacity scaling so that wide or far-off-center intervals and
 high degrees do not over- or underflow. As a result the barycentric basis
 typically converges at degrees where the classical bases fail with a
@@ -373,11 +375,15 @@ Proofs.} Dagstuhl Seminar Proceedings, \bold{5391},
 
 Pach\enc{ó}{o}n, R. and Trefethen, L. N. (2009) \dQuote{Barycentric-Remez
 algorithms for best polynomial approximation in the chebfun system}, \emph{BIT
-Numerical Mathematics}, \bold{49}, 721--741, \doi{10.1007/s10543-009-0240-1}
+Numerical Mathematics}, \bold{49}(4), 721--741, \doi{10.1007/s10543-009-0240-1}
 
 Berrut, J.-P. and Trefethen, L. N. (2004) \dQuote{Barycentric Lagrange
 interpolation}, \emph{SIAM Review}, \bold{46}(3), 501--517,
 \doi{10.1137/S0036144502417715}
+
+Higham, N. J. (2004) \dQuote{The numerical stability of barycentric Lagrange
+interpolation}, \emph{IMA Journal of Numerical Analysis}, \bold{24}(4),
+547--556, \doi{10.1093/imanum/24.4.547}
 
 Filip, S.-I. and Nakatsukasa, Y. and Trefethen, L. N. and Beckermann, B.
 (2018) \dQuote{Rational minimax approximation via adaptive barycentric
