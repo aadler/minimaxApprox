@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 tol <- sqrt(.Machine$double.eps)
+sW <- function(x) suppressWarnings(x)
+sM <- function(x) suppressMessages(x)
 
 # Most tests of warnings and messages will perforce check internals too.
 
@@ -111,16 +113,16 @@ wrnMess <- paste("Convergence to requested ratio and tolerance not achieved in",
 
 ## Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 9L, opts = opts), wrnMess)
-expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, 9L, opts = opts)$Warning))
+expect_true(sW(minimaxApprox(fn, -1, 1, 9L, opts = opts)$Warning))
 
 ## Rational
 dg <- c(2L, 2L)
 expect_warning(minimaxApprox(fn, -1, 1, dg, opts = opts), wrnMess)
-expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
+expect_true(sW(minimaxApprox(fn, -1, 1, dg, opts = opts)$Warning))
 
 ## Barycentric Polynomial
 expect_warning(minimaxApprox(fn, -1, 1, 9L, basis = "b", opts = opts), wrnMess)
-expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, 9L, basis = "b",
+expect_true(sW(minimaxApprox(fn, -1, 1, 9L, basis = "b",
                                            opts = opts)$Warning))
 
 ## E5 re-baseline: pre-E5 this stalled at the floor and raised the near-eps
@@ -250,7 +252,7 @@ expect_error(minimaxApprox(sqrt, 0, 1, 30L, basis = "m"), errMsg)
 # strictly better outcome than the hard error. Accept either honest form
 # (a platform whose solve still goes singular takes the error arm).
 errMsg <- "The algorithm did not converge when looking for a"
-oTT <- tryCatch(suppressMessages(
+oTT <- tryCatch(sM(
   minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
                 opts = list(tailtol = NULL))),
   warning = function(w) w, error = function(e) e)
@@ -321,7 +323,7 @@ expect_equal(PP2$Basis, PP1$Basis, tolerance = tol)
 # ~708 reported in the warning; the input is far outside the supported
 # envelope either way). Accept either loud outcome; a SILENT completion
 # would be the failure mode.
-o100 <- tryCatch(suppressWarnings(minimaxApprox(sin, 0, pi / 2, c(100L, 0L))),
+o100 <- tryCatch(sW(minimaxApprox(sin, 0, pi / 2, c(100L, 0L))),
                  error = function(e) e)
 expect_true(inherits(o100, "error") || isTRUE(o100$Warning))
 
@@ -410,7 +412,7 @@ f4wrn <- "NOT technically a Remez result"
 # Exactly representable: x^2 is exactly a degree-2 polynomial. Rescue returns
 # the interpolant (== the function); aMono is (0, 0, 1) to machine precision.
 expect_warning(minimaxApprox(function(x) x^2, 0, 1, 2L), f4wrn)
-ppx2 <- suppressWarnings(minimaxApprox(function(x) x^2, 0, 1, 2L))
+ppx2 <- sW(minimaxApprox(function(x) x^2, 0, 1, 2L))
 expect_equal(ppx2$aMono, c(0, 0, 1), tolerance = 1e-12)
 expect_true(ppx2$ObsErr < 10 * .Machine$double.eps)
 expect_true(ppx2$Warning)
@@ -421,7 +423,7 @@ expect_true(ppx2$Warning)
 # platforms. Rescue returns a floor-level interpolant.
 for (d in c(14L, 15L, 50L)) {
   expect_warning(minimaxApprox(exp, -1, 1, d), f4wrn)
-  ppe <- suppressWarnings(minimaxApprox(exp, -1, 1, d))
+  ppe <- sW(minimaxApprox(exp, -1, 1, d))
   expect_true(ppe$ObsErr < 1e-13)
   expect_true(ppe$Warning)
   # Re-measure the returned coefficients independently: floor-level everywhere.
@@ -436,7 +438,7 @@ for (d in c(14L, 15L, 50L)) {
 # so relative error is well-defined and the rescue fires via that branch.
 expect_warning(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L, relErr = TRUE),
                f4wrn)
-pprel <- suppressWarnings(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L,
+pprel <- sW(minimaxApprox(function(x) x^2 + 1, 0, 1, 2L,
                                         relErr = TRUE))
 expect_equal(pprel$aMono, c(1, 0, 1), tolerance = 1e-12)
 expect_true(pprel$ObsErr < 10 * .Machine$double.eps)
@@ -456,7 +458,7 @@ expect_true(pprel$Warning)
 # contract. The contract is that this input must never complete SILENTLY:
 # either the documented error, or a completed result with Warning TRUE.
 errMsg <- "The algorithm neither converged when looking for a"
-oXR <- tryCatch(suppressWarnings(minimaxApprox(function(x) x, -1, 1, 12L,
+oXR <- tryCatch(sW(minimaxApprox(function(x) x, -1, 1, 12L,
                                                relErr = TRUE, basis = "m")),
                 error = function(e) e)
 expect_true(inherits(oXR, "error") &&

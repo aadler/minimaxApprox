@@ -4,8 +4,8 @@
 # M5 Phase 2: rational barycentric-Remez (FNT 2018 subset).
 
 tol <- sqrt(.Machine$double.eps)
-sW <- suppressWarnings
-sM <- suppressMessages
+sW <- function(x) suppressWarnings(x)
+sM <- function(x) suppressMessages(x)
 
 nS <- getNamespace("minimaxApprox")
 baryRatCtilde <- get("baryRatCtilde", nS)

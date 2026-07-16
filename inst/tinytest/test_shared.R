@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 tol <- sqrt(.Machine$double.eps)
+sW <- function(x) suppressWarnings(x)
+sM <- function(x) suppressMessages(x)
 
 opts <- list(maxiter = 100L, miniter = 10L, conviter = 10L,
              showProgress = FALSE, convrat = 1.000000001, tol = 1e-14,
@@ -294,7 +296,7 @@ expect_false(minimaxApprox:::tailContribution(1e-20, 12, -1, 1, "c") > 1e-10)
 ## Unit tests of refLocalCheck itself.
 rlc <- minimaxApprox:::refLocalCheck
 ## Healthy classical fit: converged exp deg 6 -- certificate passes.
-hf <- suppressWarnings(minimaxApprox(exp, -1, 1, 6L))
+hf <- sW(minimaxApprox(exp, -1, 1, 6L))
 expect_false(rlc(list(a = hf$a), exp, FALSE, "c", -1, 1, hf$ExpErr)$refLocal)
 ## Synthetic bad fit: a deliberately-wrong polynomial with a small claimed
 ## leveled error must fail its certificate.
@@ -327,9 +329,9 @@ expect_false(o11$Warning)
 ## certificate failure -- post-E5 that is a bug alarm, not an accepted
 ## outcome.
 certAt <- function(fn, l, u, d, b, oracle) {
-  o <- suppressMessages(minimaxApprox(fn, l, u, d, basis = b))
+  o <- sM(minimaxApprox(fn, l, u, d, basis = b))
   g <- seq(l, u, length.out = 2e5L)
-  gridRatio <- max(abs(suppressMessages(minimaxEval(g, o) - fn(g)))) / o$ExpErr
+  gridRatio <- max(abs(sM(minimaxEval(g, o) - fn(g)))) / o$ExpErr
   !o$Warning && gridRatio <= minimaxApprox:::REFLOCALTOL &&
     abs(o$ExpErr / oracle - 1) < 1e-4
 }
@@ -366,6 +368,6 @@ expect_false(o56$Warning)
 ## Runge degree-10 (issue #2 restart path, DP-4b recompute): warning-free
 ## with the pinned ExpErr.
 runge <- function(x) 1 / (1 + (5 * x) ^ 2)
-o_runge <- suppressMessages(minimaxApprox(runge, -1, 1, 10L, basis = "m"))
+o_runge <- sM(minimaxApprox(runge, -1, 1, 10L, basis = "m"))
 expect_false(o_runge$Warning)
 expect_equal(o_runge$ExpErr, 0.06592293, tolerance = 1e-7)
