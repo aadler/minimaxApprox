@@ -123,12 +123,15 @@ expect_warning(minimaxApprox(fn, -1, 1, 9L, basis = "b", opts = opts), wrnMess)
 expect_true(suppressWarnings(minimaxApprox(fn, -1, 1, 9L, basis = "b",
                                            opts = opts)$Warning))
 
-# Test "very near machine double" warning message
-wrnMess <- paste("All errors very near machine double precision. The solution",
-                 "may not be optimal given floating point limitations.")
-## Polynomial
+## E5 re-baseline: pre-E5 this stalled at the floor and raised the near-eps
+## warning; the E5 exchange's trajectory reaches the singular -> rescue path
+## instead (dense error 2.0e-15, machine floor either way). Both are honest
+## machine-precision outcomes; either text passes, but one must fire.
 fn <- function(x) sin(x) + cos(x)
-expect_warning(minimaxApprox(fn, -1.5, 1.5, 15L), wrnMess)
+w15 <- tryCatch(minimaxApprox(fn, -1.5, 1.5, 15L),
+                warning = function(w) conditionMessage(w))
+expect_true(grepl("NOT technically a Remez result", w15, fixed = TRUE) ||
+              grepl(wrnMess, w15, fixed = TRUE))
 
 ## Rational
 # The various CRAN and Github testbeds are diverse enough that I cannot find a
@@ -193,28 +196,38 @@ expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
 ## NOT pass CRAN's own mac x86_64 testbed nor on Professor Ripley's Fedora-based
 ## OpenBLAS platform, so will only run on Windows for now.
 
-if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
-  # Test HW Borchers request of returning n degree if n fails but n + 1 works
-  # with uppermost effectively 0 with Runge function between -1 and 1 and degree
-  # 10.
-  ## Test successful restart
-  ## Below also tests the failover to QR
-  mess <- paste("The algorithm failed while looking for a polynomial of degree",
-                "10 but successfully completed when looking for a polynomial",
-                "of degree 11 with the largest coefficient's contribution to",
-                "the approximation <= the tailtol option. The result is a",
-                "polynomial of degree 10 as the uppermost coefficient is",
-                "effectively 0.")
-  fn <- function(x) 1 / (1 + (5 * x) ^ 2)
-  control <- c(0.934077073, 0.0, -11.553015692, 0.0, 59.171892231,
-               0.0, -134.155250367, 0.0, 135.795965068, 0.0, -50.221129702)
-  controlE <- 0.06592293
-  expect_message(minimaxApprox(fn, -1, 1, 10L), mess)
-  PP <- suppressMessages(minimaxApprox(fn, -1, 1, 10L))
-  expect_equal(PP$aMono, control, tolerance = tol)
-  expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only 8 digits in email
-  expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
-}
+# if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
+
+## They may pass now with the rengineered switch/findroots so will try removing
+## the gate.
+## (AA: 2026-07-16)
+
+# E5 re-baseline: the redesigned exchange converges degree 10 DIRECTLY
+# (no singular solve, so no degree-11 restart and no message) on the
+# platforms measured so far; a platform whose solve still goes singular
+# takes the restart path and emits HWB's message. Accept either route --
+# what is pinned is the RESULT: the returned polynomial must match HWB's
+# control coefficients and error either way.
+
+fn <- function(x) 1 / (1 + (5 * x) ^ 2)
+control <- c(0.934077073, 0.0, -11.553015692, 0.0, 59.171892231, 0.0,
+             -134.155250367, 0.0, 135.795965068, 0.0, -50.221129702)
+controlE <- 0.06592293
+
+msgs <- character(0)
+PP <- withCallingHandlers(minimaxApprox(fn, -1, 1, 10L),
+                          message = function(m) {
+                            msgs <<- c(msgs, conditionMessage(m))
+                            invokeRestart("muffleMessage")
+                          })
+expect_true(length(msgs) == 0L ||
+              any(grepl("successfully completed when looking", msgs,
+                        fixed = TRUE)))
+expect_equal(PP$aMono, control, tolerance = tol)
+expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only 8 digits in email
+expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
+
+# }
 
 ## Test unsuccessful restart due to two failures. F4: the former case here
 ## (sin, 0.25, 0.75, 16, "m") is now RESCUED -- see the F4 block below --
@@ -228,10 +241,24 @@ errMsg <- "The algorithm neither converged when looking for a"
 ## Below case has failover to QR
 expect_error(minimaxApprox(sqrt, 0, 1, 30L, basis = "m"), errMsg)
 
-# Test tailtol NULL
+# E5 re-baseline: pre-E5 the exchange fed a singular solve at degree 15 and,
+# with tailtol = NULL disabling the restart, the hard error above was raised.
+# The E5 exchange never goes singular on this input; the iteration stalls and
+# the SECOND-manifestation rescue (M4, downstream of and independent from the
+# tailtol-gated restart) returns the degree-15 interpolant -- dense error
+# 1.11e-16, a machine-floor-perfect result with the honest rescue warning, a
+# strictly better outcome than the hard error. Accept either honest form
+# (a platform whose solve still goes singular takes the error arm).
 errMsg <- "The algorithm did not converge when looking for a"
-expect_error(minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
-                           opts = list(tailtol = NULL)), errMsg)
+oTT <- tryCatch(suppressMessages(
+  minimaxApprox(sin, 0.25, 0.75, 15L, basis = "m",
+                opts = list(tailtol = NULL))),
+  warning = function(w) w, error = function(e) e)
+expect_true(inherits(oTT, "error") &&
+              grepl(errMsg, conditionMessage(oTT), fixed = TRUE) ||
+              inherits(oTT, "warning") &&
+              grepl("NOT technically a Remez result", conditionMessage(oTT),
+                    fixed = TRUE))
 
 ## Test unsuccessful restart: degree-n Remez fails singular, degree-(n+1)
 ## retry SUCCEEDS but its uppermost coefficient is NOT effectively zero (fails
@@ -288,7 +315,15 @@ expect_equal(PP2$ObsErr, PP1$ObsErr, tolerance = tol)
 expect_equal(PP2$Basis, PP1$Basis, tolerance = tol)
 
 # This should test RATIONAL failover to QR
-expect_error(minimaxApprox(sin, 0, pi / 2, c(100L, 0L)))
+# E5 re-baseline: pre-E5 the exchange fed the degree-100 monomial solve a
+# singular system (hard error). The E5 trajectory avoids the singularity and
+# the iteration runs to a stall exit with Warning = TRUE (measured: ratio
+# ~708 reported in the warning; the input is far outside the supported
+# envelope either way). Accept either loud outcome; a SILENT completion
+# would be the failure mode.
+o100 <- tryCatch(suppressWarnings(minimaxApprox(sin, 0, pi / 2, c(100L, 0L))),
+                 error = function(e) e)
+expect_true(inherits(o100, "error") || isTRUE(o100$Warning))
 
 ################################################################################
 # Input validation additions (Module M2: F2, F10, F13)
@@ -408,8 +443,22 @@ expect_true(pprel$ObsErr < 10 * .Machine$double.eps)
 expect_true(pprel$Warning)
 
 # Fall-through 1 (relErr zero-guard): x on [-1, 1] with relErr has a zero at
-# x = 0 on the probe grid, so the relative criterion is undefined; the rescue
-# does NOT fire and the original hard error is raised.
+# x = 0 on the probe grid, so the relative criterion is undefined and the
+# rescue does NOT fire.
+# E5 re-baseline: pre-E5 both Remez solves went singular and, with the
+# rescue's relErr zero-guard declining, the hard error was raised. The E5
+# exchange does not go singular here; the iteration returns an (essentially)
+# exact representation of x and exits through the stall path, Warning TRUE.
+# NOTE: ObsErr is deliberately NOT asserted. It is the RELATIVE error, and
+# fn's zero at x = 0 divides the solve's coefficient noise by x: measured
+# ObsErr is exactly 0 on the reviewer container (bitwise-exact solve) but
+# 1.9e-8 on HOMEDESKTOP (coefficient noise ~8e-10) -- platform noise, not a
+# contract. The contract is that this input must never complete SILENTLY:
+# either the documented error, or a completed result with Warning TRUE.
 errMsg <- "The algorithm neither converged when looking for a"
-expect_error(minimaxApprox(function(x) x, -1, 1, 12L, relErr = TRUE,
-                           basis = "m"), errMsg)
+oXR <- tryCatch(suppressWarnings(minimaxApprox(function(x) x, -1, 1, 12L,
+                                               relErr = TRUE, basis = "m")),
+                error = function(e) e)
+expect_true(inherits(oXR, "error") &&
+              grepl(errMsg, conditionMessage(oXR), fixed = TRUE) ||
+              isTRUE(oXR$Warning))

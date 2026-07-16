@@ -234,17 +234,18 @@ reported as an error, mirroring the classical rational path. Finally, for
 equioscillates on more than \eqn{m + n + 2} points, as happens for even or odd
 functions at generic degrees) the fixed-size exchange can converge to a leveled
 fixed point that is not the global minimax; the returned approximation is then
-valid and its expected error is a lower bound on the true minimax error, valid
-and its expected error is a lower bound on the true minimax error. This
-reference-local caveat is not specific to the rational barycentric path or to
-results near machine precision: it can occur on any basis, for polynomial or
-rational approximation, at any error magnitude, whenever the requested degrees
-are non-normal for the function or the exchange stalls at a reference-local
-fixed point. All approximation paths therefore verify a converged result
-against a dense evaluation grid and raise a warning whenever the dense-grid
-error materially exceeds the leveled error; the check is skipped only where
-its ratio would be meaningless noise (results at the machine-precision floor,
-and relative-error results when \code{fn} has an exact zero on the grid).
+valid and its expected error is a lower bound on the true minimax error
+(de la Vall\enc{é}{e}e Poussin). To guard against this, every approximation
+path verifies a converged result against a dense evaluation grid and raises a
+warning whenever the dense-grid error materially exceeds the leveled error;
+the check is skipped only where its ratio would be meaningless noise (results
+at the machine-precision floor, and relative-error results when \code{fn} has
+an exact zero on the grid). For the rational barycentric path this warning is
+a structural outcome of non-normal requests. For the polynomial and classical
+rational paths, the exchange maintains the invariants (whole-interval root
+search, retention of the global extremum) under which reference-local
+convergence should not occur, so the check there is a safety net: if it fires,
+please report it as a bug.
 }
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{

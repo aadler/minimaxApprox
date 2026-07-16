@@ -181,8 +181,25 @@ expect_error(minimaxApprox(fEC, -pi, pi, c(3L, 3L), basis = "b"),
              "degenerate or defective")
 expect_error(minimaxApprox(fEC, -pi, pi, c(14L, 13L), basis = "b"),
              "degenerate or defective")
-expect_error(minimaxApprox(fEC, -pi, pi, c(8L, 8L), basis = "b"),
-             "degenerate or defective")
+
+# E5 re-baseline: pre-E5 the (8, 8) exchange hit a mid-iteration
+# no-pole-free stop in this container (the suite's in-loop dispatch
+# coverage; M5P2's platform-fragility flag). The E5 exchange converges it
+# outright -- E = 2.897293e-7 with dense-grid ratio 1.0000, a global
+# certificate, warning-free. Accept either honest outcome; the in-loop
+# dispatch line's coverage disposition moves to the NOCOV registry per the
+# documented M5P2 fallback.
+r88 <- tryCatch(suppressWarnings(minimaxApprox(fEC, -pi, pi, c(8L, 8L),
+                                               basis = "b")),
+                error = function(e) e)
+if (inherits(r88, "error")) {
+  expect_true(grepl("degenerate or defective|has a zero at",
+                    conditionMessage(r88)))
+} else {
+  g88 <- seq(-pi, pi, length.out = 2e5L)
+  expect_true(max(abs(minimaxEval(g88, r88) - fEC(g88))) / r88$ExpErr <=
+                minimaxApprox:::REFLOCALTOL || isTRUE(r88$Warning))
+}
 
 # x^4 (2,2): even-monomial NON-NORMAL family. The true minimax equioscillates
 # on SEVEN points (the reduced (1,1)-in-x^2 problem's four alternations pull
@@ -203,10 +220,17 @@ if (inherits(r4, "error")) {
                     conditionMessage(r4)))
 } else {
   # The reference alternant is a de la Vallee Poussin LOWER bound on the
-  # true minimax error, so a converged ExpErr can never exceed it -- and
-  # the reference-local certificate warning must have fired.
+  # true minimax error, so a converged ExpErr can never exceed it.
   expect_true(r4$ExpErr <= 0.0295086)
-  expect_true(r4$Warning)
+
+  # E5 re-baseline: a platform where the redesigned exchange converges this
+  # non-normal case globally returns it warning-free WITH its dense-grid
+  # certificate (Warning FALSE at this magnitude implies the certificate
+  # passed, which forces ExpErr at the true minimax 0.0295085);
+  # reference-local convergence must still warn.
+  g4 <- seq(-1, 1, length.out = 2e5L)
+  r4Ratio <- max(abs(minimaxEval(g4, r4) - g4 ^ 4)) / r4$ExpErr
+  expect_true(isTRUE(r4$Warning) || r4Ratio <= minimaxApprox:::REFLOCALTOL)
 }
 
 # exp(cos(x)) (4,4): same non-normal family, bistable the OTHER way --
@@ -219,7 +243,15 @@ if (inherits(rec, "error")) {
   expect_true(grepl("degenerate or defective|has a zero at",
                     conditionMessage(rec)))
 } else {
-  expect_true(rec$Warning)
+  # E5 re-baseline: the E5 exchange converges this case globally --
+  # E = 1.566953e-3 (>= the pre-E5 reference-local lower bound 1.560e-3, as
+  # de la Vallee Poussin requires) with dense-grid ratio 1.0000 and no
+  # warning. A converged result is acceptable silent ONLY with its global
+  # certificate; reference-local convergence must still warn.
+  gec <- seq(-pi, pi, length.out = 2e5L)
+  recRatio <- max(abs(minimaxEval(gec, rec) - fEC(gec))) / rec$ExpErr
+  expect_true(isTRUE(rec$Warning) ||
+                recRatio <= minimaxApprox:::REFLOCALTOL)
 }
 
 # exp(cos(x)) (2,2): platform-STABLE pre-loop pole stop -- the deterministic

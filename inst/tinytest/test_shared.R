@@ -95,14 +95,22 @@ r <- minimaxApprox:::findRoots(x, RR, fn, TRUE, "m", 0, 1)
 ## Need weaker tolerance here since functions are not exactly the same
 expect_equal(r, control, tolerance = 1e-7)
 
-## Test error trap with contrived example
-## Polynomial
-r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, "m", 0, 1)
-expect_identical(r, 1.2)
-
-## Rational
-r <- minimaxApprox:::findRoots(c(1.2, 1.8), A, fn, TRUE, "m", 0, 1)
-expect_identical(r, 1.2)
+## E5 contract tests. (The pre-E5 "error trap" test here passed an UNDEFINED
+## object A: uniroot errored with "object not found", the old tryCatch
+## swallowed it, and the fallback path returned 1.2 -- a latent test bug that
+## only tested the trap by accident. The fallback no longer exists.)
+## A rootless error curve now yields numeric(0), not a substituted endpoint.
+Pc <- list(a = 5)
+fc <- function(x) 3
+expect_identical(minimaxApprox:::findRoots(c(0.4, 0.6), Pc, fc, FALSE,
+                                           "m", 0, 1), numeric(0))
+## D1 regression (MP2 B1-1): a sign change OUTSIDE the between-reference
+## span -- here the root at 0.2 lies left of the reference {0.5, 0.6} -- was
+## structurally invisible pre-E5 and must now be found.
+Pl <- list(a = c(-0.2, 1))
+f0 <- function(x) 0 * x
+r <- minimaxApprox:::findRoots(c(0.5, 0.6), Pl, f0, FALSE, "m", 0, 1)
+expect_equal(r, 0.2, tolerance = 1e-7)
 
 # Test switchX
 # Assuming function is correct, replicate a previous result.
@@ -113,7 +121,7 @@ fn <- function(x) sin(x) + cos(x)
 x <- minimaxApprox:::chebNodes(6, 0, 1)
 PP <- minimaxApprox:::polyCoeffs(x, fn, FALSE, "m", 0, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, PP, fn, FALSE, "m", 0, 1)
-x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE, "m")
+x <- minimaxApprox:::switchX(r, -1, 1, PP, fn, FALSE, "m", x)
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
@@ -124,19 +132,26 @@ fn <- function(x) ifelse(abs(x) < 1e-20, 1, sin(x) / x)
 x <- minimaxApprox:::chebNodes(5, -1, 1)
 RR <- minimaxApprox:::ratCoeffs(x, 0, fn, 2L, 1L, FALSE, "m", -1, 1, opts$ztol)
 r <- minimaxApprox:::findRoots(x, RR, fn, FALSE, "m", -1, 1)
-x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE, "m")
+x <- minimaxApprox:::switchX(r, -1, 1, RR, fn, FALSE, "m", x)
 # Need weaker tolerance here due to different build platforms
 expect_equivalent(x, control, tolerance = 3.5e-5)
 
-## Contrive no extremum examples for maximization and minimization
+## E5: degenerate (too-few-candidates) fallback. A constant error curve
+## offers a single sign region -- fewer alternating candidates than the
+## reference size -- so switchX must return the PREVIOUS reference unchanged
+## (routing the loop to the existing isUnchanging stall exit; deliberately
+## no new degenerate handling, M3 lesson) with the ZeroBasis attribute set.
 R <- list(a = 0, b = 1)
 fn <- function(x) 3
-expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, "m"), c(0, 0),
-                  tolerance = tol)
+xk <- c(0.25, 0.75)
+xf <- minimaxApprox:::switchX(numeric(0), 0, 1, R, fn, FALSE, "m", xk)
+expect_equivalent(as.vector(xf), xk, tolerance = tol)
+expect_false(attr(xf, "ZeroBasis"))
 
 fn <- function(x) -3
-expect_equivalent(minimaxApprox:::switchX(0, 0, 1, R, fn, FALSE, "m"), c(0, 0),
-                  tolerance = tol)
+xf <- minimaxApprox:::switchX(numeric(0), 0, 1, R, fn, FALSE, "m", xk)
+expect_equivalent(as.vector(xf), xk, tolerance = tol)
+expect_false(attr(xf, "ZeroBasis"))
 
 # Check isConverged
 errs <- c(-0.1, 0.1, -0.1)
@@ -301,37 +316,32 @@ expect_true(is.na(fg$gridSup))
 o11 <- minimaxApprox(exp, -1, 1, 11L, basis = "c")
 expect_false(o11$Warning)
 
-## The B1-1 quartet. The barycentric cases are measured basin-stable across
-## the reviewer container and HOMEDESKTOP (both take the sub-optimal fixed
-## point), so they assert the warning unconditionally. The CLASSICAL cases
-## are basin-bistable (BLAS-dependent): the container lands reference-local
-## (must warn "lower bound"); HOMEDESKTOP lands in the good basin and finds
-## the TRUE minimax (atan d9 m: E = 1.143854e-5 ratio 1.000000; sin d9 c:
-## E = 2.396019e-11 = 2*J_11(1), ratio 1.000017) -- an honest silent outcome,
-## accepted only WITH its dense-grid certificate (accept-either-honest-
-## outcome form, M5P2 F.4 convention). NOTE (E5 Phase 2 acceptance): after
-## the exchange redesign, ALL FOUR must take the certified-silent arm on
-## every platform, with E at the true minimax values (atan[0, 3] deg 3 ->
-## 4.802475e-3; see E5 brief section 3.4).
-expect_warning(minimaxApprox(atan, 0, 3, 3L, basis = "b"),
-               pattern = "lower bound")
-expect_warning(minimaxApprox(atan, -1, 1, 11L, basis = "b"),
-               pattern = "lower bound")
-certOrWarn <- function(fn, l, u, d, b) {
-  w <- character(0)
-  o <- withCallingHandlers(
-    suppressMessages(minimaxApprox(fn, l, u, d, basis = b)),
-    warning = function(x) {
-      w <<- c(w, conditionMessage(x))
-      invokeRestart("muffleWarning")
-    })
-  if (any(grepl("lower bound", w, fixed = TRUE))) return(TRUE)
+## The B1-1 quintet, post-E5 (exchange redesign): every case must now
+## converge WARNING-FREE to the true minimax with a dense-grid certificate,
+## on every platform. Oracles: atan[0, 3] deg 3 = 4.802475e-3 (dual-path,
+## MP2); atan deg 9 = 1.143854e-5 and sin deg 9 = 2.396019e-11 (HOMEDESKTOP
+## good-basin measurements, pre-E5; the sin value = 2 * J_11(1)); atan
+## deg 11 = 1.662360e-6 and cos deg 4 = 4.187752e-5 (parity-staircase
+## oracles: the degree-(n+1) classical fits agree to displayed digits,
+## E_n = E_{n+1} for odd/even functions). A refLocal warning here is a
+## certificate failure -- post-E5 that is a bug alarm, not an accepted
+## outcome.
+certAt <- function(fn, l, u, d, b, oracle) {
+  o <- suppressMessages(minimaxApprox(fn, l, u, d, basis = b))
   g <- seq(l, u, length.out = 2e5L)
-  gridRatio <- max(abs(minimaxEval(g, o) - fn(g))) / o$ExpErr
-  gridRatio <= minimaxApprox:::REFLOCALTOL
+  gridRatio <- max(abs(suppressMessages(minimaxEval(g, o) - fn(g)))) / o$ExpErr
+  !o$Warning && gridRatio <= minimaxApprox:::REFLOCALTOL &&
+    abs(o$ExpErr / oracle - 1) < 1e-4
 }
-expect_true(suppressMessages(certOrWarn(atan, -1, 1, 9L, "m")))
-expect_true(certOrWarn(sin, -1, 1, 9L, "c"))
+expect_true(certAt(atan, 0, 3, 3L, "b", 4.802475e-3))
+expect_true(certAt(atan, -1, 1, 9L, "m", 1.143854e-5))
+expect_true(certAt(atan, -1, 1, 11L, "b", 1.662360e-6))
+expect_true(certAt(sin, -1, 1, 9L, "c", 2.396019e-11))
+## The fifth (CP-1-discovered) case: even fn at even degree, symmetric
+## interval -- exercises both the D1/D2 exchange fixes and the E5
+## endpoint-candidate rule that breaks the parity-degenerate (h ~ 0)
+## symmetric-reference fixed point.
+expect_true(certAt(cos, -1, 1, 4L, "b", 4.187752e-5))
 
 ### Must-not-fire set.
 ## interpRescue'd results raise ONLY the rescue warning (certificate skipped

@@ -18,6 +18,20 @@
 \section{Version 0.6.0 (2026-10-01)}{
   \subsection{Fixed}{
     \itemize{
+      \item Fixed the Remez exchange silently converging to a
+      \emph{reference-local} fixed point that is not the global minimax,
+      returning a materially suboptimal approximation with no warning (for
+      example, \code{atan} on \eqn{[0, 3]} at degree 3 reported an expected
+      error 1.8 times smaller than the returned approximation's true maximum
+      error). Two structural defects were responsible: the root search only
+      ever examined the intervals \emph{between} consecutive current reference
+      points, so a sign change between an endpoint and the outermost reference
+      point was invisible; and the maximize/minimize schedule was seeded at
+      the lower endpoint and flipped mechanically, so an error curve with one
+      more oscillation than the schedule assumed desynced the exchange into
+      returning roots instead of extrema. Both are fixed by the exchange
+      redesign described under \dQuote{Changed}.
+
       \item Fixed a crash (\dQuote{segfault from C stack overflow}) evaluating a
       Chebyshev-basis approximation at several million or more points at once.
 
@@ -55,6 +69,22 @@
   }
   \subsection{Changed}{
     \itemize{
+      \item The Remez exchange was redesigned to be driven by the error curve
+      itself rather than by the current reference's structure. Roots of the
+      error equation are now located over the \emph{whole} approximation
+      interval from an oversampled grid; each sign-region's search direction
+      is taken from the error's own sign there instead of a mechanically
+      alternated schedule; the interval endpoints are always retained as
+      exchange candidates; and when the curve offers more alternating extrema
+      than the reference holds, the new reference is the alternating window
+      that contains the global extremum and maximizes its smallest error (the
+      classical conditions for the leveled error to increase strictly toward
+      the true minimax). Converged results for healthy inputs agree with
+      0.5.0 at tolerance level but are \strong{not bitwise identical}, and
+      inputs that previously exited through a singular-matrix error or a
+      stall may now exit through a different---equally loud or strictly
+      better---path, since the iteration trajectory differs.
+
       \item \strong{Breaking:} Chebyshev-basis approximation now internally
       maps the requested range \eqn{[l, u]} to \eqn{[-1, 1]} before evaluating
       \eqn{T_k}, fixing the conditioning issue noted above. \code{a} (and
