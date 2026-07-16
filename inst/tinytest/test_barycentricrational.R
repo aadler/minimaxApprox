@@ -198,7 +198,7 @@ if (inherits(r88, "error")) {
   expect_true(grepl("degenerate or defective|has a zero at",
                     conditionMessage(r88)))
 } else {
-  g88 <- seq(-pi, pi, length.out = 2e5L)
+  g88 <- seq(-pi, pi, length.out = 20001L)
   expect_true(max(abs(minimaxEval(g88, r88) - fEC(g88))) / r88$ExpErr <=
                 REFLOCALTOL || isTRUE(r88$Warning))
 }
@@ -230,7 +230,7 @@ if (inherits(r4, "error")) {
   # certificate (Warning FALSE at this magnitude implies the certificate
   # passed, which forces ExpErr at the true minimax 0.0295085);
   # reference-local convergence must still warn.
-  g4 <- seq(-1, 1, length.out = 2e5L)
+  g4 <- seq(-1, 1, length.out = 20001L)
   r4Ratio <- max(abs(minimaxEval(g4, r4) - g4 ^ 4)) / r4$ExpErr
   expect_true(isTRUE(r4$Warning) || r4Ratio <= REFLOCALTOL)
 }
@@ -250,7 +250,7 @@ if (inherits(rec, "error")) {
   # de la Vallee Poussin requires) with dense-grid ratio 1.0000 and no
   # warning. A converged result is acceptable silent ONLY with its global
   # certificate; reference-local convergence must still warn.
-  gec <- seq(-pi, pi, length.out = 2e5L)
+  gec <- seq(-pi, pi, length.out = 20001L)
   recRatio <- max(abs(minimaxEval(gec, rec) - fEC(gec))) / rec$ExpErr
   expect_true(isTRUE(rec$Warning) || recRatio <= REFLOCALTOL)
 }

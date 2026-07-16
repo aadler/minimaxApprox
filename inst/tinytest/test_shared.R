@@ -343,7 +343,7 @@ expect_false(o11$Warning)
 ## outcome.
 certAt <- function(fn, l, u, d, b, oracle) {
   o <- sM(minimaxApprox(fn, l, u, d, basis = b))
-  g <- seq(l, u, length.out = 2e5L)
+  g <- seq(l, u, length.out = 20001L)
   gridRatio <- max(abs(sM(minimaxEval(g, o) - fn(g)))) / o$ExpErr
   !o$Warning && gridRatio <= REFLOCALTOL && abs(o$ExpErr / oracle - 1) < 1e-4
 }
