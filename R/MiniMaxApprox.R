@@ -234,8 +234,8 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
       if (is.null(rescue)) {
         stop("The algorithm neither converged when looking for a polynomial of",
-             " degree ", degree, " nor when looking for a polynomial of degree ",
-             degree + 1L, ".")
+             " degree ", degree, " nor when looking for a polynomial of",
+             " degree ", degree + 1L, ".")
       }
 
       # Assemble an mmA-like result from the interpolant. expe and mxae are
@@ -282,8 +282,9 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
       # xmax^(n-1); see basisScale in shared.R).
       if (tailContribution(mmA$a[n], n, lower, upper, basis) > opts$tailtol) {
         stop("The algorithm did not converge when looking for a polynomial of",
-             " degree ", degree, " and when looking for a polynomial of degree ",
-             degree + 1L, " the uppermost coefficient is not effectively zero.")
+             " degree ", degree, " and when looking for a polynomial of",
+             " degree ", degree + 1L, " the uppermost coefficient is not",
+             " effectively zero.")
       }
 
       mmA$a <- mmA$a[-n]

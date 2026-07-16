@@ -20,7 +20,8 @@ ratMat <- function(x, E, y, nD, dD, relErr, basis, l, u) {
   # M6 (F5 Option A): l/u required (see evalFunc in shared.R for rationale).
   z <- if (basis == "c") chebMap(x, l, u) else x
   aMat <- if (basis == "m") vanderMat(x, nD) else chebMat(z, nD)
-  bMat <- (if (basis == "m") vanderMat(x, dD) else chebMat(z, dD))[, -1L] * yvctr
+  bMat <- (if (basis == "m") vanderMat(x, dD) else chebMat(z, dD))[, -1L] *
+    yvctr
   cbind(aMat, bMat, -altSgn, deparse.level = 0L)
 }
 
