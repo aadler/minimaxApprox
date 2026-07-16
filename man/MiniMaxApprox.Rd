@@ -234,11 +234,17 @@ reported as an error, mirroring the classical rational path. Finally, for
 equioscillates on more than \eqn{m + n + 2} points, as happens for even or odd
 functions at generic degrees) the fixed-size exchange can converge to a leveled
 fixed point that is not the global minimax; the returned approximation is then
-valid and its expected error is a lower bound on the true minimax error, and a
-warning to that effect is raised whenever the approximation's dense-grid error
-exceeds its leveled error. The same reference-local caveat applies, without the
-automatic check, to results within a few orders of magnitude of machine
-precision on any basis.
+valid and its expected error is a lower bound on the true minimax error, valid
+and its expected error is a lower bound on the true minimax error. This
+reference-local caveat is not specific to the rational barycentric path or to
+results near machine precision: it can occur on any basis, for polynomial or
+rational approximation, at any error magnitude, whenever the requested degrees
+are non-normal for the function or the exchange stalls at a reference-local
+fixed point. All approximation paths therefore verify a converged result
+against a dense evaluation grid and raise a warning whenever the dense-grid
+error materially exceeds the leveled error; the check is skipped only where
+its ratio would be meaningless noise (results at the machine-precision floor,
+and relative-error results when \code{fn} has an exact zero on the grid).
 }
 }
 \subsection{Polynomial Algorithm \dQuote{Singular Error} Response}{

@@ -117,6 +117,19 @@
   }
   \subsection{Added}{
     \itemize{
+      \item Added a reference-local certificate check to \strong{all}
+      approximation paths (previously rational barycentric only): at a
+      converged exit, the returned approximation's maximum error on a dense
+      grid is compared against its leveled error, and a warning is raised when
+      the former materially exceeds the latter. In that case the reported
+      expected error is a valid \emph{lower bound} on the true minimax error
+      (de la Vall\enc{é}{e}e Poussin) rather than a certificate of it, which
+      can occur for degrees that are non-normal for the function (e.g. even or
+      odd functions at generic degrees) or when the exchange stalls at a
+      reference-local fixed point. The check is skipped where its ratio would
+      be noise: results at the machine-precision floor and relative-error
+      results with an exact zero of \code{fn} on the grid.
+
       \item Added a \code{"Barycentric"} option to the \code{basis} argument,
       implementing the barycentric-Remez algorithm for best polynomial
       approximation of Pach\enc{ó}{o}n and Trefethen (2009). It represents the

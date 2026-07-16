@@ -272,3 +272,90 @@ expect_true(minimaxApprox:::tailContribution(-1e-5, 12, -1, 1, "c") > 1e-10)
 ## A tiny coefficient of either sign must not exceed tailtol.
 expect_false(minimaxApprox:::tailContribution(-1e-20, 12, -1, 1, "m") > 1e-10)
 expect_false(minimaxApprox:::tailContribution(1e-20, 12, -1, 1, "c") > 1e-10)
+
+# CP-1 (E5 Phase 1) -- reference-local certificate on all paths.
+# Mechanism: MP2 B1-1 / E5 brief section 0.1 (D3 certification vacuum).
+
+## Unit tests of refLocalCheck itself.
+rlc <- minimaxApprox:::refLocalCheck
+## Healthy classical fit: converged exp deg 6 -- certificate passes.
+hf <- suppressWarnings(minimaxApprox(exp, -1, 1, 6L))
+expect_false(rlc(list(a = hf$a), exp, FALSE, "c", -1, 1, hf$ExpErr)$refLocal)
+## Synthetic bad fit: a deliberately-wrong polynomial with a small claimed
+## leveled error must fail its certificate.
+expect_true(rlc(list(a = c(1, 0, 0)), exp, FALSE, "m", -1, 1, 1e-6)$refLocal)
+## relErr zero-on-probe guard: sin has an exact zero at the probe point 0
+## (2001 points on [-1, 1] include 0), so the check must skip, not fire.
+zg <- rlc(list(a = c(1, 0, 0)), sin, TRUE, "m", -1, 1, 1e-6)
+expect_false(zg$refLocal)
+expect_true(is.na(zg$gridSup))
+## Floor gate: an expe below 100 * eps * max(1, ||f||) skips the check even
+## for a wrong polynomial (the ratio would be noise at that magnitude).
+fg <- rlc(list(a = c(1, 0, 0)), exp, FALSE, "m", -1, 1, 1e-15)
+expect_false(fg$refLocal)
+expect_true(is.na(fg$gridSup))
+
+## Absolute-excess condition: exp deg 11 Chebyshev converges with a grid
+## ratio marginally over REFLOCALTOL (measured 1.0011) whose absolute excess
+## is ~4 * eps * ||f|| -- solve noise, not a basin miss. Must stay silent.
+o11 <- minimaxApprox(exp, -1, 1, 11L, basis = "c")
+expect_false(o11$Warning)
+
+## The B1-1 quartet. The barycentric cases are measured basin-stable across
+## the reviewer container and HOMEDESKTOP (both take the sub-optimal fixed
+## point), so they assert the warning unconditionally. The CLASSICAL cases
+## are basin-bistable (BLAS-dependent): the container lands reference-local
+## (must warn "lower bound"); HOMEDESKTOP lands in the good basin and finds
+## the TRUE minimax (atan d9 m: E = 1.143854e-5 ratio 1.000000; sin d9 c:
+## E = 2.396019e-11 = 2*J_11(1), ratio 1.000017) -- an honest silent outcome,
+## accepted only WITH its dense-grid certificate (accept-either-honest-
+## outcome form, M5P2 F.4 convention). NOTE (E5 Phase 2 acceptance): after
+## the exchange redesign, ALL FOUR must take the certified-silent arm on
+## every platform, with E at the true minimax values (atan[0, 3] deg 3 ->
+## 4.802475e-3; see E5 brief section 3.4).
+expect_warning(minimaxApprox(atan, 0, 3, 3L, basis = "b"),
+               pattern = "lower bound")
+expect_warning(minimaxApprox(atan, -1, 1, 11L, basis = "b"),
+               pattern = "lower bound")
+certOrWarn <- function(fn, l, u, d, b) {
+  w <- character(0)
+  o <- withCallingHandlers(
+    suppressMessages(minimaxApprox(fn, l, u, d, basis = b)),
+    warning = function(x) {
+      w <<- c(w, conditionMessage(x))
+      invokeRestart("muffleWarning")
+    })
+  if (any(grepl("lower bound", w, fixed = TRUE))) return(TRUE)
+  g <- seq(l, u, length.out = 2e5L)
+  gridRatio <- max(abs(minimaxEval(g, o) - fn(g))) / o$ExpErr
+  gridRatio <= minimaxApprox:::REFLOCALTOL
+}
+expect_true(suppressMessages(certOrWarn(atan, -1, 1, 9L, "m")))
+expect_true(certOrWarn(sin, -1, 1, 9L, "c"))
+
+### Must-not-fire set.
+## interpRescue'd results raise ONLY the rescue warning (certificate skipped
+## on rescued results by construction -- rescued mmA carries no refLocal).
+
+## Basin-bistable (F4 second manifestation, M4/MP2): the container solve
+## goes singular -> interpRescue -> rescue warning; HOMEDESKTOP converges
+## directly at the floor -> near-eps warning. Both are honest; either text
+## passes, but SOME machine-precision warning must fire.
+w_x2 <- tryCatch(minimaxApprox(function(x) x^2, -1, 1, 2L),
+                 warning = function(w) conditionMessage(w))
+expect_true(grepl("NOT technically a Remez result", w_x2, fixed = TRUE) ||
+              grepl("very near machine double precision", w_x2,
+                    fixed = TRUE))
+
+## Floor-regime converged fit (exp on [5, 6], deg 10, relaxed convrat; M6
+## demonstration case): the 1.05 grid ratio there is linear-solve noise below
+## the floor gate, so the certificate must stay silent (asserted where the
+## case lives, test_Chebyshev.R; here assert the driver-level skip directly).
+o56 <- minimaxApprox(exp, 5, 6, 10L, basis = "c", opts = list(convrat = 1.03))
+expect_false(o56$Warning)
+## Runge degree-10 (issue #2 restart path, DP-4b recompute): warning-free
+## with the pinned ExpErr.
+runge <- function(x) 1 / (1 + (5 * x) ^ 2)
+o_runge <- suppressMessages(minimaxApprox(runge, -1, 1, 10L, basis = "m"))
+expect_false(o_runge$Warning)
+expect_equal(o_runge$ExpErr, 0.06592293, tolerance = 1e-7)
