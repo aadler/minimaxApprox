@@ -319,7 +319,7 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
     i <- i + 1L
 
     r <- findRoots(x, trial$R, fn, relErr, "b", lower, upper)
-    xFull <- switchX(r, lower, upper, trial$R, fn, relErr, "b")
+    xFull <- switchX(r, lower, upper, trial$R, fn, relErr, "b", x)
     zb <- attr(xFull, "ZeroBasis")
 
     # PT09 overshoot safeguard (paper 3.5): if the current trial polynomial's

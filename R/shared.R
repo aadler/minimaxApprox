@@ -130,26 +130,76 @@ refLocalCheck <- function(R, fn, relErr, basis, lower, upper, expe) {
          gridSup - expe > noiseFloor)
 }
 
-# Function to identify roots of the error equation for use as bounds in finding
-# the maxima and minima.
+# E5: identify ALL roots of the error equation over the whole interval
+# [l, u]. The pre-E5 implementation searched only the length(x) - 1 intervals
+# BETWEEN consecutive current reference points, so [l, x_1] and [x_last, u]
+# were never searched (MP2 B1-1 mechanism D1): the root count was always
+# exactly length(x) - 1, downstream switchX always returned exactly length(x)
+# points, and a sign change between an endpoint and the outermost reference
+# point was structurally invisible -- the root cause of the silent
+# reference-local convergence family. Now the error is evaluated on an
+# oversampled grid (10x the reference size, minimum 129 points -- a degree-n
+# minimax error curve has at most ~n + 2 extrema, so 10x is generous), the
+# current reference points are appended (their leveled +-h values anchor
+# their sign runs at no extra cost), every strict sign change is refined by
+# uniroot on its bracketing grid subinterval, and exact grid zeros are taken
+# as roots directly. The root count is now variable -- that is the point;
+# the old "no root -> endpoint closest to zero" substitution is gone (a
+# degenerate curve simply yields fewer roots, handled by switchX's
+# fallback). Signature and return type (sorted numeric vector) unchanged.
 findRoots <- function(x, R, fn, relErr, basis, l, u) {
-  r <- double(length(x) - 1L)
-  for (i in seq_along(r)) {
-    intv <- c(x[i], x[i + 1L])
+  nGrid <- max(129L, 10L * length(x))
+  # Clamp the reference to [l, u] defensively (production references always
+  # lie within; direct calls may not).
+  g <- sort(unique(c(seq(l, u, length.out = nGrid), x[x >= l & x <= u])))
+  e <- remErr(g, R, fn, relErr, basis, l, u)
+  s <- sign(e)
+
+  # Exact zeros on the grid are roots as-is (also covers tangential zeros,
+  # which have no sign CHANGE to bracket).
+  r <- g[s == 0]
+
+  # Strict sign changes: refine each by uniroot on its grid bracket. The
+  # bracket is verified to change sign, so uniroot cannot fail on its
+  # f(lower)/f(upper) precondition; the tryCatch is defense in depth only.
+  chg <- which(s[-length(s)] * s[-1L] < 0)
+  for (i in chg) {
+    intv <- c(g[i], g[i + 1L])
     root <- tryCatch(uniroot(remErr, interval = intv, extendInt = "no", R = R,
                              fn = fn, relErr = relErr, basis = basis,
-                             l = l, u = u, tol = sqrt(.Machine$double.eps)),
-                     error = function(cond) simpleError(trimws(cond$message)))
-
-    # If there is no root in the interval, take the endpoint closest to zero.
-    if (inherits(root, "simpleError")) {
-      r[i] <- intv[which.min(abs(intv))]
-    } else {
-      r[i] <- root$root
-    }
+                             l = l, u = u,
+                             tol = sqrt(.Machine$double.eps))$root,
+                     error = function(cond) {                       # nocov
+                       intv[which.min(abs(e[c(i, i + 1L)]))]        # nocov
+                     })                                             # nocov
+    r <- c(r, root)
   }
 
-  r
+  sort(unique(r))
+}
+
+# E5: shared window-selection rule for choosing N reference points from an
+# ordered list of alternating extremum candidates. Among the size-N windows
+# of consecutive candidates, choose the one maximizing the smallest |error|
+# (FNT 2018 Step 3, "largest values satisfying the alternation"; ties break
+# to the first window, preserving baryRatInitRef's pre-E5 which.max
+# behavior bitwise). requireMax additionally restricts the windows to those
+# CONTAINING the global |error| argmax -- the classical exchange invariant
+# (the reference must hold the global extremum for h to increase strictly
+# toward E_true). baryRatInitRef calls with requireMax = FALSE (its pre-E5
+# semantics, an initialization heuristic where the invariant is not needed);
+# switchX calls with requireMax = TRUE. Note the two differ materially:
+# max-min windowing alone can DROP the global max (e.g. |e| =
+# {10, 1e-6, 5, 5, 5, 5}, N = 4 selects the last four).
+selectAlternantWindow <- function(vals, N, requireMax) {
+  nw <- length(vals) - N + 1L
+  wmin <- vapply(seq_len(nw), function(i) min(vals[i:(i + N - 1L)]), double(1L))
+  if (requireMax) {
+    imax <- which.max(vals)
+    ok <- seq_len(nw) <= imax & seq_len(nw) + N - 1L >= imax
+    wmin[!ok] <- -Inf
+  }
+  which.max(wmin)
 }
 
 # F9 fix (hardening): compute the ZeroBasis perturbation for a candidate
@@ -198,53 +248,138 @@ zeroBasisPerturb <- function(x_i, l, u, fn, maximize, peturb = 1e-12) {
   }
 }
 
-# Function to identify new x positions. This algorithm uses the multi-switch
-# paradigm, not the single switch.
-switchX <- function(r, l, u, R, fn, relErr, basis) {
-  bottoms <- c(l, r)
-  tops <- c(r, u)
-  x <- double(length(bottoms))
-  attr(x, "ZeroBasis") <- FALSE
-  maximize <- sign(remErr(l, R, fn, relErr, basis, l, u)) == 1
-  for (i in seq_along(x)) {
-    intv <- c(bottoms[i], tops[i])
+# E5: identify new reference positions from the error curve. Multi-switch
+# exchange, redesigned error-curve-first (PT09/Chebfun shape). The pre-E5
+# implementation seeded a maximize/minimize schedule from sign(remErr(l)) and
+# flipped it mechanically per bracket; when the error curve had one more
+# oscillation than the bracket structure assumed, the schedule desynced and
+# the exchange returned roots instead of extrema, destroying the reference
+# around a correctly captured global max (MP2 B1-1 mechanism D2, traced).
+# Now each bracket's direction comes from the ERROR'S OWN SIGN at the
+# bracket midpoint, so it cannot desync, and the candidate count is variable
+# (one per sign-region of the curve, endpoints included).
+#
+# New argument xk = the CURRENT reference (no default: any missed caller
+# fails loudly). It supplies the target size N = length(xk) and the
+# degenerate fallback: with fewer than N alternating candidates (floor
+# regime, flat error curve) the previous reference is returned UNCHANGED, so
+# the next trial reproduces itself and the loop exits through the existing
+# isUnchanging stall machinery -- deliberately NO new degenerate handling
+# (M3 lesson: never intercept or condition the singular/restart flow).
+#
+# Selection (the organ the pre-E5 pipeline lacked, since its candidate count
+# was structurally fixed): consecutive same-sign candidates are merged
+# keeping the larger |error| (tangential zeros can produce same-sign
+# neighbors); a surplus is resolved by selectAlternantWindow with
+# requireMax = TRUE, so the returned reference always alternates, always
+# contains the global |error| extremum, and maximizes its smallest |error|
+# -- the classical conditions under which the leveled error increases
+# strictly toward the true minimax.
+switchX <- function(r, l, u, R, fn, relErr, basis, xk) {
+  N <- length(xk)
+  brk <- sort(unique(c(l, r, u)))
+  nb <- length(brk) - 1L
+  cx <- ce <- double(nb)
+
+  for (i in seq_len(nb)) {
+    intv <- c(brk[i], brk[i + 1L])
+    # Direction from the error's own sign in this bracket (midpoint sample;
+    # the sign is constant between consecutive roots).
+    maximize <- remErr((intv[1L] + intv[2L]) / 2, R, fn, relErr,
+                       basis, l, u) > 0
     # Tighter tolerances than the default lead to issues (AA: 2024-01-31).
     extrma <- tryCatch(optimize(remErr, interval = intv, R = R, fn = fn,
                                 relErr = relErr, basis = basis, l = l, u = u,
                                 maximum = maximize),
                        error = function(cond) simpleError(trimws(cond$message)))
 
-    # If no extremum then the take endpoint with "better" value depending if we
-    # are maximizing or minimizing.
+    # If no extremum then take the endpoint with "better" value depending if
+    # we are maximizing or minimizing.
     if (inherits(extrma, "simpleError")) {
-      endPtErr <- remErr(intv, R, fn, relErr, basis, l, u)
-      if (maximize) {
-        x[i] <- intv[which.max(endPtErr)]
-      } else {
-        x[i] <- intv[which.min(endPtErr)]
-      }
+      endPtErr <- remErr(intv, R, fn, relErr, basis, l, u)            # nocov
+      xi <- intv[if (maximize) which.max(endPtErr) else                # nocov
+        which.min(endPtErr)]                                # nocov
     } else {
-      x[i] <- extrma[[1L]]
+      xi <- extrma[[1L]]
     }
 
     # Test endpoints for max/min even if an extremum was found.
-    p <- c(bottoms[i], x[i], tops[i])
+    p <- c(intv[1L], xi, intv[2L])
     E <- remErr(p, R, fn, relErr, basis, l, u)
+    j <- if (maximize) which.max(E) else which.min(E)
+    cx[i] <- p[j]
+    ce[i] <- E[j]
+  }
 
-    if (maximize) {
-      x[i] <- p[which.max(E)]
-    } else {
-      x[i] <- p[which.min(E)]
+  # Endpoints are ALWAYS standalone candidates (not merely contestants in
+  # their brackets' 3-point check). At a parity-degenerate trial (even/odd
+  # fn on a symmetric reference, where the leveled h is legitimately ~0 and
+  # the trial is essentially the interpolant), the error curve's interior
+  # lobes offer only N - 1 alternating extrema -- the endpoint lobes are
+  # pinned to zero by the endpoint nodes -- and the exchange would stall on
+  # the previous reference forever (measured: cos deg 4 barycentric). The
+  # endpoints' leveled values -sigma_i*h, though eps-scale, carry the
+  # alternation signs the lobe list lacks: after the same-sign merge below,
+  # exactly the endpoint whose sign OPPOSES its neighboring lobe survives,
+  # restoring an N-point alternating candidate set (min |e| = h, global max
+  # retained -- a legal exchange) whose asymmetry breaks the parity
+  # degeneracy on the next trial.
+  eEnd <- remErr(c(l, u), R, fn, relErr, basis, l, u)
+  if (cx[1L] != l) {
+    cx <- c(l, cx)
+    ce <- c(eEnd[1L], ce)
+    nb <- nb + 1L
+  }
+  if (cx[length(cx)] != u) {
+    cx <- c(cx, u)
+    ce <- c(ce, eEnd[2L])
+    nb <- nb + 1L
+  }
+
+  # Merge consecutive same-sign candidates, keeping the larger |error|.
+  keep <- logical(nb)
+  keep[1L] <- TRUE
+  last <- 1L
+  for (i in seq_len(nb)[-1L]) {
+    if (sign(ce[i]) != sign(ce[last])) {
+      keep[i] <- TRUE
+      last <- i
+    } else if (abs(ce[i]) > abs(ce[last])) {
+      keep[last] <- FALSE
+      keep[i] <- TRUE
+      last <- i
     }
+  }
+  cx <- cx[keep]
+  ce <- ce[keep]
 
-    # Test for 0 value at function if relative error
-    if (relErr && callFun(fn, x[i]) == 0) {
-      attr(x, "ZeroBasis") <- TRUE
-      x[i] <- zeroBasisPerturb(x[i], l, u, fn, maximize)
+  # Degenerate fallback: too few alternating candidates to fill the
+  # reference. Return the previous reference unchanged and let the existing
+  # stall machinery exit the loop.
+  if (length(cx) < N) {
+    x <- xk
+    attr(x, "ZeroBasis") <- FALSE
+    return(x)
+  }
+
+  if (length(cx) > N) {
+    i0 <- selectAlternantWindow(abs(ce), N, requireMax = TRUE)
+    sel <- i0:(i0 + N - 1L)
+    cx <- cx[sel]
+    ce <- ce[sel]
+  }
+
+  x <- cx
+  attr(x, "ZeroBasis") <- FALSE
+
+  # Test for 0 value at function if relative error (unchanged contract).
+  if (relErr) {
+    for (i in seq_len(N)) {
+      if (callFun(fn, x[i]) == 0) {
+        attr(x, "ZeroBasis") <- TRUE
+        x[i] <- zeroBasisPerturb(x[i], l, u, fn, ce[i] > 0)
+      }
     }
-
-    # Flip maximize.
-    maximize <- !maximize
   }
 
   x

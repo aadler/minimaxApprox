@@ -81,7 +81,7 @@ remRat <- function(fn, lower, upper, numerd, denomd, relErr, basis, xi, opts) {
     if (i >= opts$maxiter) break
     i <- i + 1L
     r <- findRoots(x, RR, fn, relErr, basis, lower, upper)
-    x <- switchX(r, lower, upper, RR, fn, relErr, basis)
+    x <- switchX(r, lower, upper, RR, fn, relErr, basis, x)
     relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     RR <- convergeErr(x)
     dngr <- checkDenom(RR$b, lower, upper, basis)

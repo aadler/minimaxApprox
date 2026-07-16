@@ -417,10 +417,11 @@ baryRatInitRef <- function(fn, l, u, m, n) {
     idx[which.max(abs(az$err[idx]))]
   }, integer(1L))
   vals <- abs(az$err[cand])
-  nw <- length(cand) - N + 1L
-  wmin <- vapply(seq_len(nw), function(i) min(vals[i:(i + N - 1L)]),
-                 double(1L))
-  i0 <- which.max(wmin)
+  # E5: the window computation is now the shared selectAlternantWindow
+  # (shared.R). requireMax = FALSE preserves this function's pre-E5 window
+  # choice bitwise (initialization heuristic; the keep-the-max invariant
+  # belongs to the exchange, not the init).
+  i0 <- selectAlternantWindow(vals, N, requireMax = FALSE)
   sort(az$Z[cand[i0:(i0 + N - 1L)]])
 }
 
@@ -534,7 +535,7 @@ remBaryRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
     if (anyNA(errs_last)) baryRatFail("nan", m, n)                  # nocov
 
     r <- findRoots(x, R, fn, FALSE, "b", lower, upper)
-    x <- switchX(r, lower, upper, R, fn, FALSE, "b")
+    x <- switchX(r, lower, upper, R, fn, FALSE, "b", x)
     x <- separateNodes(as.vector(x), lower, upper)
 
     f <- callFun(fn, x)

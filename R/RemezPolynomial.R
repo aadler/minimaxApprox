@@ -65,7 +65,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
     if (i >= opts$maxiter) break
     i <- i + 1L
     r <- findRoots(x, PP, fn, relErr, basis, lower, upper)
-    x <- switchX(r, lower, upper, PP, fn, relErr, basis)
+    x <- switchX(r, lower, upper, PP, fn, relErr, basis, x)
     relErrZeroBasis <- relErrZeroBasis || attr(x, "ZeroBasis")
     PP <- polyCoeffs(x, fn, relErr, basis, lower, upper, opts$ztol)
     errs <- remErr(x, PP, fn, relErr, basis, lower, upper)
