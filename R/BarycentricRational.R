@@ -485,7 +485,6 @@ remBaryRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
   normf <- max(abs(callFun(fn, probe)))
   if (!is.finite(normf) || normf == 0) normf <- 1
   hFloor <- 10 * .Machine$double.eps * max(1, normf)
-
   f <- callFun(fn, x)
   sol <- baryRatSolve(x, f, m, n, lower, upper)
   if (!is.null(sol$fail)) baryRatFail(sol$fail, m, n)
@@ -540,7 +539,17 @@ remBaryRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
 
     f <- callFun(fn, x)
     sol <- baryRatSolve(x, f, m, n, lower, upper)
+
+    # nocov start -- E5: the identical dispatch is covered at initialization
+    # and every failure code's message body is unit-tested via baryRatFail
+    # directly. A degeneracy first appearing MID-iteration was exercised by
+    # exp(cos) (8, 8) pre-E5; the redesigned exchange converges that case,
+    # and a scan of ten further degree pairs found five new detect-and-stop
+    # cases -- all dispatching PRE-loop (verified by targeted coverage).
+    # Retained: the solve must never be consumed past a detected failure.
     if (!is.null(sol$fail)) baryRatFail(sol$fail, m, n)
+    # nocov end
+
     dngr <- baryRatPoleCheck(sol$t, sol$alpha, sol$beta, lower, upper)
     # nocov start -- identical guard is covered at initialization (x^4 case);
     # a denominator zero appearing only AFTER a pole-free start was not

@@ -243,14 +243,37 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
       # x is set to the interpolation nodes (the interpolant's natural
       # reference; these are NOT equioscillation extrema). The `rescued` flag
       # triggers the not-a-Remez warning in the central warning block below.
+      #
+      # nocov start -- E5: reaching this assembly requires BOTH degree solves
+      # singular AND the interpolant resolving fn to the floor. Post-E5 the
+      # exactly-representable family (the only inputs satisfying the latter)
+      # no longer produces singular solves at all -- it exits through the
+      # SECOND-manifestation rescue below -- and inputs that still go
+      # singular on some BLAS (sqrt deg 30+) fail the probe and take the
+      # covered decline path above. Retained as platform-defensive machinery
+      # (M3): CRAN's testbeds have historically produced singulars neither
+      # measured platform does.
       mmA <- list(a = rescue$a, expe = rescue$err, mxae = rescue$err,
                   i = 0L, x = rescue$x, converged = TRUE, unchanged = FALSE,
                   unchanging_i = 0L, zeroBasisError = FALSE, rescued = TRUE)
+      # nocov end
 
     } else {
       # Degree-(n+1) retry succeeded: existing tailtol "uppermost coefficient
       # effectively 0" logic, unchanged.
+      #
+      # nocov start -- E5: this arm requires the degree-n solve singular but
+      # the degree-(n+1) solve clean. The trial-1 matrix depends only on
+      # degree and basis (not fn), so conditioning cannot produce that
+      # ordering, and the mid-iteration singulars that historically did
+      # (HWB's Runge deg-10 report) arose from degenerate references the E5
+      # exchange is designed not to construct -- measured: 12 Runge variants
+      # and the exactly-representable family, zero restarts on either
+      # platform. Retained per M3 for BLAS diversity; its result contract is
+      # pinned by the (route-agnostic) HWB coefficient test in
+      # test_MiniMaxApprox.R.
       n <- length(mmA$a)
+
       # F3 fix: was (mmA$a[n] * xmax^(n-1L)) > opts$tailtol -- no abs() on the
       # coefficient, so any NEGATIVE top coefficient of arbitrary magnitude
       # passed this test and was silently dropped as "effectively zero". Now
@@ -282,6 +305,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
               " coefficient's contribution to the approximation <= the tailtol",
               " option. The result is a polynomial of degree ", degree, " as",
               " the uppermost coefficient is effectively 0.")
+      # nocov end
     }
   }
 
