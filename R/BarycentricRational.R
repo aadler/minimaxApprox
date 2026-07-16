@@ -489,9 +489,12 @@ remBaryRat <- function(fn, lower, upper, numerd, denomd, relErr, xi, opts) {
   # reference points still poisons the exchange. Message mirrors the
   # classical rational path's checkDenom error.
 
-  #trigger is platform-bistable — fires in the reviewer container, converges
-  #pole-free on HOMEDESKTOP; baryRatPoleCheck itself is directly unit-tested;
-  #guard retained
+  # Trigger is platform-bistable -- the x^4 (2, 2) case pole-stops here in
+  # the reviewer container but converges (post-E5: globally certified) on
+  # HOMEDESKTOP, so this block has no platform-independent trigger.
+  # Re-verified post-E5 (exchange redesign): bistability unchanged;
+  # exp(cos) (2, 2) also stops here (zero at -0.319964) in-container only.
+  # baryRatPoleCheck itself is directly unit-tested; guard retained.
 
   # nocov start
   dngr <- baryRatPoleCheck(sol$t, sol$alpha, sol$beta, lower, upper)

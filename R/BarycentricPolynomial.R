@@ -137,13 +137,11 @@ baryTrial <- function(x, fn, relErr, l, u, sigmaB) {
     d <- sigmaB * w * f
     if (!is.finite(h) || abs(sum(d)) <= .Machine$double.eps * max(abs(d))) {
       zeroBasis <- TRUE
-      # NaN reach the `h == 0` test below and abort the whole approximation. In
-      # relErr mode the guard above already zeroes a non-finite h; in absolute
-      # mode sum(sigma * w) does not vanish for a distinct-node reference
-      # (separateNodes guarantees distinctness), so this is belt-and-suspenders
-      # with no constructible trigger -- excluded from coverage.
-      if (!is.finite(h)) h <- 0                                  # nocov
-
+      # Keep h finite (0 = interpolant) so the iteration reports a result
+      # with the ZeroBasis warning rather than crashing on the h == 0 test.
+      # Deterministic-arithmetic trigger (no solve involved): covered by the
+      # relErr barycentric suite tests on both platforms.
+      if (!is.finite(h)) h <- 0
     }
   }
 
