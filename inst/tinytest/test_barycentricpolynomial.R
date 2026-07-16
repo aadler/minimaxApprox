@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MPL-2.0+
 
 # Module M5 Phase 1: barycentric-Remez polynomial basis (Pachon-Trefethen 2009).
-# https://www.chebfun.org/publications/remez.pdf.
-# Oracles: PT09 Table 1 (deg-10 absolute leveled error, nine functions; three
-# used here) and the chebfun |x| deg-11 monomial coefficients (paper section 4).
-# Barycentric evaluation is well-conditioned, so the numeric assertions below are
-# cross-platform; the two genuinely platform/BLAS-fragile relative-error end-to-
-# end paths are gated to HOMEDESKTOP at the end, matching the existing suite's
-# convention for such cases.
+# https://www.chebfun.org/publications/remez.pdf. Oracles: PT09 Table 1 (deg-10
+# absolute leveled error, nine functions; three used here) and the chebfun |x|
+# deg-11 monomial coefficients (paper section 4). Barycentric evaluation is
+# well-conditioned, so the numeric assertions below are cross-platform; the two
+# genuinely platform/BLAS-fragile relative-error end-to- end paths are gated to
+# HOMEDESKTOP at the end, matching the existing suite's convention for such
+# cases.
 
 tol <- sqrt(.Machine$double.eps)
 sM <- function(x) suppressMessages(x)
