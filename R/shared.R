@@ -203,42 +203,42 @@ selectAlternantWindow <- function(vals, N, requireMax) {
 }
 
 # F9 fix (hardening): compute the ZeroBasis perturbation for a candidate
-# extremum x_i that landed exactly on a zero of fn (relative error is
+# extremum x that landed exactly on a zero of fn (relative error is
 # undefined there). The original fixed 1e-12 absolute nudge is a genuine
-# no-op once |x_i| >~ 4.5e3 (a double's ulp there already exceeds 1e-12),
+# no-op once |x| >~ 4.5e3 (a double's ulp there already exceeds 1e-12),
 # silently leaving the zero-division problem in place -- at endpoints
-# (x_i + 1e-12 == x_i) and in the interior alike (both candidates collapse
+# (x + 1e-12 == x) and in the interior alike (both candidates collapse
 # to the same value). The fix escalates to a magnitude-scaled step ONLY
-# when the plain absolute step would not move x_i; at ordinary |x_i| the
+# when the plain absolute step would not move x; at ordinary |x| the
 # step is byte-identical to the released 1e-12 absolute behavior (this
 # matters: the ZeroBasis end-to-end cases run at the machine-precision
 # floor, where changing the step's magnitude or direction perturbs
-# convergence). x_i == 0 keeps the pure absolute step. Extracted from
+# convergence). x == 0 keeps the pure absolute step. Extracted from
 # switchX so it is unit-testable independent of the optimizer.
 #
 # stepInto: additive step of magnitude >= peturb in the given direction
-# (+1 = increase x_i, -1 = decrease), escalating to abs(x_i)*peturb only if
+# (+1 = increase x, -1 = decrease), escalating to abs(x)*peturb only if
 # the base peturb is absorbed. Used for the two endpoints (always stepping
 # inward, into the interval).
-stepInto <- function(x_i, dir, peturb = 1e-12) {
+stepInto <- function(x, dir, peturb = 1e-12) {
   s <- peturb
-  if (x_i + dir * s == x_i) s <- abs(x_i) * peturb
-  x_i + dir * s
+  if (x + dir * s == x) s <- abs(x) * peturb
+  x + dir * s
 }
 
-zeroBasisPerturb <- function(x_i, l, u, fn, maximize, peturb = 1e-12) {
-  if (x_i == l) {
+zeroBasisPerturb <- function(x, l, u, fn, maximize, peturb = 1e-12) {
+  if (x == l) {
     # Step inward from the lower endpoint (toward the interior).
-    stepInto(x_i, 1, peturb)
-  } else if (x_i == u) {
+    stepInto(x, 1, peturb)
+  } else if (x == u) {
     # Step inward from the upper endpoint (mirror image of the l case).
-    stepInto(x_i, -1, peturb)
+    stepInto(x, -1, peturb)
   } else {
     # Interior: offer both directions and let the max/min pick. Escalate the
-    # step magnitude only if the base absolute step is absorbed (large |x_i|).
+    # step magnitude only if the base absolute step is absorbed (large |x|).
     s <- peturb
-    if (x_i - s == x_i || x_i + s == x_i) s <- abs(x_i) * peturb
-    xreplace <- c(x_i - s, x_i + s)
+    if (x - s == x || x + s == x) s <- abs(x) * peturb
+    xreplace <- c(x - s, x + s)
     fnreplace <- callFun(fn, xreplace)
     if (maximize) {
       xreplace[which.max(fnreplace)]
@@ -391,31 +391,31 @@ isConverged <- function(errs, expe, convrat, tol) {
   aerrs <- abs(errs)
   mxae <- max(aerrs)
   mnae <- min(aerrs)
-  a_mxa_exp <- abs(mxae - expe)
-  mx_mn <- mxae - mnae
+  aMxaExp <- abs(mxae - expe)
+  mxMn <- mxae - mnae
 
   # Check observed errors are close enough to expected by ratio or tolerance.
   errDistance <- mxae / expe <= convrat ||
-    (a_mxa_exp <= tol && a_mxa_exp > .Machine$double.eps)
+    (aMxaExp <= tol && aMxaExp > .Machine$double.eps)
 
   # Check observed errors are close enough to each other by ratio or tolerance.
   errMagnitude <- mxae / mnae <= convrat ||
-    (mx_mn <= tol && mx_mn > .Machine$double.eps)
+    (mxMn <= tol && mxMn > .Machine$double.eps)
 
   # Converged if magnitude and distance are close and error oscillates in sign.
   isOscil(errs) && errDistance && errMagnitude
 }
 
-isUnchanging <- function(errs, errs_last, convrat, tol) {
-  denomProblem <- which(errs_last == 0)
+isUnchanging <- function(errs, errsLast, convrat, tol) {
+  denomProblem <- which(errsLast == 0)
   # If any are actually 0, then perturb them by 1e-12. Ratio becomes 1 and
   # difference remains 0.
   if (length(denomProblem) > 0L) {
     errs[denomProblem] <- errs[denomProblem] + 1e-12
-    errs_last[denomProblem] <- errs_last[denomProblem] + 1e-12
+    errsLast[denomProblem] <- errsLast[denomProblem] + 1e-12
   }
-  errsDiff <- abs(errs - errs_last)
-  ratio <- abs(errs / errs_last)
+  errsDiff <- abs(errs - errsLast)
+  ratio <- abs(errs / errsLast)
   # F7 fix: the ratio test was one-sided (<= convrat), so errors shrinking
   # rapidly (e.g. 10x per iteration) satisfied it and were flagged as
   # "unchanging" -- premature stop on genuine improvement. The test must be
@@ -482,6 +482,6 @@ checkIrrelevant <- function(a, l, u, zt, basis) {
 # Extracted as its own function (unit-testable) taking abs() of the
 # coefficient and the basis-correct scale from basisScale (monomial:
 # xmax^(n-1); Chebyshev: the F6 endpoint/unit-extremum bound of |T_{n-1}|).
-tailContribution <- function(a_n, n, l, u, basis) {
-  abs(a_n) * basisScale(n, l, u, basis)[n]
+tailContribution <- function(a, n, l, u, basis) {
+  abs(a) * basisScale(n, l, u, basis)[n]
 }

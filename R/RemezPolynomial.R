@@ -57,9 +57,9 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
 
   # Initial Polynomial Guess
   PP <- polyCoeffs(x, fn, relErr, basis, lower, upper, opts$ztol)
-  errs_last <- remErr(x, PP, fn, relErr, basis, lower, upper)
+  errsLast <- remErr(x, PP, fn, relErr, basis, lower, upper)
   converged <- unchanged <- FALSE
-  unchanging_i <- i <- 0L
+  unchangingI <- i <- 0L
   repeat {
     # Check for maxiter
     if (i >= opts$maxiter) break
@@ -84,15 +84,15 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
 
     # Check that solution is evolving. If solution is not evolving then further
     # iterations will not help.
-    if (isUnchanging(errs, errs_last, opts$convrat, opts$tol)) {
-      unchanging_i <- unchanging_i + 1L
-      if (unchanging_i >= opts$conviter) {
+    if (isUnchanging(errs, errsLast, opts$convrat, opts$tol)) {
+      unchangingI <- unchangingI + 1L
+      if (unchangingI >= opts$conviter) {
         unchanged <- TRUE
         break
       }
     }
 
-    errs_last <- errs
+    errsLast <- errs
   }
 
   # CP-1: reference-local certificate at the converged exit only (maxiter and
@@ -106,7 +106,7 @@ remPoly <- function(fn, lower, upper, degree, relErr, basis, opts) {
   }
 
   list(a = PP$a, expe = expe, mxae = mxae, i = i, x = x, converged = converged,
-       unchanged = unchanged, unchanging_i = unchanging_i,
+       unchanged = unchanged, unchangingI = unchangingI,
        zeroBasisError = relErrZeroBasis, refLocal = rl$refLocal,
        gridSup = rl$gridSup)
 }
@@ -182,12 +182,12 @@ interpRescue <- function(fn, lower, upper, degree, relErr, basis) {
 
   # Measure the interpolant against f on a dense probe grid. Grid density was
   # verified stable (probe error flat from 1e3 to 5e4 points on all F4 cases).
-  i_grid <- seq(lower, upper, length.out = 2001L)
-  fg <- callFun(fn, i_grid)
+  iGrid <- seq(lower, upper, length.out = 2001L)
+  fg <- callFun(fn, iGrid)
   pg <- if (basis == "m") {
-    polyCalc(i_grid, a)
+    polyCalc(iGrid, a)
   } else {
-    chebCalc(chebMap(i_grid, lower, upper), a)
+    chebCalc(chebMap(iGrid, lower, upper), a)
   }
 
   if (relErr) {

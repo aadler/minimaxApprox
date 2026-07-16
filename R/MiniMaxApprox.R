@@ -252,7 +252,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
       # measured platform does.
       mmA <- list(a = rescue$a, expe = rescue$err, mxae = rescue$err,
                   i = 0L, x = rescue$x, converged = TRUE, unchanged = FALSE,
-                  unchanging_i = 0L, zeroBasisError = FALSE, rescued = TRUE)
+                  unchangingI = 0L, zeroBasisError = FALSE, rescued = TRUE)
       # nocov end
 
     } else {
@@ -327,7 +327,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     if (!is.null(rescue)) {
       mmA <- list(a = rescue$a, expe = rescue$err, mxae = rescue$err,
                   i = 0L, x = rescue$x, converged = TRUE, unchanged = FALSE,
-                  unchanging_i = 0L, zeroBasisError = FALSE, rescued = TRUE)
+                  unchangingI = 0L, zeroBasisError = FALSE, rescued = TRUE)
     }
   }
 
@@ -344,7 +344,7 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
 
   if (mmA$unchanged && !mmA$converged) {
     warning("Convergence to requested ratio and tolerance not achieved in ",
-            mmA$i, " iterations.\n", mmA$unchanging_i, " successive ",
+            mmA$i, " iterations.\n", mmA$unchangingI, " successive ",
             "calculated solutions were too close to each other to warrant ",
             "further iterations.\nThe ratio is ",
             fC(mmA$mxae / mmA$expe, d = 14L),

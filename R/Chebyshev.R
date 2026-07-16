@@ -85,15 +85,15 @@ cheb2mon <- function(a) {
 composeAffine <- function(c, l, u) {
   if (l == -1 && u == 1) return(c)
   n <- length(c) - 1L
-  a_i <- 2 / (u - l)
-  b_i <- -(u + l) / (u - l)
+  aI <- 2 / (u - l)
+  bI <- -(u + l) / (u - l)
   d <- double(n + 1L)
   for (k in seq_len(n + 1L)) {
     ck <- c[k]
     if (ck == 0) next
     kk <- k - 1L
     for (j in 0:kk) {
-      d[j + 1L] <- d[j + 1L] + ck * choose(kk, j) * a_i ^ j * b_i^ (kk - j)
+      d[j + 1L] <- d[j + 1L] + ck * choose(kk, j) * aI ^ j * bI^ (kk - j)
     }
   }
   d

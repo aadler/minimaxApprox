@@ -219,7 +219,7 @@ onePointExchange <- function(xk, R, fn, relErr, l, u) {
 #    conversion is the one step that can lose accuracy at high degree, so its
 #    gap is measured and stored (documented caveat).
 finishBary <- function(trial, x, expe, mxae, i, converged, unchanged,
-                       unchanging_i, zeroBasisError, l, u, n,
+                       unchangingI, zeroBasisError, l, u, n,
                        refLocal = FALSE, gridSup = NA_real_) {
   bx <- trial$R$bary$x
   bw <- trial$R$bary$w
@@ -234,7 +234,7 @@ finishBary <- function(trial, x, expe, mxae, i, converged, unchanged,
 
   list(a = a, bary = list(x = bx, w = bw, p = bp), convResid = convResid,
        expe = expe, mxae = mxae, i = i, x = x, converged = converged,
-       unchanged = unchanged, unchanging_i = unchanging_i,
+       unchanged = unchanged, unchangingI = unchangingI,
        zeroBasisError = zeroBasisError, refLocal = refLocal,
        gridSup = gridSup)
 }
@@ -264,8 +264,8 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
   x <- trial$x
   relErrZeroBasis <- relErrZeroBasis || trial$zeroBasis
 
-  errs_last <- remErr(x, trial$R, fn, relErr, "b", lower, upper)
-  mxae <- max(abs(errs_last))
+  errsLast <- remErr(x, trial$R, fn, relErr, "b", lower, upper)
+  mxae <- max(abs(errsLast))
 
   # relErr node-on-exact-zero guard (M5). When relErr is requested and fn is
   # EXACTLY 0 (to the bit) at a reference node, the trial value there is
@@ -281,7 +281,7 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
   # true 0/0 case SPECIFICALLY via is.nan (NOT is.finite, which would also fire
   # on the tolerable Inf) and stop with a clear message: the relative-error
   # minimax genuinely does not exist at a node-on-exact-zero.
-  if (relErr && anyNA(errs_last) && any(is.nan(errs_last))) {
+  if (relErr && anyNA(errsLast) && any(is.nan(errsLast))) {
     stop("Relative error is undefined because 'fn' is exactly 0 at a ",
          "reference  point (typically an endpoint of the [lower, upper] ",
          "interval). Use  absolute error (relErr = FALSE), or choose an ",
@@ -290,7 +290,7 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
 
   expe <- abs(trial$h)
   converged <- unchanged <- FALSE
-  unchanging_i <- i <- 0L
+  unchangingI <- i <- 0L
 
   # F4 family, natural in-basis fix (paper 3.6): if fn is (numerically) a
   # polynomial of degree <= n, the trial polynomial already interpolates it
@@ -334,8 +334,8 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
     # through the public API here; onePointExchange itself is exercised by a
     # direct unit test. Kept per PT09 for robustness.
     errFull <- remErr(xFull, trial$R, fn, relErr, "b", lower, upper)
-    scale_b <- if (relErr) 1 else normf
-    if (max(abs(errFull)) / scale_b > 1e5) {
+    scaleB <- if (relErr) 1 else normf
+    if (max(abs(errFull)) / scaleB > 1e5) {
       x <- onePointExchange(x, trial$R, fn, relErr, lower, upper) # nocov
     } else {
       x <- xFull
@@ -358,15 +358,15 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
       break
     }
 
-    if (isUnchanging(errs, errs_last, opts$convrat, opts$tol)) {
-      unchanging_i <- unchanging_i + 1L
-      if (unchanging_i >= opts$conviter) {
+    if (isUnchanging(errs, errsLast, opts$convrat, opts$tol)) {
+      unchangingI <- unchangingI + 1L
+      if (unchangingI >= opts$conviter) {
         unchanged <- TRUE
         break
       }
     }
 
-    errs_last <- errs
+    errsLast <- errs
   }
 
   # CP-1: reference-local certificate at the converged exit only. The h-floor
@@ -379,7 +379,7 @@ remBary <- function(fn, lower, upper, degree, relErr, opts) {
     list(gridSup = NA_real_, refLocal = FALSE)
   }
 
-  finishBary(trial, x, expe, mxae, i, converged, unchanged, unchanging_i,
+  finishBary(trial, x, expe, mxae, i, converged, unchanged, unchangingI,
              relErrZeroBasis, lower, upper, n, refLocal = rl$refLocal,
              gridSup = rl$gridSup)
 }

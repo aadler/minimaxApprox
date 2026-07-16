@@ -198,17 +198,17 @@ expect_null(checkDenom(c(-0.5, 1), 1, 2, "m"))
 # --------------------------------------------------------------------------
 
 # F7 -- isUnchanging must not flag rapidly-improving errors as stagnation.
-errs_last <- rep(1e-3, 4)
+errsLast <- rep(1e-3, 4)
 convrat <- 1.000000001
 tolF <- 1e-14
 ## 10x-shrink: genuine improvement, must NOT be flagged unchanging.
-expect_false(isUnchanging(errs_last / 10, errs_last, convrat, tolF))
+expect_false(isUnchanging(errsLast / 10, errsLast, convrat, tolF))
 ## Static vector: genuinely unchanging, must be flagged.
-expect_true(isUnchanging(errs_last, errs_last, convrat, tolF))
+expect_true(isUnchanging(errsLast, errsLast, convrat, tolF))
 ## Straddling the two-sided band (one ratio far below 1/convrat): must NOT be
 ## flagged, since not all elements are close to unchanged.
 straddle <- c(1e-3, 1e-3, 1e-3, 5e-4)
-expect_false(isUnchanging(straddle, errs_last, convrat, tolF))
+expect_false(isUnchanging(straddle, errsLast, convrat, tolF))
 ## Zero-denominator perturbation path still works (both become 1e-12, ratio
 ## exactly 1, difference exactly 0).
 expect_true(isUnchanging(rep(0, 4), rep(0, 4), convrat, tolF))
@@ -366,10 +366,10 @@ expect_true(certAt(cos, -1, 1, 4L, "b", 4.187752e-5))
 ## goes singular -> interpRescue -> rescue warning; HOMEDESKTOP converges
 ## directly at the floor -> near-eps warning. Both are honest; either text
 ## passes, but SOME machine-precision warning must fire.
-w_x2 <- tryCatch(minimaxApprox(function(x) x^2, -1, 1, 2L),
-                 warning = function(w) conditionMessage(w))
-expect_true(grepl("NOT technically a Remez result", w_x2, fixed = TRUE) ||
-              grepl("very near machine double precision", w_x2,
+wX2 <- tryCatch(minimaxApprox(function(x) x^2, -1, 1, 2L),
+                warning = function(w) conditionMessage(w))
+expect_true(grepl("NOT technically a Remez result", wX2, fixed = TRUE) ||
+              grepl("very near machine double precision", wX2,
                     fixed = TRUE))
 
 ## Floor-regime converged fit (exp on [5, 6], deg 10, relaxed convrat; M6
@@ -381,6 +381,6 @@ expect_false(o56$Warning)
 ## Runge degree-10 (issue #2 restart path, DP-4b recompute): warning-free
 ## with the pinned ExpErr.
 runge <- function(x) 1 / (1 + (5 * x) ^ 2)
-o_runge <- sM(minimaxApprox(runge, -1, 1, 10L, basis = "m"))
-expect_false(o_runge$Warning)
-expect_equal(o_runge$ExpErr, 0.06592293, tolerance = 1e-7)
+oRunge <- sM(minimaxApprox(runge, -1, 1, 10L, basis = "m"))
+expect_false(oRunge$Warning)
+expect_equal(oRunge$ExpErr, 0.06592293, tolerance = 1e-7)
