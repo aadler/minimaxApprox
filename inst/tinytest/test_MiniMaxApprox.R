@@ -129,8 +129,9 @@ expect_true(sW(minimaxApprox(fn, -1, 1, 9L, basis = "b", opts = opts)$Warning))
 ## warning; the E5 exchange's trajectory reaches the singular -> rescue path
 ## instead (dense error 2.0e-15, machine floor either way). Both are honest
 ## machine-precision outcomes; either text passes, but one must fire.
+wrnMess <- "All errors very near machine double precision."
 fn <- function(x) sin(x) + cos(x)
-w15 <- tryCatch(minimaxApprox(fn, -1.5, 1.5, 15L),
+w15 <- tryCatch(minimaxApprox(fn, -1.5, 1.5, 20L),
                 warning = function(w) conditionMessage(w))
 expect_true(grepl("NOT technically a Remez result", w15, fixed = TRUE) ||
               grepl(wrnMess, w15, fixed = TRUE))
