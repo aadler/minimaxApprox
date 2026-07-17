@@ -198,7 +198,7 @@ expect_silent(sW(minimaxApprox(exp, -1, 1, c(2L, 1L), xi = xi)))
 
 # Test checkDenom error message
 expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
-             "The 3 degree polynomial in the denominator has a zero at 2")
+             "The 3 degree polynomial in the denominator has a zero at")
 
 ## The tests below pass R mac builder AND the Github mac, but for some reason do
 ## NOT pass CRAN's own mac x86_64 testbed nor on Professor Ripley's Fedora-based

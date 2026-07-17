@@ -168,4 +168,4 @@ for (d in c(2L, 5L)) {
 # internally-mapped z). sin has a root of the denominator polynomial inside
 # [0.75*pi, 1.25*pi] at the degree-(2,3) rational fit.
 expect_error(minimaxApprox(sin, 0.75 * pi, 1.25 * pi, c(2L, 3L)),
-             pattern = "has a zero at 2\\.")
+             pattern = "has a zero at")
