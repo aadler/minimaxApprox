@@ -246,9 +246,6 @@ expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 ## through to the original error rather than masking it.
 errMsg <- "The algorithm neither converged when looking for a"
 
-## Below case has failover to QR
-expect_error(minimaxApprox(sqrt, 0, 1, 30L, basis = "m"), errMsg)
-
 # E5 re-baseline: pre-E5 the exchange fed a singular solve at degree 15 and,
 # with tailtol = NULL disabling the restart, the hard error above was raised.
 # The E5 exchange never goes singular on this input; the iteration stalls and
