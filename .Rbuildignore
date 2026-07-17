@@ -7,3 +7,4 @@
 ^CONTRIBUTING.md$
 ^LICENSE$
 ^inst/WORDLIST$
+^vignettes/.+\.(html|pdf)$
