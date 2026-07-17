@@ -186,7 +186,7 @@ expect_false(isTRUE(all.equal(baryRatInitRef(fEC, -pi, pi, 3L, 3L),
                               chebNodes2(8L, -pi, pi))))
 expect_error(minimaxApprox(fEC, -pi, pi, c(3L, 3L), basis = "b"),
              "degenerate or defective")
-expect_error(minimaxApprox(fEC, -pi, pi, c(14L, 13L), basis = "b"),
+expect_error(minimaxApprox(fEC, -pi, pi, c(14L, 15L), basis = "b"),
              "degenerate or defective")
 
 # E5 re-baseline: pre-E5 the (8, 8) exchange hit a mid-iteration
