@@ -48,12 +48,16 @@ minimaxApprox(fn, lower, upper, degree, relErr = FALSE, basis ="Chebyshev",
     (2018) and supports \strong{absolute} error only; requesting it with
     \code{relErr = TRUE} is an error. The default is \code{"Chebyshev"}, and the
     parameter is case-insensitive and may be abbreviated.}
-    \item{xi}{numeric; For rational approximation, a vector of initial points of
-    the correct length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If
-    missing, the approximation will use the appropriate Chebyshev nodes,
-    except that rational approximation in the barycentric basis initializes
-    from the error extrema of an AAA approximant (see \strong{Barycentric
-    Basis} below); a supplied \code{xi} of the correct length overrides that
+    \item{xi}{numeric; \strong{Deprecated as of 0.6.0 and scheduled for
+    removal in the next release}---the current exchange algorithm derives
+    its reference from the error curve directly, so a user-supplied initial
+    reference is no longer needed. Until removal: for rational
+    approximation, a vector of initial points of the correct
+    length---\eqn{\sum(\code{degree}) + 2}{sum(degree) + 2}. If missing,
+    the approximation will use the appropriate Chebyshev nodes, except that
+    rational approximation in the barycentric basis initializes from the
+    error extrema of an AAA approximant (see \strong{Barycentric Basis}
+    below); a supplied \code{xi} of the correct length overrides that
     initialization. Polynomial approximation \strong{always} uses Chebyshev
     nodes and will ignore \code{xi} with a message.}
     \item{opts}{\link{list}; Configuration options including:
@@ -414,11 +418,9 @@ Avraham Adler \email{Avraham.Adler@gmail.com}
 }
 
 \note{
-At present, the algorithms are implemented using machine double precision, which
-means that the approximations are at best slightly worse. Research proceeds on
-more precise, stable, and efficient implementations. So long as the package
-remains in an experimental state---noted by a 0 major version---the API may
-change at any time.
+So long as the package remains in an experimental state---noted by a 0 major
+version---the API may change at any time; see the \file{NEWS} file for
+breaking changes.
 }
 
 \seealso{\code{\link{minimaxEval}}, \code{\link{minimaxErr}}}

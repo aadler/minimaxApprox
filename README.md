@@ -27,7 +27,9 @@ suggestions which helped the author's introduction to minimax approximation.
 ## Roadmap
 ### Major
 
-  * There are no plans for major changes at current.
+  * Remove the `xi` argument (deprecated in 0.6.0): the redesigned exchange
+ derives its reference from the error curve directly, making a
+ user-supplied initial reference unnecessary.
 
 ### Minor
 

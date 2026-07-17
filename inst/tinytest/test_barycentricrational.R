@@ -124,11 +124,13 @@ expect_true(is.numeric(baryRatPoleCheck(sol$t, sol$alpha, abs(sol$beta),
 expect_error(minimaxApprox(exp, -1, 1, c(2L, 2L), relErr = TRUE,
                            basis = "b"),
              "Relative error is not yet supported for rational")
-expect_error(minimaxApprox(exp, -1, 1, c(2L, 2L), basis = "b",
-                           xi = c(-1, 0, 1)),
-             "needs to have 6 elements")
-bxi <- minimaxApprox(exp, -1, 1, c(2L, 2L), basis = "b",
-                     xi = chebNodes2(6L, -1, 1))
+expect_error(sW(                                # xi deprecation warning (0.6.0)
+  minimaxApprox(exp, -1, 1, c(2L, 2L), basis = "b", xi = c(-1, 0, 1))),
+  "needs to have 6 elements")
+
+bxi <- sW(                                      # xi deprecation warning (0.6.0)
+  minimaxApprox(exp, -1, 1, c(2L, 2L), basis = "b", xi = chebNodes2(6L, -1, 1)))
+
 expect_true(abs(bxi$ExpErr - c22$ExpErr) / c22$ExpErr < 1e-6)
 
 # ---- Wide interval: capacity scaling ---------------------------------------

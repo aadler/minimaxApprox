@@ -152,6 +152,17 @@ minimaxApprox <- function(fn, lower, upper, degree, relErr = FALSE,
     stop("Degrees must be integers of least 0 (constant).")
   }
 
+  # Deprecation (0.6.0): xi predates the redesigned exchange, which
+  # enumerates the full error curve each iteration and no longer benefits
+  # from a user-supplied initial reference. Scheduled for removal in the
+  # next release. Warn only when xi is actually passed.
+  if (!is.null(xi)) {
+    warning("The 'xi' argument is deprecated and will be removed in the ",
+            "next release. The current exchange algorithm derives its ",
+            "reference from the error curve directly, so a user-supplied ",
+            "initial reference is no longer needed.")
+  }
+
   if (length(degree) == 2L) {         # Rational approximation requested
     numerd <- as.integer(degree[1L])
     denomd <- as.integer(degree[2L])

@@ -204,6 +204,15 @@
       handful of \code{opts} most users need.
     }
   }
+  \subsection{Deprecated}{
+    \itemize{
+      \item The \code{xi} argument to \code{minimaxApprox} is deprecated
+      and will be removed in the next release. The redesigned exchange
+      algorithm derives its reference from the error curve at every
+      iteration, making a user-supplied initial reference unnecessary.
+      Passing \code{xi} now emits a deprecation warning.
+    }
+  }
 }
 
 \section{Version 0.5.0 (2026-01-08)}{

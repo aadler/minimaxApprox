@@ -174,21 +174,27 @@ errMsg <- paste("Polynomial approximation takes one value for degree and",
                 "invalid.")
 expect_error(minimaxApprox(exp, -1, 1, 1:3), errMsg)
 
-# Test passing xi
-## Polynomial - Check that it is ignored
+# Test passing xi (deprecated 0.6.0; removal scheduled next release)
+## Deprecation warning fires whenever xi is passed, on every path
+dprMess <- "'xi' argument is deprecated"
+expect_warning(minimaxApprox(exp, -1, 1, c(2L, 1L),
+                             xi = chebNodes(5L, -1, 1) + 0.01), dprMess)
+
+## Polynomial - Check that it is (still) ignored, alongside the warning
 wrnMess <- paste("Polynomial approximation uses Chebyshev nodes for initial",
                  "guess. Any passed xi is ignored.")
-expect_message(minimaxApprox(exp, -1, 1, 10L, xi = 6), wrnMess)
+expect_message(sW(minimaxApprox(exp, -1, 1, 10L, xi = 6)), wrnMess)
 
 ## Rational - Check that proper length is passed
 errMsg <- paste("Given the requested degrees for numerator and denominator,",
                 "the x-vector needs to have 8 elements.")
 xi <- chebNodes(5L, -1, 1)
-expect_error(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi), errMsg)
+expect_error(sW(minimaxApprox(exp, -1, 1, c(3L, 3L), xi = xi)), errMsg)
 
-# Test that passing proper size works for rational
+# Test that passing proper size works for rational (deprecation warning is
+# the ONLY condition emitted; silence otherwise)
 xi <- xi + 0.01
-expect_silent(minimaxApprox(exp, -1, 1, c(2L, 1L), xi = xi))
+expect_silent(sW(minimaxApprox(exp, -1, 1, c(2L, 1L), xi = xi)))
 
 # Test checkDenom error message
 expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
