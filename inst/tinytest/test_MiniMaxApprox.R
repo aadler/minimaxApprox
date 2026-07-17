@@ -203,12 +203,8 @@ expect_error(minimaxApprox(sin,  0.75 * pi, 1.25 * pi, c(2L, 3L)),
 ## The tests below pass R mac builder AND the Github mac, but for some reason do
 ## NOT pass CRAN's own mac x86_64 testbed nor on Professor Ripley's Fedora-based
 ## OpenBLAS platform, so will only run on Windows for now.
-
-# if ("windows" %in% tolower(Sys.info()[["sysname"]])) {
-
-## They may pass now with the rengineered switch/findroots so will try removing
-## the gate.
-## (AA: 2026-07-16)
+## UPDATE 2026-07-26. Willing to try removing the gate now that Chebyshev is
+## remapped to [-1, 1]
 
 # E5 re-baseline: the redesigned exchange converges degree 10 DIRECTLY
 # (no singular solve, so no degree-11 restart and no message) on the
@@ -234,8 +230,6 @@ expect_true(length(msgs) == 0L ||
 expect_equal(PP$aMono, control, tolerance = tol)
 expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
-
-# }
 
 ## Test unsuccessful restart due to two failures. F4: the former case here
 ## (sin, 0.25, 0.75, 16, "m") is now RESCUED -- see the F4 block below --
