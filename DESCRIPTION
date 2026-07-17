@@ -2,7 +2,7 @@ Package: minimaxApprox
 Type: Package
 Title: Minimax Approximation of Functions by Polynomials and Rational Functions
 Version: 0.6.0
-Date: 2026-10-01
+Date: 2026-07-17
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))
 Description: Implements minimax approximation of functions via the Remez

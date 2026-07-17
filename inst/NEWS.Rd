@@ -15,7 +15,7 @@
   }
 }
 
-\section{Version 0.6.0 (2026-10-01)}{
+\section{Version 0.6.0 (2026-07-17)}{
   \subsection{Fixed}{
     \itemize{
       \item Fixed the Remez exchange silently converging to a

@@ -7,16 +7,20 @@ cff-version: 1.2.0
 message: 'To cite package "minimaxApprox" in publications use:'
 type: software
 license: MPL-2.0
-title: 'minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational
-  Function Approximation'
+title: 'minimaxApprox: Minimax Approximation of Functions by Polynomials and Rational
+  Functions'
 version: 0.6.0
 doi: 10.32614/CRAN.package.minimaxApprox
 identifiers:
 - type: doi
   value: 10.32614/CRAN.package.minimaxApprox
-abstract: Implements the algorithm of Remez (1962) for polynomial minimax approximation
-  and of Cody et al. (1968) <https://doi.org/10.1007/BF02162506> for rational minimax
-  approximation.
+abstract: 'Implements minimax approximation of functions via the Remez (1962) algorithm
+  for polynomials and the Cody-Fraser-Hart (1968) <https://doi.org/10.1007/BF02162506>
+  algorithm for rational functions, as well as their barycentric formulations: the
+  Pachón-Trefethen (2009) <https://doi.org/10.1007/s10543-009-0240-1> algorithm for
+  polynomials and the Filip-Nakatsukasa-Trefethen-Beckermann (2018) <https://doi.org/10.1137/17M1132409>
+  algorithm for rational functions, which provide improved numerical stability at
+  higher degrees and on wider intervals.'
 authors:
 - family-names: Adler
   given-names: Avraham
@@ -24,8 +28,8 @@ authors:
   orcid: https://orcid.org/0000-0002-3039-0703
 preferred-citation:
   type: manual
-  title: 'minimaxApprox: Implementation of Remez Algorithm for Polynomial and Rational
-    Function Approximation'
+  title: 'minimaxApprox: Minimax Approximation of Functions by Polynomials and Rational
+    Functions'
   authors:
   - family-names: Adler
     given-names: Avraham
@@ -36,9 +40,9 @@ preferred-citation:
   doi: 10.32614/CRAN.package.minimaxApprox
   notes: R package version 0.6.0
 repository: https://CRAN.R-project.org/package=minimaxApprox
-repository-code: https://github.com/aadler/MiniMaxApprox
-url: https://github.com/aadler/MiniMaxApprox
-date-released: '2026-10-01'
+repository-code: https://github.com/aadler/minimaxApprox
+url: https://github.com/aadler/minimaxApprox
+date-released: '2026-07-17'
 contact:
 - family-names: Adler
   given-names: Avraham
