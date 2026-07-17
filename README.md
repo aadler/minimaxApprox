@@ -27,15 +27,11 @@ suggestions which helped the author's introduction to minimax approximation.
 ## Roadmap
 ### Major
 
- * Research
- [barycentric representations](https://www.chebfun.org/publications/remez.pdf)
- to consider if possible to implement in R.
- * Alternatively, research if possible to use [Rmpfr](https://CRAN.R-project.org/package=Rmpfr)
- package for increased precision.
+  * There are no plans for major changes at current.
 
 ### Minor
 
- * Write a vignette.
+  * There are no plans for minor changes at current.
 
 ## Contributions
 Please see
