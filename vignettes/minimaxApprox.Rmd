@@ -11,8 +11,8 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-```{r setup}
-library(minimaxApprox)
+```{r setup, echo = FALSE}
+library(minimaxApprox) # nolint undesireable_function_linter
 ```
 
 ## What is minimax approximation?
