@@ -6,9 +6,14 @@ Version: 0.6.0
 Date: 2026-10-01
 Authors@R: person(given="Avraham", family="Adler",role=c("aut", "cre", "cph"),
     email="Avraham.Adler@gmail.com", comment = c(ORCID = "0000-0002-3039-0703"))
-Description: Implements the algorithm of Remez (1962) for polynomial minimax
-    approximation and of Cody et al. (1968) <doi:10.1007/BF02162506> for
-    rational minimax approximation.
+Description: Implements minimax approximation of functions via the Remez
+    (1962) algorithm for polynomials and the Cody-Fraser-Hart (1968)
+    <doi:10.1007/BF02162506> algorithm for rational functions, as well as
+    their barycentric formulations: the Pachón-Trefethen (2009)
+    <doi:10.1007/s10543-009-0240-1> algorithm for polynomials and the
+    Filip-Nakatsukasa-Trefethen-Beckermann (2018) <doi:10.1137/17M1132409>
+    algorithm for rational functions, which provide improved numerical
+    stability at higher degrees and on wider intervals.
 License: MPL-2.0
 URL: https://github.com/aadler/minimaxApprox
 BugReports: https://github.com/aadler/minimaxApprox/issues

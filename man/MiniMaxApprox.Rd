@@ -8,11 +8,14 @@
 \title{Minimax Approximation of Functions}
 
 \description{
-Calculates minimax approximations to functions. Polynomial approximation uses
-the Remez (1962) algorithm. Rational approximation uses the Cody-Fraser-Hart
-(Cody et al., 1968) version of the algorithm. When using monomials as the
-polynomial basis, the Compensated Horner Scheme of Langlois et al. (2006) is
-used.
+Calculates minimax approximations to functions. Polynomial approximation
+uses either the Remez (1962) algorithm—with the basis polynomials evaluated
+using monomials or Chebyshev polynomials of the first kind—or the
+barycentric variant of Pachón & Trefethen (2009). Rational approximation
+uses either the Cody--Fraser--Hart (Cody et al., 1968) version of the Remez
+algorithm or the barycentric variant of Filip et al. (2018). When using
+monomials as the polynomial basis, the Compensated Horner Scheme of
+Langlois et al. (2006) is used.
 }
 
 \usage{
