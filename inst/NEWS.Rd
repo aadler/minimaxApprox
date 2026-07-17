@@ -141,6 +141,10 @@
       at which a distinct minimax solution can be discerned. Genuinely
       non-representable cases, where no polynomial comes near the function,
       still raise the original error or convergence warning.
+
+      \item Updated the package \code{Title} and \code{Description} to
+      reflect the expanded scope: minimax approximation by polynomials and
+      rational functions via both the classical and barycentric algorithms.
     }
   }
   \subsection{Added}{
