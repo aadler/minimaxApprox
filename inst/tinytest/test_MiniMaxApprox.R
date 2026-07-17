@@ -232,6 +232,9 @@ expect_equal(PP$aMono, control, tolerance = tol)
 expect_equal(PP$ExpErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 
+## Failover to QR
+expect_error(minimaxApprox(sqrt, 0, 1, 50L, basis = "m"), "neither converged")
+
 ## Test unsuccessful restart due to two failures. F4: the former case here
 ## (sin, 0.25, 0.75, 16, "m") is now RESCUED -- see the F4 block below --
 ## because its interpolant is at the machine-precision floor. Replaced with a
@@ -239,7 +242,6 @@ expect_equal(PP$ObsErr, controlE, tolerance = 1e-7) # Only 8 digits in email
 ## [0, 1] has a branch point at 0, so no polynomial interpolant comes near it
 ## (probe abs error ~2e-2 >> threshold), and the F4 rescue correctly falls
 ## through to the original error rather than masking it.
-errMsg <- "The algorithm neither converged when looking for a"
 
 # E5 re-baseline: pre-E5 the exchange fed a singular solve at degree 15 and,
 # with tailtol = NULL disabling the restart, the hard error above was raised.
