@@ -72,44 +72,42 @@
       \item The Remez exchange was redesigned to be driven by the error curve
       itself rather than by the current reference's structure. Roots of the
       error equation are now located over the \emph{whole} approximation
-      interval from an oversampled grid; each sign-region's search direction
+      interval from an oversampled grid. Each sign-region's search direction
       is taken from the error's own sign there instead of a mechanically
-      alternated schedule; the interval endpoints are always retained as
-      exchange candidates; and when the curve offers more alternating extrema
-      than the reference holds, the new reference is the alternating window
-      that contains the global extremum and maximizes its smallest error (the
+      alternated schedule, and the interval endpoints are always retained as
+      exchange candidates. When the curve offers more alternating extrema than
+      the reference holds, the new reference is the alternating window that
+      contains the global extremum and maximizes its smallest error---the
       classical conditions for the leveled error to increase strictly toward
-      the true minimax). Converged results for healthy inputs agree with
-      0.5.0 at tolerance level but are \strong{not bitwise identical}, and
-      inputs that previously exited through a singular-matrix error or a
-      stall may now exit through a different---equally loud or strictly
-      better---path, since the iteration trajectory differs.
+      the true minimax. Converged results for healthy inputs agree with version
+      0.5.0 at tolerance level but are \strong{not bitwise identical}. Inputs
+      that previously exited through a singular-matrix error or a stall may now
+      exit through a different path as the iteration trajectory differs.
 
       \item \strong{Breaking:} Chebyshev-basis approximation now internally
       maps the requested range \eqn{[l, u]} to \eqn{[-1, 1]} before evaluating
       \eqn{T_k}, fixing the conditioning issue noted above. \code{a} (and
       \code{b}) are therefore coefficients of \eqn{T_k} of the internally
       mapped variable, not \eqn{T_k(x)}, whenever the fitted range is not
-      \eqn{[-1, 1]}; results ON \eqn{[-1, 1]} are unchanged (the map is the
-      identity there, verified bitwise-identical). \code{aMono}/\code{bMono}
-      remain coefficients in the natural, raw \eqn{x} in every case, and are
-      the stable way to consume a Chebyshev-basis result without needing to
-      know about the internal map; see \code{\link{minimaxApprox}} for a
-      documented accuracy caveat on this conversion at high degree on wide,
-      far-off-\eqn{[-1,1]} ranges.
+      \eqn{[-1, 1]} Results on \eqn{[-1, 1]} are unchanged. \code{aMono} and
+      \code{bMono} remain coefficients in the natural, raw \eqn{x} in every
+      case, and are the stable way to consume a Chebyshev-basis result without
+      needing to know about the internal map. See \code{\link{minimaxApprox}}
+      for a documented accuracy caveat on this conversion at high degree on
+      wide, far-off-\eqn{[-1,1]} ranges.
 
       \item Added upfront validation of \code{fn}, \code{lower}, \code{upper},
       \code{degree}, and \code{opts} in \code{minimaxApprox()}, replacing
       cryptic low-level failures (e.g. \dQuote{missing value where TRUE/FALSE
       needed}, \dQuote{invalid argument type}) with clear, argument-specific
       error messages. \code{fn} must be a function whose first argument is
-      \code{x} (primitives such as \code{exp} and \code{sin} are still
-      accepted); \code{lower}/\code{upper} must be finite non-missing numeric
+      \code{x}, although primitives such as \code{exp} and \code{sin} are still
+      accepted; \code{lower}/\code{upper} must be finite non-missing numeric
       scalars; \code{degree} must be finite and non-missing;
       \code{opts$maxiter}/\code{miniter}/\code{conviter} must be single
       positive integers and \code{opts$tol}/\code{convrat}/\code{tailtol}/
-      \code{ztol} must be finite numeric scalars when supplied
-      (\code{tailtol}/\code{ztol} may still be \code{NULL} by design).
+      \code{ztol} must be finite numeric scalars when supplied. The
+      \code{tailtol} and \code{ztol} options may still be \code{NULL} by design.
 
       \item Corrected wording in the degree-\code{n+1} restart messages, which
       described the returned polynomial's length as its degree
@@ -117,16 +115,16 @@
 
       \item \code{isOscil}, used internally to test for the expected
       alternating-sign error pattern, no longer propagates \code{NA} when passed
-      a \code{NaN}/\code{NA} error value; this previously could error deep
-      inside the convergence check instead of failing cleanly.
+      a \code{NaN}/\code{NA} error value. Previously this could have errored
+      deep inside the convergence check instead of failing cleanly.
 
-      \item The internal zero-basis perturbation (relative-error mode, used when
-      the approximated function is exactly 0 at a candidate extremum) now
+      \item The internal zero-basis perturbation, used in relative-error mode
+      when the approximated function is exactly 0 at a candidate extremum, now
       escalates to a magnitude-scaled step when the fixed \code{1e-12} nudge
-      would be a no-op (points with \eqn{|x| \gtrsim 4.5 \times 10^3}), while
-      remaining identical to the previous behavior at ordinary magnitudes.
+      would be a no-op (points with \eqn{|x| \gtrsim 4.5 \times 10^3}). It
+      remains identical to the previous behavior at ordinary magnitudes.
 
-      \item Functions that the requested degree resolves to (or near) machine
+      \item Functions that the requested degree resolves to, or near, machine
       floating-point precision---including functions that are exactly
       polynomials, such as \code{minimaxApprox(function(x) x^2, 0, 1, 2)}, and
       well-behaved cases such as \code{minimaxApprox(exp, -1, 1, 14)}---no
@@ -141,61 +139,61 @@
       Chebyshev reference is returned instead, together with a warning that it
       is not technically a Remez result but that its error is below the level
       at which a distinct minimax solution can be discerned. Genuinely
-      non-representable cases (where no polynomial comes near the function)
-      still raise the original error or convergence warning, unaffected.
+      non-representable cases, where no polynomial comes near the function,
+      still raise the original error or convergence warning.
     }
   }
   \subsection{Added}{
     \itemize{
       \item Added a reference-local certificate check to \strong{all}
-      approximation paths (previously rational barycentric only): at a
-      converged exit, the returned approximation's maximum error on a dense
-      grid is compared against its leveled error, and a warning is raised when
-      the former materially exceeds the latter. In that case the reported
-      expected error is a valid \emph{lower bound} on the true minimax error
-      (de la Vall\enc{é}{e}e Poussin) rather than a certificate of it, which
-      can occur for degrees that are non-normal for the function (e.g. even or
-      odd functions at generic degrees) or when the exchange stalls at a
-      reference-local fixed point. The check is skipped where its ratio would
-      be noise: results at the machine-precision floor and relative-error
-      results with an exact zero of \code{fn} on the grid.
+      approximation paths. At a converged exit, the returned approximation's
+      maximum error on a dense grid is compared against its leveled error, and a
+      warning is raised when the former materially exceeds the latter. In that
+      case the reported expected error is a valid \emph{lower bound} on the true
+      minimax error (de la Vall\enc{é}{e}e Poussin) rather than a certificate or
+      gurantee of it. This can occur for degrees that are non-normal for the
+      function (e.g. even or odd functions at generic degrees) or when the
+      exchange stalls at a reference-local fixed point. The check is skipped
+      where its ratio would be noise: results at the machine-precision floor and
+      relative-error results with an exact zero of \code{fn} on the grid.
 
       \item Added a \code{"Barycentric"} option to the \code{basis} argument,
-      implementing the barycentric-Remez algorithm for best polynomial
+      implementing the barycentric-Remez algorithm for the best polynomial
       approximation of Pach\enc{ó}{o}n and Trefethen (2009). It represents the
       trial polynomial by its values at the reference points rather than by
       coefficients in a fixed basis, avoiding the ill-conditioned linear solve
-      that limits the achievable degree in the classical bases. In consequence
+      that limits the achievable degree in the classical bases. In consequence,
       it converges at degrees and on ranges where the Monomial and Chebyshev
       bases fail with a singular-matrix error---for example,
       \code{minimaxApprox(exp, -1, 1, 14)} (and degree 50), and \code{exp} on
       \eqn{[5, 6]} at degree 10---and, using capacity scaling, remains stable on
       very wide or far-off-center intervals. Exactly-representable and
       machine-precision-resolved functions are handled natively (leveled error
-      \eqn{0}, no rescue needed). Relative error is supported; a function that is
-      \strong{exactly} zero at a reference point (typically an interval
+      \eqn{0}, no rescue needed). Relative error is supported and a function
+      that is \strong{exactly} zero at a reference point (typically an interval
       endpoint), where the relative minimax does not exist, now raises a clear
       error. The returned object carries the barycentric representation and a
       coefficient-conversion residual diagnostic (\code{convResid}). See
       \code{\link{minimaxApprox}}.
 
       \item Added \strong{rational} approximation support to the
-      \code{"Barycentric"} basis, implementing (a subset of) the adaptive
+      \code{"Barycentric"} basis, implementing a subset of the adaptive
       barycentric minimax algorithm of Filip, Nakatsukasa, Trefethen, and
       Beckermann (2018), with the initial reference taken from the error
-      extrema of an AAA approximant (Nakatsukasa, S\enc{è}{e}te, and
-      Trefethen, 2018). The leveled error is computed as an eigenvalue of a
-      small symmetric matrix, so, as for the polynomial case, there is no
-      ill-conditioned linear solve; the classical smooth-function results are
-      reproduced to convergence tolerance while cases such as
-      \eqn{|x|} converge to the certified minimax where reference-based
-      classical iterations can struggle. Absolute error only in this release
-      (\code{relErr = TRUE} is an error); degenerate or defective requests
-      (e.g. even degrees for an even function) are detected and reported with
-      a clear error rather than repaired by degree reduction; a trial
-      denominator with a zero in the interval is an error mirroring the
-      classical rational path. The returned object carries \code{a}/\code{b}
-      normalized as in the classical path, \code{aMono}/\code{bMono}, the
+      extrema of an adaptive Antoulas–Anderson (\acronym{AAA}) approximant
+      (Nakatsukasa, S\enc{è}{e}te, and Trefethen, 2018). The leveled error is
+      computed as an eigenvalue of a small symmetric matrix. Therefore, as for
+      the polynomial case, there is no ill-conditioned linear solve. Rather, the
+      classical smooth-function results are reproduced to convergence tolerance
+      while cases such as \eqn{|x|} converge to the certified minimax where
+      reference-based classical iterations can struggle. This release only
+      implements the algorithm using \strong{absolute} error. Passing
+      \code{relErr = TRUE} will return an error. Degenerate or defective
+      requests (e.g. even degrees for an even function) are detected and
+      reported with a clear error rather than repaired by degree reduction. A
+      trial denominator with a zero in the interval is an error mirroring the
+      classical rational path. The returned object carries \code{a} and \code{b}
+      normalized as in the classical path, \code{aMono} and \code{bMono}, the
       barycentric representation, and a named two-component \code{convResid}.
       See \code{\link{minimaxApprox}}.
 
