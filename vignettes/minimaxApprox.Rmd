@@ -1,0 +1,271 @@
+---
+title: "Using minimaxApprox"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using minimaxApprox}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(minimaxApprox)
+```
+
+## What is minimax approximation?
+
+Least-squares fitting minimizes the *average* squared error; interpolation
+forces the fit through chosen points and lets the error do whatever it likes
+in between. Minimax approximation asks a different question: what is the
+polynomial (or rational function) of a given degree whose **largest** error
+anywhere on the interval is as small as possible?
+
+The answer has a distinctive fingerprint: at the optimum, the error curve
+oscillates between its extreme positive and negative values at least
+`degree + 2` times (`degree1 + degree2 + 2` for rational approximation), a
+property called *equioscillation*. Below, a degree-5 minimax fit to `sin(x)`
+on `[0, 1]`, plotted with `plot.minimaxApprox`:
+
+```{r, fig.width = 6, fig.height = 4}
+fit <- minimaxApprox(sin, 0, 1, 5)
+plot(fit)
+```
+
+The error touches its bounds seven times, alternating sign every time -- no
+other degree-5 polynomial can do better in the worst case.
+
+The exchange algorithm used to find such a fit dates to Remez (1934; the
+translation cited in `?minimaxApprox` is Remez, 1962), refined for rational
+approximation by Fraser and Hart (1962) and Cody, Fraser, and Hart (1968) into
+the form this package follows most closely. A newer *barycentric*
+formulation -- used here as an additional basis option -- represents the
+trial function by its values rather than by coefficients, following Pachón
+and Trefethen (2009) for polynomials and Filip, Nakatsukasa, Trefethen, and
+Beckermann (2018) for rational functions; see **Choosing a basis** below.
+
+## Quick start
+
+```{r}
+fit <- minimaxApprox(exp, 0, 1, 5)
+fit
+```
+
+`coef()` extracts the coefficient vectors:
+
+```{r}
+coef(fit)
+```
+
+`a` holds the coefficients in whatever basis was used to fit (Chebyshev by
+default); `aMono` is always the monomial-basis (raw `x^k`) equivalent, useful
+when you need ordinary polynomial coefficients regardless of how the fit was
+computed. `minimaxEval()` evaluates the fit at new points, using the same
+basis as the fit unless told otherwise:
+
+```{r}
+x <- seq(0, 1, length.out = 11)
+minimaxEval(x, fit)
+```
+
+In the printed summary, `ExpectedAbsError` is the leveled error the Remez
+iteration converged to; `ObservedAbsError` is the largest error actually seen
+at the final reference points. `Ratio` and `Difference` are the two ways the
+two are compared for convergence (see **Options** below); for a clean
+converged result they will be at or near 1 and 0 respectively.
+
+## Choosing a basis
+
+Three bases are available via the `basis` argument, matched case-insensitively
+and by abbreviation (`"m"`, `"c"`, `"b"`).
+
+**Monomial** (`x^k`) is the most familiar and the worst conditioned: the
+Vandermonde-style linear solve it relies on degrades quickly with degree or
+with intervals far from `[-1, 1]`.
+
+**Chebyshev** (the default) evaluates `T_k` on the range **mapped** to
+`[-1, 1]`; off that interval, `a` are coefficients of `T_k` in the *mapped*
+variable, not raw `x` (a breaking change as of 0.6.0 -- see `NEWS.Rd`).
+`aMono` is always in raw `x` regardless of basis, recovered by composing the
+mapped-Chebyshev coefficients with the affine map; that composition is itself
+a monomial-basis operation, so `aMono` inherits some of the conditioning cost
+of the monomial basis at high degree on wide, far-off-range intervals.
+
+**Barycentric** represents the trial function by its values at the reference
+points rather than by coefficients, so there is no linear solve to go
+singular. It is the most numerically robust choice and converges in cases the
+classical bases cannot reach. For example, on `[10, 20]` at degree 30:
+
+```{r, error = TRUE}
+tryCatch(minimaxApprox(exp, 10, 20, 30, basis = "monomial"),
+         error = function(e) message(conditionMessage(e)))
+```
+
+```{r}
+bfit <- minimaxApprox(exp, 10, 20, 30, basis = "barycentric")
+bfit$ObsErr
+bfit$Warning
+```
+
+Monomial hard-errors; barycentric converges cleanly. (Chebyshev also manages
+this case, but only via the machine-precision fallback described in **Trust
+and diagnostics** below, at a coarser error than barycentric achieves here.)
+
+For best evaluation accuracy, use `minimaxEval()` on the barycentric object
+directly -- it evaluates the stored barycentric representation, which is more
+accurate than the derived monomial coefficients. The one potentially lossy
+step is the `aMono` conversion; `convResid` reports how much accuracy that
+conversion cost:
+
+```{r}
+bfit$convResid
+```
+
+## Rational approximation
+
+Rational approximation fits a ratio of two polynomials, requested as
+`degree = c(numerator, denominator)`. It is most useful when the function has
+a nearby singularity (in the real or complex plane) that a polynomial can only
+chase by adding more and more degree. Compare a polynomial and a rational fit
+to a function with a pole just outside `[-1, 1]`:
+
+```{r}
+f <- function(x) 1 / (x + 1.05)
+poly8 <- minimaxApprox(f, -1, 1, 8)
+poly8$ObsErr                                  # degree 8, still poor
+rat21 <- minimaxApprox(f, -1, 1, c(2, 1))      # classical (Cody) rational
+rat21$ObsErr
+```
+
+The degree-(2,1) rational is many orders of magnitude more accurate than the
+degree-8 polynomial. The barycentric basis handles the same request via the
+adaptive algorithm of Filip, Nakatsukasa, Trefethen, and Beckermann (2018):
+
+```{r}
+rat21b <- minimaxApprox(f, -1, 1, c(2, 1), basis = "barycentric")
+rat21b$ObsErr
+rat21b$Warning
+```
+
+The barycentric rational implementation in this release is a deliberate
+subset of the published algorithm, with three limitations. It supports
+**absolute error only**; requesting `relErr = TRUE` with `basis = "b"` is an
+error. Degenerate or *defective* requests -- for example, an even numerator
+and denominator degree for an even function, which has fewer effective
+parameters than the requested degree pair -- are detected and reported as an
+error naming a workaround, rather than repaired by degree reduction:
+
+```{r, error = TRUE}
+g <- function(x) 1 / (x ^ 2 + 0.01)
+tryCatch(minimaxApprox(g, -1, 1, c(3, 3), basis = "barycentric"),
+         error = function(e) message(conditionMessage(e)))
+```
+
+And a trial denominator with a zero inside the approximation interval is
+likewise reported as an error, mirroring the classical rational path.
+
+## Relative error
+
+By default, `minimaxApprox()` minimizes *absolute* error. Setting
+`relErr = TRUE` instead minimizes relative error, `(fn(x) - approx(x)) / fn(x)`
+-- useful when the function's magnitude varies enormously over the interval
+and a uniform absolute tolerance would waste accuracy where the function is
+small and starve it where the function is large:
+
+```{r}
+relfit <- minimaxApprox(exp, 0.5, 2, 6, relErr = TRUE)
+relfit$ObsErr   # this is now a maximum *relative* error, not absolute
+```
+
+Relative error is undefined wherever `fn` is exactly 0, so an interval whose
+endpoints (or interior, more generally) include a zero of `fn` cannot be fit
+with `relErr = TRUE`:
+
+```{r, error = TRUE}
+tryCatch(minimaxApprox(sin, -1, 1, 5, relErr = TRUE),
+         error = function(e) message(conditionMessage(e)))
+```
+
+## Trust and diagnostics
+
+Every returned object carries a `Warning` flag. `Warning = TRUE` means one of
+two things happened: the iteration did not converge to the requested
+tolerance within `maxiter` (see **Options** below), or -- on every
+approximation path, as of 0.6.0 -- the returned result's true maximum error
+was checked against a dense evaluation grid and found to materially exceed
+the leveled error the algorithm reported. In the second case, `ExpErr` is
+still a valid *lower bound* on the true minimax error, not a certificate of
+it.
+
+Because of this, a non-converged result's `ObsErr` need not bound the true
+maximum error -- the final reference points may not track the
+approximation's actual extrema. Verify with `minimaxErr()` on a dense grid
+before relying on such a result:
+
+```{r}
+chk <- minimaxApprox(exp, 5, 6, 10)
+chk$Warning
+chk$ObsErr                                            # what the object reports
+grid <- seq(5, 6, length.out = 100001)
+max(abs(minimaxErr(grid, chk)))                        # what a dense grid shows
+```
+
+Here the two are close but not identical -- exactly the kind of gap the
+`Warning` flag exists to surface.
+
+## Options
+
+Most calls need no `opts` at all. Two are worth knowing:
+
+`maxiter` (default 100) caps the number of Remez iterations. If a fit hits
+this cap and warns of non-convergence, increasing `maxiter` occasionally
+resolves it, though a persistent warning at high `maxiter` more often signals
+a genuinely hard case (near machine precision, or non-normal for the
+function -- see **Trust and diagnostics**) than one that simply needs more
+iterations.
+
+`convrat` and `tol` control how closely the observed and expected error must
+agree before the algorithm declares convergence -- by ratio (`convrat`,
+default `1 + 1e-9`) or by absolute difference (`tol`, default `1e-14`),
+whichever check is more informative for the current error magnitude. Loosening
+either lets marginal cases converge sooner, at the cost of a less tightly
+verified result.
+
+`tailtol` and `ztol` also exist but do not apply to `basis = "b"`, which has
+no coefficient solve to restart or prune.
+
+## References
+
+Remez, E. I. (1962) *General computational methods of Chebyshev
+approximation: The problems with linear real parameters*. US Atomic Energy
+Commission, Division of Technical Information. AEC-tr-4491
+
+Fraser, W. and Hart, J. F. (1962) "On the computation of rational
+approximations to continuous functions", *Communications of the ACM*, 5(7),
+401-403. \doi{10.1145/368273.368578}
+
+Cody, W. J., Fraser, W. and Hart, J. F. (1968) "Rational Chebyshev
+approximation using linear equations", *Numerische Mathematik*, 12, 242-251.
+\doi{10.1007/BF02162506}
+
+Pachón, R. and Trefethen, L. N. (2009) "Barycentric-Remez algorithms for best
+polynomial approximation in the chebfun system", *BIT Numerical Mathematics*,
+49(4), 721-741. \doi{10.1007/s10543-009-0240-1}
+
+Berrut, J.-P. and Trefethen, L. N. (2004) "Barycentric Lagrange
+interpolation", *SIAM Review*, 46(3), 501-517. \doi{10.1137/S0036144502417715}
+
+Higham, N. J. (2004) "The numerical stability of barycentric Lagrange
+interpolation", *IMA Journal of Numerical Analysis*, 24(4), 547-556.
+\doi{10.1093/imanum/24.4.547}
+
+Filip, S.-I., Nakatsukasa, Y., Trefethen, L. N. and Beckermann, B. (2018)
+"Rational minimax approximation via adaptive barycentric representations",
+*SIAM Journal on Scientific Computing*, 40(4), A2427-A2455.
+\doi{10.1137/17M1132409}
+
+Nakatsukasa, Y., Sète, O. and Trefethen, L. N. (2018) "The AAA algorithm for
+rational approximation", *SIAM Journal on Scientific Computing*, 40(3),
+A1494-A1522. \doi{10.1137/16M1106122}

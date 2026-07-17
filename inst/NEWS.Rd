@@ -198,6 +198,12 @@
       normalized as in the classical path, \code{aMono}/\code{bMono}, the
       barycentric representation, and a named two-component \code{convResid}.
       See \code{\link{minimaxApprox}}.
+
+      \item Added the package's first vignette, \dQuote{Using minimaxApprox},
+      covering the minimax criterion, the three bases and how to choose among
+      them, rational approximation and its barycentric-basis limitations,
+      relative error, the \code{Warning}/\code{convResid} diagnostics, and the
+      handful of \code{opts} most users need.
     }
   }
 }
