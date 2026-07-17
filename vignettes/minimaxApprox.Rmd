@@ -34,14 +34,14 @@ fit <- minimaxApprox(sin, 0, 1, 5)
 plot(fit)
 ```
 
-The error touches its bounds seven times, alternating sign every time -- no
+The error touches its bounds seven times, alternating sign every time---no
 other degree-5 polynomial can do better in the worst case.
 
 The exchange algorithm used to find such a fit dates to Remez (1934; the
 translation cited in `?minimaxApprox` is Remez, 1962), refined for rational
 approximation by Fraser and Hart (1962) and Cody, Fraser, and Hart (1968) into
 the form this package follows most closely. A newer *barycentric*
-formulation -- used here as an additional basis option -- represents the
+formulation---used here as an additional basis option---represents the
 trial function by its values rather than by coefficients, following Pachón
 and Trefethen (2009) for polynomials and Filip, Nakatsukasa, Trefethen, and
 Beckermann (2018) for rational functions; see **Choosing a basis** below.
@@ -87,7 +87,7 @@ with intervals far from `[-1, 1]`.
 
 **Chebyshev** (the default) evaluates `T_k` on the range **mapped** to
 `[-1, 1]`; off that interval, `a` are coefficients of `T_k` in the *mapped*
-variable, not raw `x` (a breaking change as of 0.6.0 -- see `NEWS.Rd`).
+variable, not raw `x` (a breaking change as of 0.6.0; see `NEWS.Rd`).
 `aMono` is always in raw `x` regardless of basis, recovered by composing the
 mapped-Chebyshev coefficients with the affine map; that composition is itself
 a monomial-basis operation, so `aMono` inherits some of the conditioning cost
@@ -114,7 +114,7 @@ this case, but only via the machine-precision fallback described in **Trust
 and diagnostics** below, at a coarser error than barycentric achieves here.)
 
 For best evaluation accuracy, use `minimaxEval()` on the barycentric object
-directly -- it evaluates the stored barycentric representation, which is more
+directly---it evaluates the stored barycentric representation, which is more
 accurate than the derived monomial coefficients. The one potentially lossy
 step is the `aMono` conversion; `convResid` reports how much accuracy that
 conversion cost:
@@ -152,9 +152,9 @@ rat21b$Warning
 The barycentric rational implementation in this release is a deliberate
 subset of the published algorithm, with three limitations. It supports
 **absolute error only**; requesting `relErr = TRUE` with `basis = "b"` is an
-error. Degenerate or *defective* requests -- for example, an even numerator
+error. Degenerate or *defective* requests---for example, an even numerator
 and denominator degree for an even function, which has fewer effective
-parameters than the requested degree pair -- are detected and reported as an
+parameters than the requested degree pair---are detected and reported as an
 error naming a workaround, rather than repaired by degree reduction:
 
 ```{r, error = TRUE}
@@ -169,10 +169,10 @@ likewise reported as an error, mirroring the classical rational path.
 ## Relative error
 
 By default, `minimaxApprox()` minimizes *absolute* error. Setting
-`relErr = TRUE` instead minimizes relative error, `(fn(x) - approx(x)) / fn(x)`
--- useful when the function's magnitude varies enormously over the interval
-and a uniform absolute tolerance would waste accuracy where the function is
-small and starve it where the function is large:
+`relErr = TRUE` instead minimizes relative error, `(fn(x) - approx(x)) / fn(x)`,
+useful when the function's magnitude varies enormously over the interval and a
+uniform absolute tolerance would waste accuracy where the function is small and
+starve it where the function is large:
 
 ```{r}
 relfit <- minimaxApprox(exp, 0.5, 2, 6, relErr = TRUE)
@@ -192,15 +192,15 @@ tryCatch(minimaxApprox(sin, -1, 1, 5, relErr = TRUE),
 
 Every returned object carries a `Warning` flag. `Warning = TRUE` means one of
 two things happened: the iteration did not converge to the requested
-tolerance within `maxiter` (see **Options** below), or -- on every
-approximation path, as of 0.6.0 -- the returned result's true maximum error
+tolerance within `maxiter` (see **Options** below), or---on every
+approximation path, as of 0.6.0---the returned result's true maximum error
 was checked against a dense evaluation grid and found to materially exceed
 the leveled error the algorithm reported. In the second case, `ExpErr` is
 still a valid *lower bound* on the true minimax error, not a certificate of
 it.
 
 Because of this, a non-converged result's `ObsErr` need not bound the true
-maximum error -- the final reference points may not track the
+maximum error---the final reference points may not track the
 approximation's actual extrema. Verify with `minimaxErr()` on a dense grid
 before relying on such a result:
 
@@ -212,8 +212,8 @@ grid <- seq(5, 6, length.out = 100001)
 max(abs(minimaxErr(grid, chk)))                        # what a dense grid shows
 ```
 
-Here the two are close but not identical -- exactly the kind of gap the
-`Warning` flag exists to surface.
+Here the two are close but not identical---exactly the kind of gap the `Warning`
+flag exists to surface.
 
 ## Options
 
@@ -223,11 +223,11 @@ Most calls need no `opts` at all. Two are worth knowing:
 this cap and warns of non-convergence, increasing `maxiter` occasionally
 resolves it, though a persistent warning at high `maxiter` more often signals
 a genuinely hard case (near machine precision, or non-normal for the
-function -- see **Trust and diagnostics**) than one that simply needs more
+function---see **Trust and diagnostics**) than one that simply needs more
 iterations.
 
 `convrat` and `tol` control how closely the observed and expected error must
-agree before the algorithm declares convergence -- by ratio (`convrat`,
+agree before the algorithm declares convergence---by ratio (`convrat`,
 default `1 + 1e-9`) or by absolute difference (`tol`, default `1e-14`),
 whichever check is more informative for the current error magnitude. Loosening
 either lets marginal cases converge sooner, at the cost of a less tightly
